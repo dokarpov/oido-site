@@ -1,14 +1,37 @@
-
 name: UI and i18n smoke
 
 on:
   push:
     branches: [main]
+    paths:
+      - 'index.html'
+      - 'investors/**'
+      - 'shared/**'
+      - 'functions/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'wrangler.toml'
+      - '.github/workflows/ui-smoke.yml'
   pull_request:
+    paths:
+      - 'index.html'
+      - 'investors/**'
+      - 'shared/**'
+      - 'functions/**'
+      - 'tests/**'
+      - 'package.json'
+      - 'wrangler.toml'
+      - '.github/workflows/ui-smoke.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: ui-i18n-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   smoke:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
