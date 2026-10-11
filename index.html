@@ -923,7 +923,7 @@ if(!validEmail(email)){showError('Please add a valid email address.');form.query
 if(honey)return;
 sending=true;button.disabled=true;label.textContent='Sending…';error.hidden=true;status.hidden=true;
 var plan=window.__oidoPlan||'';
-var payload={business:business,email:email,_replyto:email,_subject:'New Oído pilot request — '+business,_template:'table',_url:location.href,source:'oido-site'};
+var payload={business:business,email:email,_replyto:email,_cc:'dokarpov@gmail.com',_subject:'New Oído pilot request — '+business,_template:'table',_url:location.href,source:'oido-site'};
 if(plan)payload.plan_clicked=plan;
 try{
 var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},10000);
