@@ -465,7 +465,7 @@ $('#mfrm').addEventListener('submit', function(e){ e.preventDefault(); var n = $
   if (!n || m.indexOf('@') < 1){ err.textContent = 'Add your name and an email so we can reply.'; err.hidden = false; return; }
   err.hidden = true; track('meet_email_compose', {audience: aud});
   var body = 'Name / organisation: ' + n + '\nEmail: ' + m + '\nAudience: ' + aud + '\n\nI would like to discuss Oído and arrange a meeting.';
-  window.location.href = 'mailto:diego@sinthetic.io?subject=' + encodeURIComponent('Oído investor / partner meeting request') + '&body=' + encodeURIComponent(body); });
+  window.location.href = 'mailto:diego@sinthetic.io?cc=dokarpov%40gmail.com&subject=' + encodeURIComponent('Oído investor / partner meeting request') + '&body=' + encodeURIComponent(body); });
 })();
 </script>
 
