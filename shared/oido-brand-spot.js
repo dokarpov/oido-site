@@ -3,6 +3,23 @@
 
   var reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
 
+  function paintWord(el,x){
+    var letters=[].slice.call(el.querySelectorAll(".wm>span"));
+    if(!letters.length)return;
+    letters.forEach(function(letter,i){
+      var center=(i+.5)/letters.length*100;
+      var d=Math.abs(center-x);
+      letter.style.color=d<15?"#c9f24d":d<29?"#efffc2":"#ffffff";
+      letter.style.textShadow=d<18?"0 0 12px rgba(201,242,77,.72)":"none";
+    });
+  }
+  function clearWord(el){
+    [].slice.call(el.querySelectorAll(".wm>span")).forEach(function(letter){
+      letter.style.removeProperty("color");
+      letter.style.removeProperty("text-shadow");
+    });
+  }
+
   function bindBrand(){
     var logos=[].slice.call(document.querySelectorAll(".oido-brand-spot"));
     logos.forEach(function(el){
@@ -25,12 +42,14 @@
         var y=Math.max(0,Math.min(100,(ev.clientY-box.top)/box.height*100));
         el.style.setProperty("--spot-x",x.toFixed(1)+"%");
         el.style.setProperty("--spot-y",y.toFixed(1)+"%");
+        paintWord(el,x);
       },{passive:true});
 
       el.addEventListener("pointerleave",function(){
         el.classList.remove("is-hot");
         el.style.removeProperty("--spot-x");
         el.style.removeProperty("--spot-y");
+        clearWord(el);
       },{passive:true});
       el.addEventListener("focusin",function(){el.classList.add("is-hot");});
       el.addEventListener("focusout",function(){el.classList.remove("is-hot");});
@@ -48,6 +67,7 @@
           var y=Math.max(0,Math.min(100,(ev.clientY-box.top)/Math.max(1,box.height)*100));
           el.style.setProperty("--spot-x",x.toFixed(1)+"%");
           el.style.setProperty("--spot-y",y.toFixed(1)+"%");
+          paintWord(el,x);
         });
       },{passive:true});
     }
