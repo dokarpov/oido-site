@@ -98,8 +98,12 @@
     });
 
     wrap.append(select,status);
+    const theme = header.querySelector('.thm');
     const actions = header.querySelector('.hda');
-    if (actions) header.insertBefore(wrap, actions);
+    const primaryCta = header.querySelector('a.btn,button.btn');
+    if (theme) header.insertBefore(wrap, theme);
+    else if (actions) header.insertBefore(wrap, actions);
+    else if (primaryCta) header.insertBefore(wrap, primaryCta);
     else header.appendChild(wrap);
     return status;
   }
