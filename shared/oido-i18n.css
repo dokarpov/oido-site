@@ -70,3 +70,33 @@ html,body{top:0!important}
   pointer-events:none!important;
   z-index:-1!important;
 }
+
+
+/* Never expose third-party translation chrome. */
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+iframe.goog-te-banner-frame,
+iframe.skiptranslate,
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-aZ2wEe-OiiCO,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-te-menu-frame{
+  display:none!important;visibility:hidden!important;height:0!important;min-height:0!important;
+}
+html.translated-ltr,html.translated-rtl,body{top:0!important}
+
+/* RTL languages: mirror reading direction, menu, header and footer flow. */
+html[dir="rtl"] body,body[dir="rtl"]{direction:rtl;text-align:right}
+html[dir="rtl"] .hdi,
+html[dir="rtl"] .nv,
+html[dir="rtl"] .invest-nav,
+html[dir="rtl"] .ftr,
+html[dir="rtl"] .invest-footer-inner,
+html[dir="rtl"] .oido-menu-panel{direction:rtl}
+html[dir="rtl"] .oido-menu-panel{right:auto;left:0;text-align:right}
+html[dir="rtl"] .oido-menu-action{text-align:right}
+@media(max-width:700px){
+  html[dir="rtl"] .oido-menu-panel{right:auto;left:12px}
+}
