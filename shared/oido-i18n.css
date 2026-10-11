@@ -18,4 +18,11 @@
 @media(max-width:700px){
   .oido-menu-panel{position:fixed;right:12px;top:calc(env(safe-area-inset-top,0px) + 62px);width:calc(100vw - 24px);max-width:360px}
   .site .hdi>.thm{display:none!important}
+  /* Main Oído mobile: the floating business switch must never widen the page. */
+  .site .isw-float{width:calc(100vw - 24px);max-width:360px}
+  .site .isw-float>.isw,.site .isw-float .isw{width:100%;max-width:100%}
+  .site .isw-float .isw button{flex:1 1 0;min-width:0;padding-inline:6px;font-size:12px}
+}
+@media(max-width:340px){
+  .site .isw-float .isw button{padding-inline:3px;font-size:11px}
 }
