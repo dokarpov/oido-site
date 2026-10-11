@@ -14,6 +14,7 @@ const viewports = [
   {name:'tablet', width:768, height:1024},
   {name:'desktop', width:1440, height:1000}
 ];
+const commonLanguages=['es','ca','fr','de','it','pt','nl','pl','ru','uk','tr','ar','he','zh','ja','ko','hi','id','vi','th','fil'];
 
 await mkdir('artifacts/ui', {recursive:true});
 const browser = await chromium.launch({headless:true});
@@ -36,6 +37,8 @@ for (const vp of viewports) {
       const picker = document.querySelector('.oido-lang');
       const panel = document.querySelector('.oido-menu-panel');
       const menu = document.querySelector('.oido-menu-btn');
+      const footer = document.querySelector('footer');
+      const brand = document.querySelector('.oido-brand-spot');
       const rect = header?.getBoundingClientRect();
       return {
         lang:document.documentElement.lang,
@@ -44,18 +47,22 @@ for (const vp of viewports) {
         menu:!!menu,
         menuVisible:!!menu && getComputedStyle(menu).display !== 'none',
         picker:!!picker,
+        values:picker ? [...picker.options].map(o=>o.value) : [],
         pickerVisible:!!picker && getComputedStyle(picker).display !== 'none' && getComputedStyle(panel).display !== 'none',
         panelVisible:!!panel && getComputedStyle(panel).display !== 'none',
         headerLeft:rect?.left ?? 0,
         headerRight:rect?.right ?? 0,
-        headerWidth:rect?.width ?? 0,
         h1:!!document.querySelector('h1'),
+        motionReady:document.documentElement.dataset.oidoMotionReady,
+        scrollBehavior:getComputedStyle(document.documentElement).scrollBehavior,
+        brandNoTranslate:brand?.getAttribute('translate')==='no' && brand?.classList.contains('notranslate'),
+        footerLogo:!!footer?.querySelector('.brand,.wm,.giant'),
         mobileThemeVisible: window.innerWidth <= 700 && !!document.querySelector('.site .hdi>.thm') &&
           getComputedStyle(document.querySelector('.site .hdi>.thm')).display !== 'none',
         offenders:[...document.querySelectorAll('body *')].map(el => {
           const r=el.getBoundingClientRect();
           const cs=getComputedStyle(el);
-          return {tag:el.tagName.toLowerCase(), cls:el.className?.toString().slice(0,120) || '', text:(el.textContent||'').trim().replace(/\\s+/g,' ').slice(0,80), left:Math.round(r.left), right:Math.round(r.right), width:Math.round(r.width), display:cs.display, position:cs.position};
+          return {tag:el.tagName.toLowerCase(), cls:el.className?.toString().slice(0,120) || '', text:(el.textContent||'').trim().replace(/\s+/g,' ').slice(0,80), left:Math.round(r.left), right:Math.round(r.right), width:Math.round(r.width), display:cs.display};
         }).filter(x => x.display !== 'none' && x.width > 0 && (x.left < -2 || x.right > window.innerWidth + 2)).slice(0,20)
       };
     });
@@ -64,16 +71,27 @@ for (const vp of viewports) {
     if (closed.offenders.length) console.log('OFFENDERS',item.name,vp.name,JSON.stringify(closed.offenders));
     if (!closed.menu || !closed.menuVisible) throw new Error(item.name+' '+vp.name+': compact menu missing');
     if (!closed.picker) throw new Error(item.name+' '+vp.name+': language control missing from menu');
+    for (const lang of commonLanguages) if (!closed.values.includes(lang)) throw new Error(item.name+' '+vp.name+': common language missing '+lang);
     if (closed.pickerVisible || closed.panelVisible) throw new Error(item.name+' '+vp.name+': language selector visible before menu opens');
     if (!closed.h1) throw new Error(item.name+' '+vp.name+': H1 missing');
+    if (closed.motionReady !== '1') throw new Error(item.name+' '+vp.name+': shared motion layer missing');
+    if (closed.scrollBehavior !== 'smooth') throw new Error(item.name+' '+vp.name+': smooth anchor scrolling not enabled');
+    if (!closed.brandNoTranslate) throw new Error(item.name+' '+vp.name+': Oído logo not protected from translation');
+    if (closed.footerLogo) throw new Error(item.name+' '+vp.name+': duplicate footer logo remains');
     if (closed.scrollWidth > closed.viewport + 2) throw new Error(item.name+' '+vp.name+': horizontal overflow '+closed.scrollWidth+' > '+closed.viewport);
     if (closed.headerLeft < -1 || closed.headerRight > closed.viewport + 1) throw new Error(item.name+' '+vp.name+': header escapes viewport');
     if (closed.mobileThemeVisible) throw new Error(item.name+' '+vp.name+': duplicate theme control remains in mobile header');
     if (errors.length) throw new Error(item.name+' '+vp.name+': page errors '+errors.join(' | '));
 
+    const brand=page.locator('.oido-brand-spot').first();
+    const bb=await brand.boundingBox();
+    if(!bb) throw new Error(item.name+' '+vp.name+': logo missing');
+    await page.mouse.move(bb.x+Math.max(2,bb.width*.18),bb.y+bb.height*.5);
+    const spot=await brand.evaluate(el=>el.style.getPropertyValue('--spot-x'));
+    if(!spot) throw new Error(item.name+' '+vp.name+': cursor spotlight did not update');
+
     await page.locator('.oido-menu-btn').click();
     await page.waitForTimeout(120);
-
     const opened = await page.evaluate(() => {
       const panel=document.querySelector('.oido-menu-panel');
       const picker=document.querySelector('.oido-lang');
@@ -85,7 +103,6 @@ for (const vp of viewports) {
         pickerVisible:!!picker && getComputedStyle(picker).display !== 'none',
         panelLeft:pr?.left ?? 0,
         panelRight:pr?.right ?? 0,
-        panelTop:pr?.top ?? 0,
         selected:picker?.value
       };
     });
@@ -108,6 +125,46 @@ for (const vp of viewports) {
     if (await page.locator('.oido-menu-btn').getAttribute('aria-expanded') !== 'false') throw new Error(item.name+' '+vp.name+': Escape does not close menu');
     console.log('PASS',item.name,vp.name);
   }
+  await context.close();
+}
+
+// Verify the static-host Google Translate fallback without calling the external service in CI.
+{
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
+  const page=await context.newPage();
+  await page.route('https://translate.google.com/translate_a/element.js**', async route => {
+    await route.fulfill({
+      contentType:'application/javascript',
+      body:`
+        window.google={translate:{}};
+        google.translate.TranslateElement=function(opts,id){
+          var host=document.getElementById(id);
+          var s=document.createElement('select');s.className='goog-te-combo';
+          ['en','es','ca','fr','de','it','pt','ru','uk','ar','iw','zh-CN','ja','ko','hi','id','vi','th','tl'].forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});
+          s.addEventListener('change',function(){
+            if(s.value==='es'){
+              var a=[...document.querySelectorAll('a')].find(function(x){return x.textContent.trim()==='How it works';});
+              if(a)a.textContent='Cómo funciona';
+              document.documentElement.classList.add('translated-ltr');
+            }
+          });
+          host.appendChild(s);
+        };
+        google.translate.TranslateElement.InlineLayout={SIMPLE:1};
+        window.googleTranslateElementInit();
+      `
+    });
+  });
+  await page.goto(base+'/index.html?lang=es',{waitUntil:'networkidle'});
+  await page.waitForTimeout(350);
+  const state=await page.evaluate(()=>({
+    provider:window.__oidoI18n?.provider,
+    lang:document.documentElement.lang,
+    nav:[...document.querySelectorAll('a')].some(a=>a.textContent.trim()==='Cómo funciona'),
+    combo:document.querySelector('.goog-te-combo')?.value
+  }));
+  if(state.provider!=='google'||state.lang!=='es'||!state.nav||state.combo!=='es') throw new Error('static multilingual fallback did not activate: '+JSON.stringify(state));
+  console.log('PASS static Google Translate fallback');
   await context.close();
 }
 
