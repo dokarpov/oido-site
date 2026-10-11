@@ -177,7 +177,6 @@
       try {
         const u = new URL(raw, location.href);
         if (u.origin !== location.origin) return;
-        if (!u.pathname.includes('/oido-site')) return;
         u.searchParams.set('lang', target);
         a.setAttribute('href', u.pathname + u.search + u.hash);
       } catch {}
