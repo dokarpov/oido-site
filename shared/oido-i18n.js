@@ -14,7 +14,9 @@
     ['tr','Türkçe'],['ar','العربية'],['he','עברית'],['fa','فارسی'],['zh','中文'],
     ['ja','日本語'],['ko','한국어'],['hi','हिन्दी'],['bn','বাংলা'],['ur','اردو'],
     ['id','Bahasa Indonesia'],['ms','Bahasa Melayu'],['vi','Tiếng Việt'],['th','ไทย'],
-    ['fil','Filipino']
+    ['fil','Filipino'],['bg','Български'],['hr','Hrvatski'],['sr','Српски'],['sl','Slovenščina'],
+    ['et','Eesti'],['lv','Latviešu'],['lt','Lietuvių'],['is','Íslenska'],['ga','Gaeilge'],
+    ['af','Afrikaans'],['sw','Kiswahili'],['ta','தமிழ்'],['te','తెలుగు']
   ];
   const SUPPORTED = new Set(LANGUAGES.slice(1).map(([code]) => code));
   const GOOGLE_CODE = {he:'iw', zh:'zh-CN', fil:'tl'};
@@ -281,11 +283,19 @@
         if (chosen === 'auto') localStorage.removeItem(KEY);
         else localStorage.setItem(KEY, chosen);
       } catch {}
-      clearGoogleCookie();
+
+      if (chosen === 'auto') {
+        clearGoogleCookie();
+      } else {
+        setGoogleCookie(chosen);
+        document.documentElement.lang = supportedBase(chosen);
+        document.documentElement.dir = RTL.has(supportedBase(chosen)) ? 'rtl' : 'ltr';
+      }
+
       const u = new URL(location.href);
       if (chosen === 'auto') u.searchParams.delete('lang');
       else u.searchParams.set('lang', chosen);
-      location.href = u.toString();
+      location.replace(u.toString());
     });
 
     root.append(button,panel);
@@ -502,9 +512,20 @@
     }
   }
 
+  // On GitHub Pages there is no server-side translation runtime. Start the
+  // browser translator as early as possible so a selected/device language
+  // does not sit in English for several seconds before translation begins.
+  const eagerLocale = explicitLocale() || storedLocale() || browserLocale();
+  if (EDGE_STATIC_HOST && eagerLocale && eagerLocale !== 'en') {
+    setGoogleCookie(eagerLocale);
+    loadGoogleTranslate().catch(() => {});
+  }
+
   document.addEventListener('DOMContentLoaded', async () => {
     protectBrandNames();
     const locale = await chooseLocale();
+    document.documentElement.lang = supportedBase(locale);
+    document.documentElement.dir = RTL.has(supportedBase(locale)) ? 'rtl' : 'ltr';
     preserveLocaleLinks(locale);
     const status = installMenu(locale);
     await translate(locale,status);
