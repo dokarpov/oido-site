@@ -1,0 +1,11 @@
+
+{
+  "name":"oido-site",
+  "private":true,
+  "type":"module",
+  "scripts":{
+    "check":"node --check shared/oido-i18n.js && node --check functions/api/locale.js && node --check functions/api/translate.js",
+    "test:i18n":"node tests/i18n-unit.mjs",
+    "test:ui":"node tests/ui-smoke.mjs"
+  }
+}
