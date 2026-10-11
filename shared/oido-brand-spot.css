@@ -24,18 +24,19 @@ body{scroll-behavior:smooth}
   display:inline-flex;gap:0;line-height:1;color:currentColor!important;
   transition:color .16s ease,filter .18s ease;will-change:filter;
 }
-@media(hover:hover) and (pointer:fine){
-  .brand.oido-brand-spot:is(:hover,:focus-visible)::before{opacity:.92}
-  .oido-brand-spot:is(:hover,:focus-visible) .mk{
-    color:#c9f24d;filter:drop-shadow(0 0 12px rgba(201,242,77,.62));
-    transform:translate3d(0,-1px,0) scale(1.03)
-  }
-  .oido-brand-spot:is(:hover,:focus-visible) .wm{
-    color:transparent!important;
-    background:radial-gradient(72px circle at var(--spot-x) var(--spot-y),#c9f24d 0%,#efffc2 34%,#fff 72%);
-    -webkit-background-clip:text;background-clip:text;
-    filter:drop-shadow(0 0 11px rgba(201,242,77,.24))
-  }
+.brand.oido-brand-spot.is-hot::before,
+.brand.oido-brand-spot:is(:hover,:focus-visible)::before{opacity:1}
+.oido-brand-spot.is-hot .mk,
+.oido-brand-spot:is(:hover,:focus-visible) .mk{
+  color:#c9f24d;filter:drop-shadow(0 0 14px rgba(201,242,77,.72));
+  transform:translate3d(0,-1px,0) scale(1.04)
+}
+.oido-brand-spot.is-hot .wm,
+.oido-brand-spot:is(:hover,:focus-visible) .wm{
+  color:transparent!important;
+  background:radial-gradient(82px circle at var(--spot-x) var(--spot-y),#c9f24d 0%,#efffc2 28%,#fff 62%,rgba(255,255,255,.78) 100%);
+  -webkit-background-clip:text;background-clip:text;
+  filter:drop-shadow(0 0 13px rgba(201,242,77,.32))
 }
 @media(max-width:700px){.brand.oido-brand-spot{font-size:20px}}
 @media(hover:none),(pointer:coarse){
