@@ -433,16 +433,26 @@
     protectBrandNames();
     setGoogleCookie(locale);
     const combo = await loadGoogleTranslate();
+
+    // Google Translate skips display:none branches. Oído keeps inactive industry
+    // prototypes hidden, so expose them off-canvas while the translator walks
+    // the DOM. They never become visible to the visitor.
+    const prepHiddenVariants = () => document.querySelector('.site')?.classList.add('oido-translate-prep');
+    const releaseHiddenVariants = () => document.querySelector('.site')?.classList.remove('oido-translate-prep');
+
     const retrigger = () => {
+      prepHiddenVariants();
       combo.value = target;
       combo.dispatchEvent(new Event('change',{bubbles:true}));
+      clearTimeout(retrigger.releaseTimer);
+      retrigger.releaseTimer = setTimeout(releaseHiddenVariants, 1600);
     };
     retrigger();
 
     let refreshTimer = 0;
     const scheduleRefresh = () => {
       clearTimeout(refreshTimer);
-      refreshTimer = setTimeout(retrigger, 180);
+      refreshTimer = setTimeout(retrigger, 120);
     };
     const observer = new MutationObserver(mutations => {
       if (mutations.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && !n.closest?.('#oido-google-translate,.goog-te-banner-frame')))) {
@@ -454,6 +464,7 @@
       if (e.target.closest && e.target.closest('button[data-ind],.pz,[data-choose]')) setTimeout(scheduleRefresh,80);
     });
     setTimeout(retrigger,700);
+    setTimeout(retrigger,1800);
 
     document.documentElement.lang = supportedBase(locale);
     document.documentElement.dir = RTL.has(supportedBase(locale)) ? 'rtl' : 'ltr';

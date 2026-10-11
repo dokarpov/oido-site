@@ -35,3 +35,38 @@ html,body{top:0!important}
 }
 @media(max-width:340px){.site .isw-float .isw button{padding-inline:3px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){.oido-menu-btn i,.oido-menu[data-open="true"] .oido-menu-panel{transition:none;animation:none}}
+
+
+/* Translation pass for inactive product variants.
+   Main-site CSS hides non-selected industries with !important; this more
+   specific rule temporarily keeps them in the DOM flow off-canvas so the
+   translation engine can process them without flashing or changing layout. */
+.site.oido-translate-prep[data-ind]:not([data-ind="rest"]) .i-rest,
+.site.oido-translate-prep[data-ind]:not([data-ind="cafe"]) .i-cafe,
+.site.oido-translate-prep[data-ind]:not([data-ind="salon"]) .i-salon,
+.site.oido-translate-prep[data-ind]:not([data-ind="studio"]) .i-studio{
+  display:block!important;
+  position:fixed!important;
+  left:-250vw!important;
+  top:0!important;
+  width:420px!important;
+  max-width:420px!important;
+  height:auto!important;
+  max-height:none!important;
+  opacity:.001!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+  contain:layout style paint!important;
+  z-index:-1!important;
+}
+.site.oido-translate-prep .nv,
+.site.oido-translate-prep .isw-top{
+  display:flex!important;
+  position:fixed!important;
+  left:-250vw!important;
+  top:0!important;
+  opacity:.001!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+  z-index:-1!important;
+}

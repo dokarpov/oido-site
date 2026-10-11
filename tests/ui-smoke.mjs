@@ -87,8 +87,14 @@ for (const vp of viewports) {
     const bb=await brand.boundingBox();
     if(!bb) throw new Error(item.name+' '+vp.name+': logo missing');
     await page.mouse.move(bb.x+Math.max(2,bb.width*.18),bb.y+bb.height*.5);
-    const spot=await brand.evaluate(el=>el.style.getPropertyValue('--spot-x'));
-    if(!spot) throw new Error(item.name+' '+vp.name+': cursor spotlight did not update');
+    const logoVisual=await brand.evaluate(el=>({
+      spot:el.style.getPropertyValue('--spot-x'),
+      glow:getComputedStyle(el,'::before').opacity,
+      mark:getComputedStyle(el.querySelector('.mk')).filter
+    }));
+    if(!logoVisual.spot) throw new Error(item.name+' '+vp.name+': cursor spotlight did not update');
+    if(Number(logoVisual.glow)<0.9) throw new Error(item.name+' '+vp.name+': logo hover glow is not visible '+JSON.stringify(logoVisual));
+    if(!logoVisual.mark || logoVisual.mark==='none') throw new Error(item.name+' '+vp.name+': logo mark glow is not active '+JSON.stringify(logoVisual));
 
     await page.locator('.oido-menu-btn').click();
     await page.waitForTimeout(120);
@@ -145,6 +151,13 @@ for (const vp of viewports) {
             if(s.value==='es'){
               var a=[...document.querySelectorAll('a')].find(function(x){return x.textContent.trim()==='How it works';});
               if(a)a.textContent='Cómo funciona';
+              var hidden=[...document.querySelectorAll('.i-rest')].find(function(x){return x.textContent.includes('Orders');});
+              if(hidden && getComputedStyle(hidden).display!=='none'){
+                document.documentElement.dataset.mockHiddenTranslated='1';
+                [...hidden.querySelectorAll('*')].forEach(function(el){
+                  if(el.childNodes.length===1 && el.firstChild.nodeType===3 && el.textContent.trim()==='Orders')el.firstChild.nodeValue='Pedidos';
+                });
+              }
               document.documentElement.classList.add('translated-ltr');
             }
           });
@@ -164,12 +177,14 @@ for (const vp of viewports) {
     combo:document.querySelector('.goog-te-combo')?.value,
     menuLabel:document.querySelector('.oido-menu-label span')?.textContent.trim(),
     investorHref:[...document.querySelectorAll('a')].find(a=>a.textContent.includes('invest'))?.getAttribute('href') || '',
-    stored:localStorage.getItem('oido.locale')
+    stored:localStorage.getItem('oido.locale'),
+    hiddenVariantTranslated:document.documentElement.dataset.mockHiddenTranslated==='1'
   }));
   if(state.provider!=='google'||state.lang!=='es'||!state.nav||state.combo!=='es') throw new Error('static multilingual fallback did not activate: '+JSON.stringify(state));
   if(state.menuLabel!=='Idioma') throw new Error('language menu did not localize: '+JSON.stringify(state));
   if(!state.investorHref.includes('lang=es')) throw new Error('language was not preserved across internal navigation: '+JSON.stringify(state));
   if(state.stored!=='es') throw new Error('explicit language was not persisted: '+JSON.stringify(state));
+  if(!state.hiddenVariantTranslated) throw new Error('inactive industry variants were hidden from translation engine: '+JSON.stringify(state));
   console.log('PASS static Google Translate fallback');
   await context.close();
 }
