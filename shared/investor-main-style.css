@@ -119,3 +119,5 @@ a{color:inherit}
 }
 @media(max-width:370px){.tw .mtb tbody td{grid-template-columns:87px minmax(0,1fr);gap:8px}.hdi>.wm::before{width:17px;height:17px}}
 @media(prefers-reduced-motion:reduce){.btn,.chip{transition:none}}
+/* Keep the shared language menu inside the viewport at tablet widths. */
+@media(min-width:701px) and (max-width:899px){.oido-menu-panel{position:fixed;right:16px;top:76px;max-width:calc(100vw - 32px)}}
