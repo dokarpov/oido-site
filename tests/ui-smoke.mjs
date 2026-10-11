@@ -90,6 +90,7 @@ for (const vp of viewports) {
     const bb=await brand.boundingBox();
     if(!bb) throw new Error(item.name+' '+vp.name+': logo missing');
     await page.mouse.move(bb.x+Math.max(2,bb.width*.18),bb.y+bb.height*.5);
+    await page.waitForTimeout(280);
     const logoVisual=await brand.evaluate(el=>({
       spot:el.style.getPropertyValue('--spot-x'),
       glow:Number(getComputedStyle(el,'::before').opacity),
