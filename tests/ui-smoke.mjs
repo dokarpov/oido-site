@@ -20,9 +20,12 @@ await mkdir('artifacts/ui', {recursive:true});
 const browser = await chromium.launch({headless:true});
 
 for (const vp of viewports) {
+  const isTouch = vp.width <= 430;
   const context = await browser.newContext({
     viewport:{width:vp.width,height:vp.height},
-    locale:'en-GB'
+    locale:'en-GB',
+    isMobile:isTouch,
+    hasTouch:isTouch
   });
   const page = await context.newPage();
 
