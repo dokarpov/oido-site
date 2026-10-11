@@ -1,5 +1,7 @@
 # Oído
 
+[![UI and i18n smoke](https://github.com/dokarpov/oido-site/actions/workflows/ui-smoke.yml/badge.svg)](https://github.com/dokarpov/oido-site/actions/workflows/ui-smoke.yml)
+
 **A browser-first service-commerce layer for independent hospitality and service businesses.** Oído helps merchants turn menus and service lists into mobile customer experiences: QR storefronts, demo ordering, optional tips, feedback, and merchant reporting—without replacing their existing POS.
 
 **Status:** pre-incorporation, bootstrapped, pre-seed working browser beta. The public website demonstrates a product concept and pilot offering; production payment settlement, paying merchants, GMV, and revenue are **not** being claimed as verified.
@@ -9,7 +11,23 @@
 - **For businesses:** https://dokarpov.github.io/oido-site/
 - **For investors and partners:** https://dokarpov.github.io/oido-site/investors/
 
-The public-facing site and investor overview use separate HTML entry points in this repository. Both are static web pages hosted by GitHub Pages. Current enquiry forms prepare an email in the visitor's email app; there is no form backend, CRM integration, or stored submission. Prices and commercial terms presented on the site are hypotheses pending paid-merchant validation.
+The public-facing site and investor overview use separate HTML entry points in this repository. Both are currently hosted by GitHub Pages. Current enquiry forms prepare an email in the visitor's email app; there is no form backend, CRM integration, or stored submission. The repository also contains a Cloudflare Pages/Workers localization path for edge locale detection and runtime translation; those server-side functions are not executed by GitHub Pages. Prices and commercial terms presented on the site are hypotheses pending paid-merchant validation.
+
+## What is real today
+
+| Evidence | Status |
+|---|---|
+| Public business website | live |
+| Investor / partner view | live |
+| Responsive browser validation | passing at 320, 375, 390, 430, 768 and 1440 px widths |
+| Automatic locale selection + compact manual language menu | implemented |
+| Common-language catalogue | 36 languages |
+| Edge/IP-country locale fallback + runtime translation | implemented for Cloudflare Pages/Workers, **not active on GitHub Pages** |
+| Payment settlement | **not live / not claimed** |
+| Paying merchants, GMV, revenue | **not yet claimed as verified** |
+| Prices / commercial terms | hypotheses pending paid validation |
+
+This is deliberately a **working product and pilot proposition, not a fabricated traction story**. The next credibility step is external: paid merchant evidence, activation/usage, repeat value and support economics.
 
 ## Repository layout
 
