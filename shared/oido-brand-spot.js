@@ -10,8 +10,14 @@
       if(el.dataset.oidoSpotReady)return;
       el.dataset.oidoSpotReady="1";
 
+      el.addEventListener("pointerenter",function(ev){
+        if(ev.pointerType==="touch")return;
+        el.classList.add("is-hot");
+      },{passive:true});
+
       el.addEventListener("pointermove",function(ev){
         if(ev.pointerType==="touch")return;
+        el.classList.add("is-hot");
         var box=el.getBoundingClientRect();
         if(!box.width||!box.height)return;
         var x=Math.max(0,Math.min(100,(ev.clientX-box.left)/box.width*100));
@@ -21,9 +27,12 @@
       },{passive:true});
 
       el.addEventListener("pointerleave",function(){
+        el.classList.remove("is-hot");
         el.style.removeProperty("--spot-x");
         el.style.removeProperty("--spot-y");
       },{passive:true});
+      el.addEventListener("focusin",function(){el.classList.add("is-hot");});
+      el.addEventListener("focusout",function(){el.classList.remove("is-hot");});
     });
   }
 
