@@ -11,7 +11,7 @@
 - **For businesses:** https://dokarpov.github.io/oido-site/
 - **For investors and partners:** https://dokarpov.github.io/oido-site/investors/
 
-The public-facing site and investor overview use separate HTML entry points in this repository. Both are currently hosted by GitHub Pages. Current enquiry forms prepare an email in the visitor's email app; there is no form backend, CRM integration, or stored submission. The repository also contains a Cloudflare Pages/Workers localization path for edge locale detection and runtime translation; those server-side functions are not executed by GitHub Pages. Prices and commercial terms presented on the site are hypotheses pending paid-merchant validation.
+The public-facing site and investor overview use separate HTML entry points in this repository. Both are currently hosted by GitHub Pages. The business pilot form sends submissions through FormSubmit.co to diego@sinthetic.io with a copy to dokarpov@gmail.com; delivery requires the FormSubmit recipient to activate the form. The investor meeting form currently opens a prepared email addressed to Diego with Daria in CC (the visitor must press Send). The GitHub Pages site does not host its own form backend or CRM. The repository also contains a Cloudflare Pages/Workers localization path for edge locale detection and runtime translation; those server-side functions are not executed by GitHub Pages. Prices and commercial terms presented on the site are hypotheses pending paid-merchant validation.
 
 ## What is real today
 
