@@ -842,7 +842,7 @@ function setupUpd(){ var p = reduce ? .99 : prog(usec), f = clamp(p) * 4 * .999,
 stps.forEach(function(s, k){ s.addEventListener('click', function(){ manual.setup = {i: k, y: scrollY}; last.s = -1; all(); track('setup_step', {step: k + 1}); }); });
 
 // MODULES: the tags fall into a pile
-var tags = $('.tag'), pile = $('.pile');
+var tags = Array.prototype.slice.call(site.querySelectorAll('.tag')), pile = $('.pile');
 tags.forEach(function(t){ t._oidoR = parseFloat(getComputedStyle(t).getPropertyValue('--r')) || 0; });
 function modsUpd(){ var p = reduce ? 1 : seen(pile, .95, .7);
   tags.forEach(function(t, i){ var a = ease(clamp((p - i * .06) / .5)), r = t._oidoR;
