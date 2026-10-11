@@ -82,7 +82,7 @@ for (const vp of viewports) {
     if (closed.scrollBehavior !== 'smooth') throw new Error(item.name+' '+vp.name+': smooth anchor scrolling not enabled');
     if (!closed.brandNoTranslate) throw new Error(item.name+' '+vp.name+': Oído logo not protected from translation');
     if (closed.headerLogoCount !== 1) throw new Error(item.name+' '+vp.name+': expected exactly one header logo, got '+closed.headerLogoCount);
-    if (closed.footerLogoCount !== 1) throw new Error(item.name+' '+vp.name+': expected exactly one small footer logo, got '+closed.footerLogoCount);
+    if (closed.footerLogoCount !== 0) throw new Error(item.name+' '+vp.name+': duplicate footer logo remains, got '+closed.footerLogoCount);
     if (closed.scrollWidth > closed.viewport + 2) throw new Error(item.name+' '+vp.name+': horizontal overflow '+closed.scrollWidth+' > '+closed.viewport);
     if (closed.headerLeft < -1 || closed.headerRight > closed.viewport + 1) throw new Error(item.name+' '+vp.name+': header escapes viewport');
     if (closed.mobileThemeVisible) throw new Error(item.name+' '+vp.name+': duplicate theme control remains in mobile header');
