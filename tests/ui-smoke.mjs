@@ -51,10 +51,17 @@ for (const vp of viewports) {
         headerWidth:rect?.width ?? 0,
         h1:!!document.querySelector('h1'),
         mobileThemeVisible: window.innerWidth <= 700 && !!document.querySelector('.site .hdi>.thm') &&
-          getComputedStyle(document.querySelector('.site .hdi>.thm')).display !== 'none'
+          getComputedStyle(document.querySelector('.site .hdi>.thm')).display !== 'none',
+        offenders:[...document.querySelectorAll('body *')].map(el => {
+          const r=el.getBoundingClientRect();
+          const cs=getComputedStyle(el);
+          return {tag:el.tagName.toLowerCase(), cls:el.className?.toString().slice(0,120) || '', text:(el.textContent||'').trim().replace(/\\s+/g,' ').slice(0,80), left:Math.round(r.left), right:Math.round(r.right), width:Math.round(r.width), display:cs.display, position:cs.position};
+        }).filter(x => x.display !== 'none' && x.width > 0 && (x.left < -2 || x.right > window.innerWidth + 2)).slice(0,20)
       };
     });
 
+    await page.screenshot({path:`artifacts/ui/${item.name}-${vp.name}-closed.png`,fullPage:false});
+    if (closed.offenders.length) console.log('OFFENDERS',item.name,vp.name,JSON.stringify(closed.offenders));
     if (!closed.menu || !closed.menuVisible) throw new Error(item.name+' '+vp.name+': compact menu missing');
     if (!closed.picker) throw new Error(item.name+' '+vp.name+': language control missing from menu');
     if (closed.pickerVisible || closed.panelVisible) throw new Error(item.name+' '+vp.name+': language selector visible before menu opens');
@@ -63,8 +70,6 @@ for (const vp of viewports) {
     if (closed.headerLeft < -1 || closed.headerRight > closed.viewport + 1) throw new Error(item.name+' '+vp.name+': header escapes viewport');
     if (closed.mobileThemeVisible) throw new Error(item.name+' '+vp.name+': duplicate theme control remains in mobile header');
     if (errors.length) throw new Error(item.name+' '+vp.name+': page errors '+errors.join(' | '));
-
-    await page.screenshot({path:`artifacts/ui/${item.name}-${vp.name}-closed.png`,fullPage:false});
 
     await page.locator('.oido-menu-btn').click();
     await page.waitForTimeout(120);
