@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '2026-10-11.5';
+  const VERSION = '2026-10-11.6';
   const KEY = 'oido.locale';
   const GOOGLE_SCRIPT = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
   const RTL = new Set(['ar','fa','he','ur']);
@@ -455,7 +455,7 @@
       combo.value = target;
       combo.dispatchEvent(new Event('change',{bubbles:true}));
       clearTimeout(retrigger.releaseTimer);
-      retrigger.releaseTimer = setTimeout(releaseHiddenVariants, 1600);
+      retrigger.releaseTimer = setTimeout(releaseHiddenVariants, 6500);
     };
     retrigger();
 
@@ -475,6 +475,7 @@
     });
     setTimeout(retrigger,700);
     setTimeout(retrigger,1800);
+    setTimeout(retrigger,4200);
 
     document.documentElement.lang = supportedBase(locale);
     document.documentElement.dir = RTL.has(supportedBase(locale)) ? 'rtl' : 'ltr';
