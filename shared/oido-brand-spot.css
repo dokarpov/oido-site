@@ -53,8 +53,12 @@ body{scroll-behavior:smooth}
 
 /* Keep native scroll fluid and GPU-friendly; scroll-linked product scenes update in rAF. */
 .rail-in,.pcs,.app.page{scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
-.site .stamp,.site .beam,.site .pa,.site .tag,.site .sb,.site .tapr,.site .scn,.site .fr{
+.site .stamp,.site .beam,.site .pa,.site .tag,.site .sb,.site .tapr{
   will-change:transform,opacity;backface-visibility:hidden;transform-origin:center;
+  transition:transform 90ms linear!important,opacity 90ms linear!important;
+}
+.site .scn,.site .fr{
+  will-change:transform,opacity;backface-visibility:hidden;
 }
 .site .tkt,.site .sc-paper,.site .pz-card,.site [data-sec],
 .pitch-hero,.pitch-section,.pitch-fact,.pitch-proof,.pitch-evidence-card,.tier,.meetc{
