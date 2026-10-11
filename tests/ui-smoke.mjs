@@ -145,6 +145,23 @@ for (const vp of viewports) {
   await context.close();
 }
 
+// Verify that navigation scrolls through intermediate positions rather than jumping.
+{
+  const context=await browser.newContext({viewport:{width:1440,height:1000},locale:'en-GB'});
+  const page=await context.newPage();
+  await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+  const target=await page.locator('#how').evaluate(el=>el.getBoundingClientRect().top+scrollY);
+  await page.locator('.nv a[href="#how"]').click();
+  await page.waitForTimeout(70);
+  const mid=await page.evaluate(()=>scrollY);
+  if(!(mid>0 && mid<target-40)) throw new Error('anchor scroll did not animate through an intermediate position: '+JSON.stringify({mid,target}));
+  await page.waitForTimeout(700);
+  const end=await page.evaluate(()=>scrollY);
+  if(end<=mid) throw new Error('smooth anchor scroll did not continue: '+JSON.stringify({mid,end,target}));
+  console.log('PASS smooth anchor motion');
+  await context.close();
+}
+
 // Verify the static-host Google Translate fallback without calling the external service in CI.
 {
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
