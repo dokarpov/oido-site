@@ -239,3 +239,156 @@ test('core form flow produces no uncaught page errors', async ({ page }) => {
   await expect(page.locator('#lead-status')).toBeVisible();
   expect(errors).toEqual([]);
 });
+
+
+test('conversion path contains no mailto links or Lisbon/Web Summit remnants', async ({ page }) => {
+  await page.goto(URL);
+  await expect(page.locator('a[href^="mailto:"]')).toHaveCount(0);
+  const formText = await page.locator('#lead-form').innerText();
+  expect(formText).not.toMatch(/Lisbon|Web Summit/i);
+});
+
+for (const viewport of [
+  { width: 320, height: 568 },
+  { width: 375, height: 667 },
+  { width: 390, height: 844 },
+  { width: 430, height: 932 },
+  { width: 844, height: 390 }
+]) {
+  test(`responsive form stays inside viewport at ${viewport.width}x${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await gotoForm(page);
+    const metrics = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth
+    }));
+    expect(metrics.scrollWidth).toBeLessThanOrEqual(metrics.clientWidth + 1);
+
+    const form = page.locator('#lead-form');
+    const box = await form.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box.x).toBeGreaterThanOrEqual(-1);
+    expect(box.x + box.width).toBeLessThanOrEqual(viewport.width + 1);
+
+    const fields = page.locator('#lead-biz, #lead-email');
+    for (let i = 0; i < await fields.count(); i++) {
+      const fontSize = parseFloat(await fields.nth(i).evaluate(el => getComputedStyle(el).fontSize));
+      expect(fontSize).toBeGreaterThanOrEqual(16);
+    }
+  });
+}
+
+test('Get started lands with the first field visible below the sticky header', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(URL);
+  await page.locator('header [data-tofind]').click();
+  await expect(page.locator('#lead-biz')).toBeFocused({ timeout: 2000 });
+  const result = await page.evaluate(() => {
+    const input = document.querySelector('#lead-biz').getBoundingClientRect();
+    const header = document.querySelector('.hd').getBoundingClientRect();
+    return { inputTop: input.top, inputBottom: input.bottom, headerBottom: header.bottom, viewport: innerHeight };
+  });
+  expect(result.inputTop).toBeGreaterThanOrEqual(result.headerBottom - 1);
+  expect(result.inputBottom).toBeLessThanOrEqual(result.viewport + 1);
+});
+
+test('failed submission preserves entered values and clears busy state', async ({ page }) => {
+  await mockSubmit(page, async route => {
+    await route.fulfill({ status: 500, contentType: 'text/plain', body: 'down' });
+  });
+  await gotoForm(page);
+  await page.locator('#lead-biz').fill('  Café Ñ  ');
+  await page.locator('#lead-email').fill('  owner@example.com  ');
+  await page.locator('#lead-form').evaluate(form => form.requestSubmit());
+
+  await expect(page.locator('#lead-error')).toBeVisible();
+  await expect(page.locator('#lead-biz')).toHaveValue('Café Ñ');
+  await expect(page.locator('#lead-email')).toHaveValue('owner@example.com');
+  await expect(page.locator('#lead-form')).toHaveAttribute('aria-busy', 'false');
+  await expect(page.getByRole('button', { name: /Request pilot access/i })).toBeEnabled();
+});
+
+test('busy state is exposed while a request is in flight', async ({ page }) => {
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  await mockSubmit(page, async route => {
+    await gate;
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ success: true }) });
+  });
+  await gotoForm(page);
+  await page.locator('#lead-biz').fill('Business');
+  await page.locator('#lead-email').fill('owner@example.com');
+  await page.getByRole('button', { name: /Request pilot access/i }).click();
+
+  await expect(page.locator('#lead-form')).toHaveAttribute('aria-busy', 'true');
+  await expect(page.locator('.lead-submit')).toBeDisabled();
+  await expect(page.locator('.lead-submit-label')).toHaveText('Sending…');
+  release();
+  await expect(page.locator('#lead-status')).toContainText('Request sent');
+  await expect(page.locator('#lead-form')).toHaveAttribute('aria-busy', 'false');
+});
+
+test('429 rate limit gets an in-page retry message', async ({ page }) => {
+  await mockSubmit(page, async route => {
+    await route.fulfill({ status: 429, contentType: 'application/json', body: JSON.stringify({ success: false }) });
+  });
+  await gotoForm(page);
+  await page.locator('#lead-biz').fill('Business');
+  await page.locator('#lead-email').fill('owner@example.com');
+  await page.locator('#lead-form').evaluate(form => form.requestSubmit());
+
+  await expect(page.locator('#lead-error')).toContainText('Too many requests');
+  await expect(page.locator('#lead-form')).toHaveAttribute('aria-busy', 'false');
+  await expect(page.locator('.lead-submit')).toBeEnabled();
+});
+
+test('AbortError is handled as timeout without navigation', async ({ page }) => {
+  await gotoForm(page);
+  const before = page.url();
+  await page.evaluate(() => {
+    window.fetch = () => Promise.reject(Object.assign(new Error('aborted'), { name: 'AbortError' }));
+  });
+  await page.locator('#lead-biz').fill('Business');
+  await page.locator('#lead-email').fill('owner@example.com');
+  await page.locator('#lead-form').evaluate(form => form.requestSubmit());
+
+  await expect(page.locator('#lead-error')).toContainText('timed out');
+  expect(page.url()).toBe(before);
+  await expect(page.locator('.lead-submit')).toBeEnabled();
+});
+
+test('successful empty-body response is accepted without JSON dependency', async ({ page }) => {
+  await mockSubmit(page, async route => {
+    await route.fulfill({ status: 204, body: '' });
+  });
+  await gotoForm(page);
+  await page.locator('#lead-biz').fill('Business');
+  await page.locator('#lead-email').fill('owner@example.com');
+  await page.locator('#lead-form').evaluate(form => form.requestSubmit());
+  await expect(page.locator('#lead-status')).toContainText('Request sent');
+});
+
+test('invalid fields expose aria-invalid and clear it when edited', async ({ page }) => {
+  await gotoForm(page);
+  await page.locator('#lead-email').fill('owner@example.com');
+  await page.locator('#lead-form').evaluate(form => form.requestSubmit());
+  await expect(page.locator('#lead-biz')).toHaveAttribute('aria-invalid', 'true');
+  await page.locator('#lead-biz').fill('Business');
+  await expect(page.locator('#lead-biz')).not.toHaveAttribute('aria-invalid', 'true');
+
+  await page.locator('#lead-email').fill('bad');
+  await page.locator('#lead-form').evaluate(form => form.requestSubmit());
+  await expect(page.locator('#lead-email')).toHaveAttribute('aria-invalid', 'true');
+  await page.locator('#lead-email').fill('owner@example.com');
+  await expect(page.locator('#lead-email')).not.toHaveAttribute('aria-invalid', 'true');
+});
+
+test('tab order reaches both fields and the submit control without traps', async ({ page }) => {
+  await gotoForm(page);
+  await page.locator('#lead-biz').focus();
+  await expect(page.locator('#lead-biz')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#lead-email')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('.lead-submit')).toBeFocused();
+});
