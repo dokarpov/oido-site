@@ -89,12 +89,17 @@ for (const vp of viewports) {
     await page.mouse.move(bb.x+Math.max(2,bb.width*.18),bb.y+bb.height*.5);
     const logoVisual=await brand.evaluate(el=>({
       spot:el.style.getPropertyValue('--spot-x'),
-      glow:getComputedStyle(el,'::before').opacity,
-      mark:getComputedStyle(el.querySelector('.mk')).filter
+      glow:Number(getComputedStyle(el,'::before').opacity),
+      mark:getComputedStyle(el.querySelector('.mk')).filter,
+      fine:matchMedia('(hover:hover) and (pointer:fine)').matches
     }));
-    if(!logoVisual.spot) throw new Error(item.name+' '+vp.name+': cursor spotlight did not update');
-    if(Number(logoVisual.glow)<0.9) throw new Error(item.name+' '+vp.name+': logo hover glow is not visible '+JSON.stringify(logoVisual));
-    if(!logoVisual.mark || logoVisual.mark==='none') throw new Error(item.name+' '+vp.name+': logo mark glow is not active '+JSON.stringify(logoVisual));
+    if(logoVisual.fine){
+      if(!logoVisual.spot) throw new Error(item.name+' '+vp.name+': cursor spotlight did not update');
+      if(logoVisual.glow<0.9) throw new Error(item.name+' '+vp.name+': desktop logo hover glow is not visible '+JSON.stringify(logoVisual));
+      if(!logoVisual.mark || logoVisual.mark==='none') throw new Error(item.name+' '+vp.name+': desktop logo mark glow is not active '+JSON.stringify(logoVisual));
+    } else {
+      if(logoVisual.glow<0.3) throw new Error(item.name+' '+vp.name+': mobile logo has no static spotlight '+JSON.stringify(logoVisual));
+    }
 
     await page.locator('.oido-menu-btn').click();
     await page.waitForTimeout(120);
