@@ -6,15 +6,22 @@
   const EN = new Set(['en','en-us','en-gb']);
   const RTL = new Set(['ar','fa','he','ur']);
   const POPULAR = [
-    ['auto','Automatic'],['en','English'],['es','Español'],['ca','Català'],['fr','Français'],
-    ['de','Deutsch'],['it','Italiano'],['pt','Português'],['nl','Nederlands'],['pl','Polski'],
-    ['ru','Русский'],['uk','Українська'],['tr','Türkçe'],['ar','العربية'],['he','עברית'],
-    ['zh','中文'],['ja','日本語'],['ko','한국어'],['hi','हिन्दी']
+    ['auto','Automatic'],
+    ['en','English'],['es','Español'],['ca','Català'],['fr','Français'],['de','Deutsch'],
+    ['it','Italiano'],['pt','Português'],['nl','Nederlands'],['pl','Polski'],['cs','Čeština'],
+    ['sk','Slovenčina'],['ro','Română'],['hu','Magyar'],['el','Ελληνικά'],['sv','Svenska'],
+    ['da','Dansk'],['no','Norsk'],['fi','Suomi'],['ru','Русский'],['uk','Українська'],
+    ['tr','Türkçe'],['ar','العربية'],['he','עברית'],['fa','فارسی'],['zh','中文'],
+    ['ja','日本語'],['ko','한국어'],['hi','हिन्दी'],['bn','বাংলা'],['ur','اردو'],
+    ['id','Bahasa Indonesia'],['ms','Bahasa Melayu'],['vi','Tiếng Việt'],['th','ไทย'],
+    ['fil','Filipino']
   ];
   const COUNTRY_HINT = {
     ES:'es',AD:'ca',FR:'fr',DE:'de',AT:'de',CH:'de',IT:'it',PT:'pt',BR:'pt',NL:'nl',
-    BE:'nl',PL:'pl',RU:'ru',UA:'uk',TR:'tr',SA:'ar',AE:'ar',IL:'he',CN:'zh',TW:'zh',
-    JP:'ja',KR:'ko',IN:'hi',MX:'es',AR:'es',CL:'es',CO:'es',PE:'es'
+    BE:'nl',PL:'pl',CZ:'cs',SK:'sk',RO:'ro',HU:'hu',GR:'el',SE:'sv',DK:'da',NO:'no',
+    FI:'fi',RU:'ru',UA:'uk',TR:'tr',SA:'ar',AE:'ar',IL:'he',IR:'fa',CN:'zh',TW:'zh',
+    JP:'ja',KR:'ko',IN:'hi',BD:'bn',PK:'ur',ID:'id',MY:'ms',VN:'vi',TH:'th',PH:'fil',
+    MX:'es',AR:'es',CL:'es',CO:'es',PE:'es'
   };
 
   const originals = new WeakMap();
