@@ -1,7 +1,7 @@
 (() => {
   'use strict';
 
-  const VERSION = '2026-10-11.6';
+  const VERSION = '2026-10-11.7';
   const KEY = 'oido.locale';
   const GOOGLE_SCRIPT = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
   const RTL = new Set(['ar','fa','he','ur']);
@@ -121,6 +121,35 @@
   function googleCode(locale) {
     const b = supportedBase(locale);
     return GOOGLE_CODE[b] || b;
+  }
+
+  function applyDirection(locale) {
+    const target = supportedBase(locale);
+    const dir = RTL.has(target) ? 'rtl' : 'ltr';
+    document.documentElement.lang = target;
+    document.documentElement.dir = dir;
+    if (document.body) document.body.dir = dir;
+  }
+
+  function hideTranslateChrome() {
+    const selectors = [
+      '.goog-te-banner-frame',
+      'iframe.goog-te-banner-frame',
+      'iframe.skiptranslate',
+      '.VIpgJd-ZVi9od-ORHb-OEVmcd',
+      '.VIpgJd-ZVi9od-aZ2wEe-wOHMyf',
+      '.VIpgJd-ZVi9od-aZ2wEe-OiiCO',
+      '#goog-gt-tt',
+      '.goog-te-balloon-frame',
+      '.goog-te-menu-frame'
+    ];
+    document.querySelectorAll(selectors.join(',')).forEach(el => {
+      el.style.setProperty('display','none','important');
+      el.style.setProperty('visibility','hidden','important');
+      el.style.setProperty('height','0','important');
+    });
+    document.documentElement.style.setProperty('top','0','important');
+    if (document.body) document.body.style.setProperty('top','0','important');
   }
 
   function clearGoogleCookie() {
@@ -288,8 +317,7 @@
         clearGoogleCookie();
       } else {
         setGoogleCookie(chosen);
-        document.documentElement.lang = supportedBase(chosen);
-        document.documentElement.dir = RTL.has(supportedBase(chosen)) ? 'rtl' : 'ltr';
+        applyDirection(chosen);
       }
 
       const u = new URL(location.href);
@@ -335,8 +363,7 @@
       if (originals.has(node)) node.nodeValue = originals.get(node);
     }
     clearGoogleCookie();
-    document.documentElement.lang = 'en';
-    document.documentElement.dir = 'ltr';
+    applyDirection('en');
   }
 
   async function translateWithEdge(locale) {
@@ -443,6 +470,7 @@
     protectBrandNames();
     setGoogleCookie(locale);
     const combo = await loadGoogleTranslate();
+    hideTranslateChrome();
 
     // Google Translate skips display:none branches. Oído keeps inactive industry
     // prototypes hidden, so expose them off-canvas while the translator walks
@@ -454,6 +482,8 @@
       prepHiddenVariants();
       combo.value = target;
       combo.dispatchEvent(new Event('change',{bubbles:true}));
+      applyDirection(locale);
+      hideTranslateChrome();
       clearTimeout(retrigger.releaseTimer);
       retrigger.releaseTimer = setTimeout(releaseHiddenVariants, 6500);
     };
@@ -477,8 +507,8 @@
     setTimeout(retrigger,1800);
     setTimeout(retrigger,4200);
 
-    document.documentElement.lang = supportedBase(locale);
-    document.documentElement.dir = RTL.has(supportedBase(locale)) ? 'rtl' : 'ltr';
+    applyDirection(locale);
+    hideTranslateChrome();
     return true;
   }
 
@@ -495,8 +525,7 @@
     try {
       if (await translateWithEdge(target)) {
         window.__oidoI18n.provider = 'edge';
-        document.documentElement.lang = target;
-        document.documentElement.dir = RTL.has(target) ? 'rtl' : 'ltr';
+        applyDirection(target);
         if (status) status.textContent = 'Language: ' + target;
         return;
       }
@@ -522,11 +551,14 @@
     loadGoogleTranslate().catch(() => {});
   }
 
+  const translateChromeObserver = new MutationObserver(() => hideTranslateChrome());
+  translateChromeObserver.observe(document.documentElement,{childList:true,subtree:true});
+
   document.addEventListener('DOMContentLoaded', async () => {
     protectBrandNames();
+    hideTranslateChrome();
     const locale = await chooseLocale();
-    document.documentElement.lang = supportedBase(locale);
-    document.documentElement.dir = RTL.has(supportedBase(locale)) ? 'rtl' : 'ltr';
+    applyDirection(locale);
     preserveLocaleLinks(locale);
     const status = installMenu(locale);
     await translate(locale,status);
