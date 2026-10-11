@@ -161,9 +161,15 @@ for (const vp of viewports) {
     provider:window.__oidoI18n?.provider,
     lang:document.documentElement.lang,
     nav:[...document.querySelectorAll('a')].some(a=>a.textContent.trim()==='Cómo funciona'),
-    combo:document.querySelector('.goog-te-combo')?.value
+    combo:document.querySelector('.goog-te-combo')?.value,
+    menuLabel:document.querySelector('.oido-menu-label span')?.textContent.trim(),
+    investorHref:[...document.querySelectorAll('a')].find(a=>a.textContent.includes('invest'))?.getAttribute('href') || '',
+    stored:localStorage.getItem('oido.locale')
   }));
   if(state.provider!=='google'||state.lang!=='es'||!state.nav||state.combo!=='es') throw new Error('static multilingual fallback did not activate: '+JSON.stringify(state));
+  if(state.menuLabel!=='Idioma') throw new Error('language menu did not localize: '+JSON.stringify(state));
+  if(!state.investorHref.includes('lang=es')) throw new Error('language was not preserved across internal navigation: '+JSON.stringify(state));
+  if(state.stored!=='es') throw new Error('explicit language was not persisted: '+JSON.stringify(state));
   console.log('PASS static Google Translate fallback');
   await context.close();
 }

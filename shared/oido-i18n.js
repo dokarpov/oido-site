@@ -19,6 +19,43 @@
   const SUPPORTED = new Set(LANGUAGES.slice(1).map(([code]) => code));
   const GOOGLE_CODE = {he:'iw', zh:'zh-CN', fil:'tl'};
   const EDGE_STATIC_HOST = /(^|\.)github\.io$/i.test(location.hostname);
+  const UI = {
+    en:{menu:'Menu',language:'Language',automatic:'Automatic',manual:'Manual',theme:'Switch light / dark'},
+    es:{menu:'Menú',language:'Idioma',automatic:'Automático',manual:'Manual',theme:'Cambiar tema'},
+    ca:{menu:'Menú',language:'Idioma',automatic:'Automàtic',manual:'Manual',theme:'Canvia el tema'},
+    fr:{menu:'Menu',language:'Langue',automatic:'Automatique',manual:'Manuel',theme:'Changer de thème'},
+    de:{menu:'Menü',language:'Sprache',automatic:'Automatisch',manual:'Manuell',theme:'Design wechseln'},
+    it:{menu:'Menu',language:'Lingua',automatic:'Automatico',manual:'Manuale',theme:'Cambia tema'},
+    pt:{menu:'Menu',language:'Idioma',automatic:'Automático',manual:'Manual',theme:'Alternar tema'},
+    nl:{menu:'Menu',language:'Taal',automatic:'Automatisch',manual:'Handmatig',theme:'Thema wisselen'},
+    pl:{menu:'Menu',language:'Język',automatic:'Automatycznie',manual:'Ręcznie',theme:'Zmień motyw'},
+    cs:{menu:'Nabídka',language:'Jazyk',automatic:'Automaticky',manual:'Ručně',theme:'Přepnout motiv'},
+    sk:{menu:'Ponuka',language:'Jazyk',automatic:'Automaticky',manual:'Manuálne',theme:'Prepnúť motív'},
+    ro:{menu:'Meniu',language:'Limbă',automatic:'Automat',manual:'Manual',theme:'Schimbă tema'},
+    hu:{menu:'Menü',language:'Nyelv',automatic:'Automatikus',manual:'Kézi',theme:'Téma váltása'},
+    el:{menu:'Μενού',language:'Γλώσσα',automatic:'Αυτόματα',manual:'Χειροκίνητα',theme:'Αλλαγή θέματος'},
+    sv:{menu:'Meny',language:'Språk',automatic:'Automatiskt',manual:'Manuellt',theme:'Byt tema'},
+    da:{menu:'Menu',language:'Sprog',automatic:'Automatisk',manual:'Manuel',theme:'Skift tema'},
+    no:{menu:'Meny',language:'Språk',automatic:'Automatisk',manual:'Manuelt',theme:'Bytt tema'},
+    fi:{menu:'Valikko',language:'Kieli',automatic:'Automaattinen',manual:'Manuaalinen',theme:'Vaihda teema'},
+    ru:{menu:'Меню',language:'Язык',automatic:'Автоматически',manual:'Вручную',theme:'Сменить тему'},
+    uk:{menu:'Меню',language:'Мова',automatic:'Автоматично',manual:'Вручну',theme:'Змінити тему'},
+    tr:{menu:'Menü',language:'Dil',automatic:'Otomatik',manual:'Manuel',theme:'Temayı değiştir'},
+    ar:{menu:'القائمة',language:'اللغة',automatic:'تلقائي',manual:'يدوي',theme:'تبديل السمة'},
+    he:{menu:'תפריט',language:'שפה',automatic:'אוטומטי',manual:'ידני',theme:'החלפת ערכת נושא'},
+    fa:{menu:'منو',language:'زبان',automatic:'خودکار',manual:'دستی',theme:'تغییر پوسته'},
+    zh:{menu:'菜单',language:'语言',automatic:'自动',manual:'手动',theme:'切换主题'},
+    ja:{menu:'メニュー',language:'言語',automatic:'自動',manual:'手動',theme:'テーマを切り替え'},
+    ko:{menu:'메뉴',language:'언어',automatic:'자동',manual:'수동',theme:'테마 전환'},
+    hi:{menu:'मेनू',language:'भाषा',automatic:'स्वचालित',manual:'मैन्युअल',theme:'थीम बदलें'},
+    bn:{menu:'মেনু',language:'ভাষা',automatic:'স্বয়ংক্রিয়',manual:'ম্যানুয়াল',theme:'থিম বদলান'},
+    ur:{menu:'مینو',language:'زبان',automatic:'خودکار',manual:'دستی',theme:'تھیم تبدیل کریں'},
+    id:{menu:'Menu',language:'Bahasa',automatic:'Otomatis',manual:'Manual',theme:'Ganti tema'},
+    ms:{menu:'Menu',language:'Bahasa',automatic:'Automatik',manual:'Manual',theme:'Tukar tema'},
+    vi:{menu:'Menu',language:'Ngôn ngữ',automatic:'Tự động',manual:'Thủ công',theme:'Đổi giao diện'},
+    th:{menu:'เมนู',language:'ภาษา',automatic:'อัตโนมัติ',manual:'ด้วยตนเอง',theme:'สลับธีม'},
+    fil:{menu:'Menu',language:'Wika',automatic:'Awtomatiko',manual:'Manwal',theme:'Palitan ang tema'}
+  };
   const originals = new WeakMap();
 
   const norm = value => String(value || '').trim().replace('_','-').toLowerCase();
@@ -67,7 +104,12 @@
   }
 
   async function chooseLocale() {
-    const forced = explicitLocale() || storedLocale();
+    const explicit = explicitLocale();
+    if (explicit) {
+      try { localStorage.setItem(KEY, explicit); } catch {}
+      return explicit;
+    }
+    const forced = storedLocale();
     if (forced) return forced;
     const browser = browserLocale();
     if (browser && browser !== 'en') return browser;
@@ -126,12 +168,29 @@
     });
   }
 
+  function preserveLocaleLinks(locale) {
+    const target = supportedBase(locale);
+    if (target === 'en') return;
+    document.querySelectorAll('a[href]').forEach(a => {
+      const raw = a.getAttribute('href');
+      if (!raw || raw.startsWith('#') || raw.startsWith('mailto:') || raw.startsWith('tel:') || raw.startsWith('javascript:')) return;
+      try {
+        const u = new URL(raw, location.href);
+        if (u.origin !== location.origin) return;
+        if (!u.pathname.includes('/oido-site')) return;
+        u.searchParams.set('lang', target);
+        a.setAttribute('href', u.pathname + u.search + u.hash);
+      } catch {}
+    });
+  }
+
   function installMenu(locale) {
     const header = document.querySelector('.hdi') || document.querySelector('header') || document.body;
     if (!header || header.querySelector('.oido-menu')) return null;
 
     const forced = explicitLocale() || storedLocale();
     const currentBase = supportedBase(locale);
+    const ui = UI[currentBase] || UI.en;
 
     const root = document.createElement('div');
     root.className = 'oido-menu notranslate';
@@ -142,14 +201,14 @@
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'oido-menu-btn';
-    button.setAttribute('aria-label','Menu');
+    button.setAttribute('aria-label',ui.menu);
     button.setAttribute('aria-expanded','false');
     button.innerHTML = '<span aria-hidden="true"><i></i><i></i><i></i></span>';
 
     const panel = document.createElement('div');
     panel.className = 'oido-menu-panel';
     panel.setAttribute('role','dialog');
-    panel.setAttribute('aria-label','Site settings');
+    panel.setAttribute('aria-label',ui.menu);
 
     const row = document.createElement('div');
     row.className = 'oido-menu-row';
@@ -157,10 +216,10 @@
     const label = document.createElement('div');
     label.className = 'oido-menu-label';
     const labelText = document.createElement('span');
-    labelText.textContent = 'Language';
+    labelText.textContent = ui.language;
     const autoHint = document.createElement('span');
     autoHint.className = 'oido-menu-auto';
-    autoHint.textContent = forced ? 'Manual · ' + currentBase.toUpperCase() : 'Automatic · ' + currentBase.toUpperCase();
+    autoHint.textContent = forced ? ui.manual + ' · ' + currentBase.toUpperCase() : ui.automatic + ' · ' + currentBase.toUpperCase();
     label.append(labelText,autoHint);
 
     const select = document.createElement('select');
@@ -169,7 +228,7 @@
     LANGUAGES.forEach(([value,text]) => {
       const option = document.createElement('option');
       option.value = value;
-      option.textContent = text;
+      option.textContent = value === 'auto' ? ui.automatic : text;
       select.appendChild(option);
     });
     select.value = forced ? currentBase : 'auto';
@@ -186,7 +245,7 @@
       const themeAction = document.createElement('button');
       themeAction.type = 'button';
       themeAction.className = 'oido-menu-action';
-      themeAction.textContent = 'Switch light / dark';
+      themeAction.textContent = ui.theme;
       themeAction.addEventListener('click', () => {
         theme.click();
         close();
@@ -375,12 +434,28 @@
     protectBrandNames();
     setGoogleCookie(locale);
     const combo = await loadGoogleTranslate();
-    if (combo.value !== target) {
+    const retrigger = () => {
       combo.value = target;
       combo.dispatchEvent(new Event('change',{bubbles:true}));
-    } else {
-      combo.dispatchEvent(new Event('change',{bubbles:true}));
-    }
+    };
+    retrigger();
+
+    let refreshTimer = 0;
+    const scheduleRefresh = () => {
+      clearTimeout(refreshTimer);
+      refreshTimer = setTimeout(retrigger, 180);
+    };
+    const observer = new MutationObserver(mutations => {
+      if (mutations.some(m => [...m.addedNodes].some(n => n.nodeType === 1 && !n.closest?.('#oido-google-translate,.goog-te-banner-frame')))) {
+        scheduleRefresh();
+      }
+    });
+    observer.observe(document.body,{childList:true,subtree:true});
+    document.addEventListener('click', e => {
+      if (e.target.closest && e.target.closest('button[data-ind],.pz,[data-choose]')) setTimeout(scheduleRefresh,80);
+    });
+    setTimeout(retrigger,700);
+
     document.documentElement.lang = supportedBase(locale);
     document.documentElement.dir = RTL.has(supportedBase(locale)) ? 'rtl' : 'ltr';
     return true;
@@ -420,6 +495,7 @@
   document.addEventListener('DOMContentLoaded', async () => {
     protectBrandNames();
     const locale = await chooseLocale();
+    preserveLocaleLinks(locale);
     const status = installMenu(locale);
     await translate(locale,status);
   });
