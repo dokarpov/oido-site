@@ -44,6 +44,8 @@ Open `index.html` locally in a browser to preview the public landing page. Open 
 
 To publish a change, update the relevant HTML file on `main`, then check the GitHub Actions **pages build and deployment** workflow and the public URL. This is a marketing/investor website, not the Oído application backend.
 
+For the evidence ladder, pilot measures and decision rules, see [`docs/VALIDATION.md`](docs/VALIDATION.md).
+
 ## Product validation priorities
 
 1. Confirm merchants' willingness to pay through evidence-grade pilots.
