@@ -1,0 +1,21 @@
+/* Oído single-logo interaction, shared by business and investor websites. */
+.brand.oido-brand-spot,.hd .wm.oido-brand-spot{
+  position:relative;display:inline-flex;align-items:center;gap:.12em;
+  text-decoration:none;white-space:nowrap;isolation:isolate;
+}
+.oido-brand-spot .lk{display:inline-flex;align-items:center;gap:.18em;line-height:1}
+.oido-brand-spot .mk{height:1.05em;width:1.05em;flex:none;color:var(--fg,#fff);transition:color .18s ease,filter .18s ease}
+.oido-brand-spot .wm{
+  display:inline-flex;gap:0;line-height:1;
+  color:transparent!important;
+  background:radial-gradient(95px circle at var(--spot-x,50%) var(--spot-y,50%),#c9f24d 0%,#e6ffc2 32%,#fff 85%);
+  -webkit-background-clip:text;background-clip:text;
+  font-weight:700;letter-spacing:-.035em;
+}
+.oido-brand-spot:is(:hover,:focus-visible) .mk{color:#c9f24d;filter:drop-shadow(0 0 8px rgba(201,242,77,.34))}
+@media(hover:none){.oido-brand-spot .wm{--spot-x:32%;--spot-y:42%}.oido-brand-spot .mk{color:var(--fg,#fff)}}
+@media(prefers-reduced-motion:reduce){.oido-brand-spot .mk{transition:none}}
+/* Only one instance of the wordmark: in the sticky header. Footer keeps navigation and context. */
+.ft .giant,.foot .giant{display:none!important}
+.ft .wm,.foot .wm{display:none!important}
+.ft,.foot{padding-bottom:max(38px,env(safe-area-inset-bottom))!important}
