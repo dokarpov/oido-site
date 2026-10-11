@@ -59,7 +59,8 @@ for (const vp of viewports) {
         motionReady:document.documentElement.dataset.oidoMotionReady,
         scrollBehavior:getComputedStyle(document.documentElement).scrollBehavior,
         brandNoTranslate:brand?.getAttribute('translate')==='no' && brand?.classList.contains('notranslate'),
-        footerLogo:!!footer?.querySelector('.brand,.wm,.giant'),
+        headerLogoCount:header ? header.querySelectorAll('.oido-brand-spot').length : 0,
+        footerLogoCount:footer ? footer.querySelectorAll('.oido-footer-brand').length : 0,
         mobileThemeVisible: window.innerWidth <= 700 && !!document.querySelector('.site .hdi>.thm') &&
           getComputedStyle(document.querySelector('.site .hdi>.thm')).display !== 'none',
         offenders:[...document.querySelectorAll('body *')].map(el => {
@@ -80,7 +81,8 @@ for (const vp of viewports) {
     if (closed.motionReady !== '1') throw new Error(item.name+' '+vp.name+': shared motion layer missing');
     if (closed.scrollBehavior !== 'smooth') throw new Error(item.name+' '+vp.name+': smooth anchor scrolling not enabled');
     if (!closed.brandNoTranslate) throw new Error(item.name+' '+vp.name+': Oído logo not protected from translation');
-    if (closed.footerLogo) throw new Error(item.name+' '+vp.name+': duplicate footer logo remains');
+    if (closed.headerLogoCount !== 1) throw new Error(item.name+' '+vp.name+': expected exactly one header logo, got '+closed.headerLogoCount);
+    if (closed.footerLogoCount !== 1) throw new Error(item.name+' '+vp.name+': expected exactly one small footer logo, got '+closed.footerLogoCount);
     if (closed.scrollWidth > closed.viewport + 2) throw new Error(item.name+' '+vp.name+': horizontal overflow '+closed.scrollWidth+' > '+closed.viewport);
     if (closed.headerLeft < -1 || closed.headerRight > closed.viewport + 1) throw new Error(item.name+' '+vp.name+': header escapes viewport');
     if (closed.mobileThemeVisible) throw new Error(item.name+' '+vp.name+': duplicate theme control remains in mobile header');
@@ -187,14 +189,49 @@ for (const vp of viewports) {
     menuLabel:document.querySelector('.oido-menu-label span')?.textContent.trim(),
     investorHref:[...document.querySelectorAll('a')].find(a=>a.textContent.includes('invest'))?.getAttribute('href') || '',
     stored:localStorage.getItem('oido.locale'),
-    hiddenVariantTranslated:document.documentElement.dataset.mockHiddenTranslated==='1'
+    hiddenVariantTranslated:document.documentElement.dataset.mockHiddenTranslated==='1',
+    googleChromeVisible:[...document.querySelectorAll('.goog-te-banner-frame,iframe.skiptranslate,.VIpgJd-ZVi9od-ORHb-OEVmcd')].some(el=>getComputedStyle(el).display!=='none')
   }));
   if(state.provider!=='google'||state.lang!=='es'||!state.nav||state.combo!=='es') throw new Error('static multilingual fallback did not activate: '+JSON.stringify(state));
   if(state.menuLabel!=='Idioma') throw new Error('language menu did not localize: '+JSON.stringify(state));
   if(!state.investorHref.includes('lang=es')) throw new Error('language was not preserved across internal navigation: '+JSON.stringify(state));
   if(state.stored!=='es') throw new Error('explicit language was not persisted: '+JSON.stringify(state));
   if(!state.hiddenVariantTranslated) throw new Error('inactive industry variants were hidden from translation engine: '+JSON.stringify(state));
+  if(state.googleChromeVisible) throw new Error('third-party translation chrome is visible: '+JSON.stringify(state));
   console.log('PASS static Google Translate fallback');
+  await context.close();
+}
+
+// RTL locale must mirror reading direction even when the translation engine is external.
+{
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'ar'});
+  const page=await context.newPage();
+  await page.route('https://translate.google.com/translate_a/element.js**', async route => {
+    await route.fulfill({
+      contentType:'application/javascript',
+      body:`
+        window.google={translate:{}};
+        google.translate.TranslateElement=function(opts,id){
+          var host=document.getElementById(id);
+          var s=document.createElement('select');s.className='goog-te-combo';
+          ['en','ar'].forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});
+          host.appendChild(s);
+        };
+        google.translate.TranslateElement.InlineLayout={SIMPLE:1};
+        window.googleTranslateElementInit();
+      `
+    });
+  });
+  await page.goto(base+'/index.html?lang=ar',{waitUntil:'networkidle'});
+  await page.waitForTimeout(250);
+  const rtl=await page.evaluate(()=>({
+    html:document.documentElement.dir,
+    body:document.body.dir,
+    css:getComputedStyle(document.body).direction,
+    menuLeft:document.querySelector('.oido-menu-panel') ? getComputedStyle(document.querySelector('.oido-menu-panel')).left : ''
+  }));
+  if(rtl.html!=='rtl'||rtl.body!=='rtl'||rtl.css!=='rtl') throw new Error('RTL direction not enforced: '+JSON.stringify(rtl));
+  console.log('PASS RTL language direction');
   await context.close();
 }
 
