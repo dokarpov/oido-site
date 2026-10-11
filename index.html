@@ -757,7 +757,7 @@ html,body{margin:0;background:#0E1726}html{overflow-x:clip;scroll-behavior:smoot
 <p id="lead-status" class="lead-status" role="status" aria-live="polite" hidden></p>
 <button class="btn ink lead-submit" type="submit"><span class="lead-submit-label">Request pilot access</span> <i aria-hidden="true">→</i></button>
 <p class="lead-help">We’ll send your request directly. No email app opens.</p>
-</form></div></div></section></main><footer class="ft"><div class="wrap"><div class="ftr"><a class="brand oido-brand-spot oido-footer-brand notranslate" translate="no" href="#top" aria-label="oído — home"><span class="lk" role="img" aria-label="oído"><svg class="mk mk-talon" viewBox="0 0 48 48" aria-hidden="true"><defs><mask id="mkft1" maskUnits="userSpaceOnUse" x="0" y="0" width="48" height="48"><rect width="48" height="48" fill="#fff"/><path d="M15 23 L21.4 29.4 L33 17.8" stroke="#000" stroke-width="5.4" fill="none" stroke-linecap="square" stroke-linejoin="miter"/></mask></defs><path class="mk-body" mask="url(#mkft1)" d="M9 3H39V40L34 45L29 40L24 45L19 40L14 45L9 40Z" fill="currentColor"/></svg><span class="wm" aria-hidden="true"><span>o</span><span>í</span><span>d</span><span>o</span></span></span></a><nav aria-label="Footer"><a href="#how">How it works</a><a href="#plans">Plans</a><a href="#faq">FAQ</a><a href="#try" data-tofind>Get started</a><a href="investors/">For investors</a></nav><span>Barcelona · 2026 · Active beta</span></div></div></footer></div>
+</form></div></div></section></main><footer class="ft"><div class="wrap"><div class="ftr"><nav aria-label="Footer"><a href="#how">How it works</a><a href="#plans">Plans</a><a href="#faq">FAQ</a><a href="#try" data-tofind>Get started</a><a href="investors/">For investors</a></nav><span>Barcelona · 2026 · Active beta</span></div></div></footer></div>
 <script>
 (function(){
 var site = document.querySelector('.site');
@@ -842,9 +842,10 @@ function setupUpd(){ var p = reduce ? .99 : prog(usec), f = clamp(p) * 4 * .999,
 stps.forEach(function(s, k){ s.addEventListener('click', function(){ manual.setup = {i: k, y: scrollY}; last.s = -1; all(); track('setup_step', {step: k + 1}); }); });
 
 // MODULES: the tags fall into a pile
-var tags = $$('.tag'), pile = $('.pile');
+var tags = $('.tag'), pile = $('.pile');
+tags.forEach(function(t){ t._oidoR = parseFloat(getComputedStyle(t).getPropertyValue('--r')) || 0; });
 function modsUpd(){ var p = reduce ? 1 : seen(pile, .95, .7);
-  tags.forEach(function(t, i){ var a = ease(clamp((p - i * .06) / .5)), r = parseFloat(getComputedStyle(t).getPropertyValue('--r'));
+  tags.forEach(function(t, i){ var a = ease(clamp((p - i * .06) / .5)), r = t._oidoR;
     t.style.transform = 'translateY(' + (-(1 - a) * 260).toFixed(1) + 'px) rotate(' + (r + (1 - a) * (i % 2 ? 40 : -40)).toFixed(2) + 'deg)'; t.style.opacity = Math.min(1, a * 3).toFixed(3); }); }
 
 // CTA: ¡OÍDO! is stamped letter by letter
