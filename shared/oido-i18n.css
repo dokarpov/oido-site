@@ -1,3 +1,4 @@
+.site{overflow-x:clip}
 /* Shared Oído language/menu controls. Language is automatic by default and manual choice stays inside the compact menu. */
 .oido-menu{position:relative;display:flex;align-items:center;flex:none}
 .oido-menu-btn{appearance:none;width:44px;height:44px;border:1px solid currentColor;background:transparent;color:inherit;display:grid;place-items:center;cursor:pointer;padding:0}
