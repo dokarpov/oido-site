@@ -54,23 +54,6 @@
       el.addEventListener("focusin",function(){el.classList.add("is-hot");});
       el.addEventListener("focusout",function(){el.classList.remove("is-hot");});
     });
-
-    if(!document.documentElement.hasAttribute("data-oido-global-spot")){
-      document.documentElement.setAttribute("data-oido-global-spot","1");
-      document.addEventListener("mousemove",function(ev){
-        logos.forEach(function(el){
-          var box=el.getBoundingClientRect();
-          var inside=ev.clientX>=box.left&&ev.clientX<=box.right&&ev.clientY>=box.top&&ev.clientY<=box.bottom;
-          if(!inside){el.classList.remove("is-hot");return;}
-          el.classList.add("is-hot");
-          var x=Math.max(0,Math.min(100,(ev.clientX-box.left)/Math.max(1,box.width)*100));
-          var y=Math.max(0,Math.min(100,(ev.clientY-box.top)/Math.max(1,box.height)*100));
-          el.style.setProperty("--spot-x",x.toFixed(1)+"%");
-          el.style.setProperty("--spot-y",y.toFixed(1)+"%");
-          paintWord(el,x);
-        });
-      },{passive:true});
-    }
   }
 
   function addReveals(){
