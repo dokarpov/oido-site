@@ -14,7 +14,7 @@ const viewports = [
   {name:'tablet', width:768, height:1024},
   {name:'desktop', width:1440, height:1000}
 ];
-const commonLanguages=['es','ca','fr','de','it','pt','nl','pl','ru','uk','tr','ar','he','zh','ja','ko','hi','id','vi','th','fil'];
+const commonLanguages=['en','es','ca','fr','de','it','pt','nl','pl','cs','sk','ro','hu','el','sv','da','no','fi','ru','uk','tr','ar','he','fa','zh','ja','ko','hi','bn','ur','id','ms','vi','th','fil','bg','hr','sr','sl','et','lv','lt','is','ga','af','sw','ta','te'];
 
 await mkdir('artifacts/ui', {recursive:true});
 const browser = await chromium.launch({headless:true});
