@@ -52,4 +52,85 @@ for(const [width,height] of [[320,700],[390,844],[768,1024],[1440,900]]){
  console.log('PASS reduced-motion fallback');
  await context.close();
 }
+
+// Four-step phone storyboard: phone, frames, caption and all quote cards
+// must keep identical geometry across industry, step and translated copy.
+for(const vp of [{w:320,h:700},{w:375,h:812},{w:390,h:844},{w:430,h:932},{w:768,h:1024},{w:1024,h:768},{w:1440,h:900}]){
+  const context=await browser.newContext({viewport:{width:vp.w,height:vp.h},locale:'en-GB'});
+  const page=await context.newPage();
+  await page.goto(base+'/index.html?lang=en',{waitUntil:'domcontentloaded'});
+  await page.waitForTimeout(350);
+  const snapshot=()=>page.evaluate(()=>{
+    const ind=document.querySelector('.site').dataset.ind, w=document.querySelector('.i-'+ind+'.pz-w');
+    const rect=(el)=>{
+      if(!el)return null;const r=el.getBoundingClientRect();
+      return {top:+r.top.toFixed(2),left:+r.left.toFixed(2),width:+r.width.toFixed(2),height:+r.height.toFixed(2)};
+    };
+    return {
+      ind,phone:rect(w.querySelector('.pz-ph')),
+      dv:rect(w.querySelector('.pz-ph>.dv')),
+      screen:rect(w.querySelector('.dv-s')),
+      caption:rect(w.querySelector('.pz-cap')),
+      quoteStage:rect(w.querySelector('.pz-cur')),
+      quotes:[...w.querySelectorAll('.pz-cur>.pz-card')].map(rect),
+      scenes:[...w.querySelectorAll('.scn')].map(rect),
+      frames:[...w.querySelectorAll('.scn .fr')].map(rect),
+      screenOverflow:getComputedStyle(w.querySelector('.dv-s')).overflow,
+      scrollWidth:document.documentElement.scrollWidth,
+      viewport:innerWidth
+    };
+  });
+  let baselineByIndustry={};
+  for(const ind of ['rest','cafe','salon','studio']){
+    await page.evaluate(ind=>document.querySelector('.hdi button[data-ind="'+ind+'"]')?.click()||document.querySelector('button[data-ind="'+ind+'"]')?.click(),ind);
+    await page.waitForTimeout(80);
+    const siteInd=await page.evaluate(()=>document.querySelector('.site').dataset.ind);
+    if(siteInd!==ind)throw Error(vp.w+': could not select '+ind+' / got '+siteInd);
+    const results=[];
+    for(let step=0;step<4;step++){
+      await page.locator('.i-'+ind+'.pz-w .pz[data-i="'+step+'"]').click({force:true});
+      await page.waitForTimeout(50);
+      results.push(await snapshot());
+    }
+    // Simulate expansion after translation without relying on an external API.
+    await page.evaluate(ind=>{
+      const w=document.querySelector('.i-'+ind+'.pz-w');
+      w.querySelectorAll('.pz-card .tq,.pz-a span,.pz-card .ans2 span').forEach(el=>el.textContent='Превратите этот список в многоязычный мобильный магазин без перестройки существующих процессов обслуживания и оплаты.');
+      w.querySelectorAll('.fr .u-h').forEach(el=>el.textContent='Заказы и взаимодействие с посетителями');
+      const cap=w.querySelector('.pz-cap span');if(cap)cap.textContent='Продолжение сценария с более длинным описанием взаимодействия и этапов';
+    },ind);
+    await page.waitForTimeout(100);
+    results.push(await snapshot());
+    const stableKeys=['phone','dv','screen','caption','quoteStage'];
+    for(const key of stableKeys){
+      const b=results[0][key];
+      if(!b)throw Error(vp.w+' '+ind+': missing '+key);
+      for(const item of results.slice(1)){
+        const v=item[key];
+        for(const dim of ['top','left','height','width']){
+          if(Math.abs(v[dim]-b[dim])>1.2)throw Error(vp.w+' '+ind+': '+key+'.'+dim+' jumps '+JSON.stringify([b,v]));
+        }
+      }
+    }
+    for(const snap of results){
+      if(snap.scrollWidth>snap.viewport+2)throw Error(vp.w+' '+ind+': horizontal overflow '+JSON.stringify(snap));
+      if(Math.abs(snap.phone.width-snap.dv.width)>1.2||Math.abs(snap.phone.height-snap.dv.height)>1.2)throw Error(vp.w+' '+ind+': phone frame mismatches stage '+JSON.stringify(snap));
+      for(const frame of snap.frames){
+        if(Math.abs(frame.height-snap.screen.height)>1.2||Math.abs(frame.width-snap.screen.width)>1.2)
+          throw Error(vp.w+' '+ind+': uneven phone animation frame '+JSON.stringify({frame,screen:snap.screen}));
+      }
+      if(vp.w<768){
+        if(snap.quotes.length!==4)throw Error(vp.w+' '+ind+': mobile quote cards missing');
+        for(const q of snap.quotes){
+          if(Math.abs(q.height-snap.quoteStage.height)>1.2||Math.abs(q.width-snap.quoteStage.width)>1.2)
+            throw Error(vp.w+' '+ind+': quote cards differ in size '+JSON.stringify({q,stage:snap.quoteStage}));
+        }
+      }
+    }
+    baselineByIndustry[ind]=results[0];
+  }
+  console.log('PASS fixed multi-language four-step storyboard',vp.w,Object.keys(baselineByIndustry).join(','));
+  await context.close();
+}
+
 await browser.close();
