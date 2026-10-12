@@ -277,10 +277,11 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
     const site=document.querySelector('.site');
     const panel=document.querySelector('.i-'+site.dataset.ind+'.bpanel');
     const steps=[...document.querySelectorAll('[data-sec="setup"] .stp')];
+    const stepWrap=document.querySelector('[data-sec="setup"] .stps').getBoundingClientRect();
     return {
       height:panel.getBoundingClientRect().height,
       active:steps.findIndex(x=>x.getAttribute('aria-pressed')==='true'),
-      tops:steps.map(x=>x.getBoundingClientRect().top),
+      tops:steps.map(x=>x.getBoundingClientRect().top-stepWrap.top),
       sides:[...panel.querySelectorAll('.side')].map(x=>{
         const cs=getComputedStyle(x);
         return {opacity:Number(cs.opacity),visibility:cs.visibility,display:cs.display};
