@@ -103,8 +103,23 @@
 /* Mobile quotation/answer area occupies the same height as the phone,
    regardless of content, language, or current scenario. */
 @media(max-width:767px){
-  .site .pains .pz-w{--oido-pain-phone:min(184px,47vw)}
+  .site .pains .pz-w{
+    --oido-pain-phone:min(184px,44vw);
+    grid-template-columns:minmax(0,var(--oido-pain-phone)) minmax(0,1fr);
+    grid-template-areas:'tabs tabs' 'ph card';
+    column-gap:clamp(10px,2.6vw,14px);
+    align-items:start;
+  }
+  .site .pains .pz-r{
+    grid-area:ph;
+    width:var(--oido-pain-phone);
+    min-width:0;
+    justify-self:start;
+    justify-items:start;
+  }
+  .site .pains .pz-ph{place-self:start start}
   .site .pains .pz-cur{
+    grid-area:card;
     position:relative;
     display:block;
     width:100%;
