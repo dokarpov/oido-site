@@ -497,36 +497,21 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   await context.close();
 }
 
-// RTL locale must mirror reading direction even when the translation engine is external.
+// Unsupported locales must fall back to English instead of exposing untested translation.
 {
-  const context=await browser.newContext({viewport:{width:390,height:844},locale:'ar'});
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'ru-RU'});
   const page=await context.newPage();
-  await page.route('https://translate.google.com/translate_a/element.js**', async route => {
-    await route.fulfill({
-      contentType:'application/javascript',
-      body:`
-        window.google={translate:{}};
-        google.translate.TranslateElement=function(opts,id){
-          var host=document.getElementById(id);
-          var s=document.createElement('select');s.className='goog-te-combo';
-          ['en','ar'].forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});
-          host.appendChild(s);
-        };
-        google.translate.TranslateElement.InlineLayout={SIMPLE:1};
-        window.googleTranslateElementInit();
-      `
-    });
-  });
-  await page.goto(base+'/index.html?lang=ar',{waitUntil:'networkidle'});
+  await page.goto(base+'/index.html?lang=ru',{waitUntil:'domcontentloaded'});
   await page.waitForTimeout(250);
-  const rtl=await page.evaluate(()=>({
-    html:document.documentElement.dir,
-    body:document.body.dir,
-    css:getComputedStyle(document.body).direction,
-    menuLeft:document.querySelector('.oido-menu-panel') ? getComputedStyle(document.querySelector('.oido-menu-panel')).left : ''
+  const state=await page.evaluate(()=>({
+    html:document.documentElement.lang,
+    dir:document.documentElement.dir,
+    choices:[...document.querySelectorAll('.oido-lang option')].map(o=>o.value),
+    exposed:window.__oidoI18n?.supported||[]
   }));
-  if(rtl.html!=='rtl'||rtl.body!=='rtl'||rtl.css!=='rtl') throw new Error('RTL direction not enforced: '+JSON.stringify(rtl));
-  console.log('PASS RTL language direction');
+  if(state.html!=='en'||state.dir!=='ltr'||state.choices.join(',')!=='auto,en,es,ca'||state.exposed.join(',')!=='en,es,ca')
+    throw new Error('Unreviewed locale was exposed instead of English fallback: '+JSON.stringify(state));
+  console.log('PASS production language allowlist and unsupported language fallback');
   await context.close();
 }
 
