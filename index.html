@@ -293,7 +293,7 @@
 .sb{position:absolute;left:0;right:0;bottom:0;height:3px;background:currentColor;transform:scaleX(0);transform-origin:0 0;opacity:.5;will-change:transform;transition:transform .22s var(--e)}
 .blr{position:relative;padding:12px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line)}
 .bpanel{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"card" "side";align-items:start}
-.mcard{grid-area:card;background:#fff;color:#0E1726;padding:12px 14px;font-size:14px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6)}
+.mcard{grid-area:card;background:#fff;color:#0E1726;padding:12px 14px;font-size:14px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6);will-change:opacity;backface-visibility:hidden}
 .mh{display:flex;justify-content:space-between;align-items:center}
 .mt{font:600 18px 'Arc',sans-serif;font-stretch:110%}
 .lv{font:500 11px 'Arc',sans-serif;padding:3px 8px;box-shadow:inset 0 0 0 1px #CDD3DC;color:#5B6576;transition:background-color .32s var(--e),color .32s var(--e),box-shadow .32s var(--e)}
@@ -525,12 +525,15 @@ select.inp option{color:#0E1726}
 .pz.is-on .pz-n{color:var(--fg);border-top-color:var(--fg)}
 .pz.is-done .pz-n{color:var(--acc);border-top-color:var(--acc)}
 .pz-q,.pz-a,.pz-st{display:none}
-.pz-cur{min-height:132px}
+.pz-cur{min-height:132px;display:grid;position:relative;isolation:isolate}
+.pz-cur>.pz-card{grid-area:1/1;opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,6px,0) scale(.994);will-change:opacity,transform;transition:opacity .32s ease,transform .4s var(--e),visibility 0s linear .4s}
+.pz-cur>.pz-card.is-card-on{visibility:visible;transform:translate3d(0,0,0) scale(1);transition-delay:0s}
 .pz-r{display:grid;justify-items:center;gap:10px}
 .dv.w-pz{--w:184px}
 .scn,.fr{grid-area:1/1;height:100%}
-.scn{display:none}.scn.is-on{display:grid}
-.fr{opacity:0;transform:translateY(10px) scale(.985);transition:opacity .3s var(--e),transform .3s var(--e)}
+.scn{display:grid;opacity:0;visibility:hidden;pointer-events:none;will-change:opacity;transition:opacity .34s ease,visibility 0s linear .34s}
+.scn.is-on{visibility:visible;pointer-events:auto;transition-delay:0s}
+.fr{opacity:0;transform:translateY(8px) scale(.99);transition:opacity .34s ease,transform .42s var(--e)}
 .fr.is-on{opacity:1;transform:none}
 .fr .scr-m{height:100%;aspect-ratio:auto}
 .pz-cap{margin:0;display:flex;gap:10px;align-items:baseline;font-size:14px;color:var(--fg2);min-height:22px;text-align:center}
@@ -844,9 +847,27 @@ function painsUpd(){ return; var w = vis('.pa-w'); if (!w) return; var its = $$(
 [].forEach(function(it){ it.addEventListener('click', function(){ manual.pains = {i: +it.dataset.i, y: scrollY}; all(); track('pain_select', {item: +it.dataset.i + 1}); }); });
 
 // SETUP: four steps; every change follows a visible tap
-var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = $$('.stp');
-function setLang(l){ var i = {en: 0, ca: 1, es: 2}[l]; $$('[data-l]', blr).forEach(function(e){ if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i]; }); $$('.lg span', blr).forEach(function(s){ s.classList.toggle('is-on', s.dataset.l === l); }); }
-function fixed(on){ blr.classList.toggle('fixed', on); var r = vis('.mflag'); if (!r) return; var em = $('em', r); em.textContent = on ? em.dataset.ok : em.dataset.bad; $('.flag', r).textContent = on ? '✓ Fixed' : 'Check'; }
+var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = $('.stp'), setupLang = null, setupFixed = null;
+function soften(el){
+  if (!el || reduce || !el.animate) return;
+  var old = el._oidoSoftAnim; if (old) try { old.cancel(); } catch(e){}
+  el._oidoSoftAnim = el.animate([{opacity:.64},{opacity:1}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)'});
+}
+function setLang(l){
+  if (setupLang === l) return;
+  var i = {en: 0, ca: 1, es: 2}[l], card = vis('.mcard') || $('.mcard', blr);
+  $('[data-l]', blr).forEach(function(e){ if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i]; });
+  $('.lg span', blr).forEach(function(s){ s.classList.toggle('is-on', s.dataset.l === l); });
+  if (setupLang !== null) soften(card);
+  setupLang = l;
+}
+function fixed(on){
+  if (setupFixed === on) return;
+  blr.classList.toggle('fixed', on); var r = vis('.mflag'); if (!r) return;
+  var em = $('em', r); em.textContent = on ? em.dataset.ok : em.dataset.bad; $('.flag', r).textContent = on ? '✓ Fixed' : 'Check';
+  if (setupFixed !== null) soften(r);
+  setupFixed = on;
+}
 function setupUpd(){ var p = reduce ? .99 : forward('setup', prog(usec)), f = clamp(p) * 4 * .999, auto = Math.floor(f), q = f - auto;
   var i = pick('setup', auto), manualStep = i !== auto; if (manualStep) q = 1;
   var blend = (!manualStep && i < 3) ? ease(clamp((q - .70) / .30)) : 0;
@@ -866,9 +887,9 @@ function setupUpd(){ var p = reduce ? .99 : forward('setup', prog(usec)), f = cl
   });
   blr.dataset.f = visualStep; var sub;
   if (i === 0){ sub = Math.floor(q * 5); Array.from((vis('.mcard') || blr).querySelectorAll('.mr')).forEach(function(r, k){ r.classList.toggle('rd', k < sub); }); fixed(false); setLang('en'); }
-  if (i === 1){ sub = q > .45 ? 1 : 0; if (sub && last.s !== 11) tap(vis('.s1 .mini')); fixed(!!sub); setLang('en'); }
-  if (i === 2){ sub = q < .3 ? 0 : q < .65 ? 1 : 2; if (sub && last.s !== 20 + sub) tap(vis('.lg [data-l="' + (sub === 1 ? 'ca' : 'es') + '"]')); setLang(['en', 'ca', 'es'][sub]); fixed(true); }
-  if (i === 3){ sub = q > .5 ? 1 : 0; if (sub && last.s !== 31) tap(vis('.s3 .mini')); fixed(true); }
+  if (i === 1){ sub = q > .45 ? 1 : 0; fixed(!!sub); setLang('en'); }
+  if (i === 2){ sub = q < .3 ? 0 : q < .65 ? 1 : 2; setLang(['en', 'ca', 'es'][sub]); fixed(true); }
+  if (i === 3){ sub = q > .5 ? 1 : 0; fixed(true); }
   last.s = i * 10 + sub; }
 stps.forEach(function(s, k){ s.addEventListener('click', function(){ manual.setup = {i: k, y: scrollY}; last.s = -1; all(); track('setup_step', {step: k + 1}); }); });
 
@@ -917,22 +938,72 @@ function painForward(raw){
   return painMotion.current;
 }
 function painSchedule(){ if (!painTick){ painTick = true; requestAnimationFrame(upd); } }
-function cardHTML(w, i){ var b = $$('.pz', w)[i]; return '<div class="pz-card" data-s="0"><span class="tqw"><span class="tq">' + $('.tq', b).innerHTML + '</span></span><div class="ans2"><b>' + $('.pz-a b', b).innerHTML + '</b><span>' + $('.pz-a span', b).innerHTML + '</span></div><span class="stp2">OÍDO ✓</span></div>'; }
-function ensureCur(w){ var c = $('.pz-cur', w); if (!c){ c = document.createElement('div'); c.className = 'pz-cur'; $('.pz-l', w).after(c); } return c; }
+function cardHTML(w, i){ var b = $('.pz', w)[i]; return '<div class="pz-card" data-card="' + i + '" data-s="0"><span class="tqw"><span class="tq">' + $('.tq', b).innerHTML + '</span></span><div class="ans2"><b>' + $('.pz-a b', b).innerHTML + '</b><span>' + $('.pz-a span', b).innerHTML + '</span></div><span class="stp2">OÍDO ✓</span></div>'; }
+function ensureCur(w){
+  var c = $('.pz-cur', w);
+  if (!c){ c = document.createElement('div'); c.className = 'pz-cur'; $('.pz-l', w).after(c); }
+  if (c.querySelectorAll('.pz-card').length !== 4) c.innerHTML = [0,1,2,3].map(function(i){ return cardHTML(w,i); }).join('');
+  return c;
+}
 function upd(){ painTick = false; var w = $('.i-' + site.dataset.ind + '.pz-w'); if (!w) return;
-  var p = reduce ? .99 : painForward(prog(sec)), q0 = clamp((p - .04) / .92) * 4, auto = Math.min(3, Math.floor(q0)), q = q0 - auto;
-  var a = auto; if (man && Math.abs(scrollY - man.y) < Math.max(160, innerHeight * .35)){ a = man.i; q = man.q; } else man = null;
-  $$('.pz', w).forEach(function(b, i){ b.classList.toggle('is-on', i === a); b.classList.toggle('is-done', i < a); b.classList.toggle('is-stamp', i === a && q > .55); b.setAttribute('aria-pressed', i === a); });
-  var scn = $$('.scn', w); scn.forEach(function(s, i){ s.classList.toggle('is-on', i === a); });
-  var fr = $$('.fr', scn[a]), n = fr.length, f = Math.min(n - 1, Math.floor(q * n * .999)), lf = q * n - f;
-  fr.forEach(function(x, i){ x.classList.toggle('is-on', i === f); });
-  var ring = $('.tapr', w), sel = fr[f].dataset.tap, t = sel && $(sel.split(',')[0], fr[f]);
-  if (t && lf > .45 && !reduce){ var R = $('.dv-s', w).getBoundingClientRect(), r = t.getBoundingClientRect();
-    ring.style.left = (r.left - R.left + r.width / 2) + 'px'; ring.style.top = (r.top - R.top + r.height / 2) + 'px';
-    ring.classList.add('is-on'); ring.classList.toggle('is-press', lf > .75); } else ring.classList.remove('is-on', 'is-press');
-  var cap = $('.pz-cap', w); $('b', cap).textContent = '0' + (a + 1) + ' · ' + (f + 1) + '/' + n; $('span', cap).textContent = fr[f].dataset.cap;
-  var c = ensureCur(w), key = site.dataset.ind + a; if (lastKey !== key){ c.innerHTML = cardHTML(w, a); lastKey = key; }
-  var card = $('.pz-card', c); if (card) card.dataset.s = q > .3 ? '1' : '0';
+  var p = reduce ? .99 : painForward(prog(sec)), q0 = clamp((p - .04) / .92) * 4;
+  var base = Math.min(3, Math.floor(q0)), q = base === 3 ? clamp(q0 - 3) : q0 - base, manualStep = false;
+  if (man && Math.abs(scrollY - man.y) < Math.max(160, innerHeight * .35)){ base = man.i; q = man.q; manualStep = true; } else man = null;
+  var blend = (!manualStep && base < 3) ? ease(clamp((q - .78) / .22)) : 0;
+  var visual = blend > .5 && base < 3 ? base + 1 : base;
+
+  $$('.pz', w).forEach(function(b, i){
+    b.classList.toggle('is-on', i === visual);
+    b.classList.toggle('is-done', i < visual);
+    b.classList.toggle('is-stamp', i === visual && (visual === base ? q > .55 : blend > .55));
+    b.setAttribute('aria-pressed', i === visual);
+  });
+
+  var scn = $$('.scn', w);
+  function renderScenario(index, localQ, weight){
+    var scene = scn[index]; if (!scene) return null;
+    scene.classList.toggle('is-on', weight > .002);
+    scene.style.opacity = weight.toFixed(3);
+    scene.style.visibility = weight > .002 ? 'visible' : 'hidden';
+    scene.style.pointerEvents = weight > .65 ? 'auto' : 'none';
+    var frames = $$('.fr', scene), n = frames.length, pos = clamp(localQ) * n;
+    var frame = Math.min(n - 1, Math.floor(pos * .999)), lf = pos - frame;
+    frames.forEach(function(x, i){ x.classList.toggle('is-on', i === frame); });
+    return {scene:scene,frames:frames,frame:frame,lf:lf,node:frames[frame],n:n};
+  }
+  scn.forEach(function(scene){ scene.classList.remove('is-on'); scene.style.opacity='0'; scene.style.visibility='hidden'; scene.style.pointerEvents='none'; });
+  var main = renderScenario(base, q, 1 - blend);
+  var next = base < 3 ? renderScenario(base + 1, 0, blend) : null;
+
+  var c = ensureCur(w), cards = $$('.pz-card', c);
+  cards.forEach(function(card, i){
+    var weight = i === base ? 1 - blend : (i === base + 1 ? blend : 0);
+    if (base === 3 && i === 3) weight = 1;
+    card.classList.toggle('is-card-on', weight > .002);
+    card.style.opacity = weight.toFixed(3);
+    card.style.visibility = weight > .002 ? 'visible' : 'hidden';
+    card.style.transform = 'translate3d(0,' + ((1 - weight) * 6).toFixed(2) + 'px,0) scale(' + (.994 + .006 * weight).toFixed(4) + ')';
+    if (i === base) card.dataset.s = q > .3 ? '1' : '0';
+    else if (i === base + 1) card.dataset.s = '0';
+  });
+
+  var active = blend > .5 && next ? next : main;
+  var ring = $('.tapr', w);
+  if (blend > .05 && blend < .95) ring.classList.remove('is-on','is-press');
+  else if (active && active.node){
+    var sel = active.node.dataset.tap, t = sel && $(sel.split(',')[0], active.node);
+    if (t && active.lf > .45 && !reduce){
+      var R = $('.dv-s', w).getBoundingClientRect(), r = t.getBoundingClientRect();
+      ring.style.left = (r.left - R.left + r.width / 2) + 'px'; ring.style.top = (r.top - R.top + r.height / 2) + 'px';
+      ring.classList.add('is-on'); ring.classList.toggle('is-press', active.lf > .75);
+    } else ring.classList.remove('is-on','is-press');
+  }
+
+  var cap = $('.pz-cap', w);
+  if (active && active.node){
+    $('b', cap).textContent = '0' + (visual + 1) + ' · ' + (active.frame + 1) + '/' + active.n;
+    $('span', cap).textContent = active.node.dataset.cap;
+  }
   if (!reduce && painMotion.current < painMotion.target - .0008) painSchedule(); }
 Array.prototype.slice.call(site.querySelectorAll('.pz')).forEach(function(b){ b.addEventListener('click', function(){ man = {i: +b.dataset.i, q: .62, y: scrollY}; upd(); track('pain_select', {item: +b.dataset.i + 1}); }); });
 addEventListener('scroll', painSchedule, {passive: true});
