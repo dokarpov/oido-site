@@ -920,9 +920,9 @@ function upd(){ painTick = false; var w = $('.i-' + site.dataset.ind + '.pz-w');
   var c = ensureCur(w), key = site.dataset.ind + a; if (lastKey !== key){ c.innerHTML = cardHTML(w, a); lastKey = key; }
   var card = $('.pz-card', c); if (card) card.dataset.s = q > .3 ? '1' : '0';
   if (!reduce && painMotion.current < painMotion.target - .0008) painSchedule(); }
-$('.pz').forEach(function(b){ b.addEventListener('click', function(){ man = {i: +b.dataset.i, q: .62, y: scrollY}; upd(); track('pain_select', {item: +b.dataset.i + 1}); }); });
+Array.prototype.slice.call(site.querySelectorAll('.pz')).forEach(function(b){ b.addEventListener('click', function(){ man = {i: +b.dataset.i, q: .62, y: scrollY}; upd(); track('pain_select', {item: +b.dataset.i + 1}); }); });
 addEventListener('scroll', painSchedule, {passive: true});
-addEventListener('resize', painSchedule); $('button[data-ind]').forEach(function(b){ b.addEventListener('click', function(){ lastKey = ''; man = null; setTimeout(painSchedule, 0); }); }); upd();
+addEventListener('resize', painSchedule); Array.prototype.slice.call(site.querySelectorAll('button[data-ind]')).forEach(function(b){ b.addEventListener('click', function(){ lastKey = ''; man = null; setTimeout(painSchedule, 0); }); }); upd();
 
 })();
 </script><script>
