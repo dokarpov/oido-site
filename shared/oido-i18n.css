@@ -100,3 +100,108 @@ html[dir="rtl"] .oido-menu-action{text-align:right}
 @media(max-width:700px){
   html[dir="rtl"] .oido-menu-panel{right:auto;left:12px}
 }
+
+
+/* Translation-safe layout and typography — no fixed English-only copy widths. */
+.site .hx,
+.site .hx>*,
+.site .hs,
+.site .hs>*,
+.pitch-hero-grid,
+.pitch-hero-grid>*,
+.pitch-hero-copy,
+.pitch-hero-copy>*,
+.pitch-section,
+.pitch-section>*,
+.invest-nav,
+.hdi,
+.hdi>* { min-width:0; }
+.site .hx{ align-items:start; }
+.site .hero .h-xl,
+.pitch-hero h1,
+.pitch-section h2,
+.site .h-l,
+.site .disp2 {
+  max-inline-size:100%;
+  overflow-wrap:break-word;
+  word-break:normal;
+  hyphens:auto;
+  text-wrap:balance;
+}
+.site .hs .lead,
+.site .hs .note,
+.pitch-hero-lead,
+.pitch-sub,
+.pitch-section p {
+  max-inline-size:100%;
+  overflow-wrap:break-word;
+  text-wrap:pretty;
+}
+.site .hero .h-xl { line-height:1.03; }
+.site .hx > .h-xl { align-self:start; }
+.site .hx .hs { width:100%; overflow-wrap:break-word; }
+/* Translations need room: no English headline metrics for Cyrillic, Greek, CJK or RTL. */
+html:not([lang="en"]) .site .hero .h-xl {
+  font-size:clamp(38px,5.2vw,70px);
+  letter-spacing:-.025em;
+  line-height:1.1;
+}
+html:not([lang="en"]) .pitch-hero h1 {
+  font-size:clamp(38px,5.3vw,72px);
+  line-height:1.08;
+  letter-spacing:-.025em;
+}
+html:not([lang="en"]) .site .h-l,
+html:not([lang="en"]) .site .disp2,
+html:not([lang="en"]) .pitch-section h2 {
+  font-size:clamp(29px,3.8vw,55px);
+  line-height:1.13;
+  letter-spacing:-.02em;
+}
+html:is([lang="ru"],[lang="uk"],[lang="bg"],[lang="sr"],[lang="el"],[lang="ar"],[lang="he"],[lang="fa"],[lang="ur"],[lang="hi"],[lang="bn"],[lang="ta"],[lang="te"],[lang="th"],[lang="zh"],[lang="ja"],[lang="ko"]) .site .h-xl,
+html:is([lang="ru"],[lang="uk"],[lang="bg"],[lang="sr"],[lang="el"],[lang="ar"],[lang="he"],[lang="fa"],[lang="ur"],[lang="hi"],[lang="bn"],[lang="ta"],[lang="te"],[lang="th"],[lang="zh"],[lang="ja"],[lang="ko"]) .pitch-hero h1,
+html:is([lang="ru"],[lang="uk"],[lang="bg"],[lang="sr"],[lang="el"],[lang="ar"],[lang="he"],[lang="fa"],[lang="ur"],[lang="hi"],[lang="bn"],[lang="ta"],[lang="te"],[lang="th"],[lang="zh"],[lang="ja"],[lang="ko"]) .site .h-l,
+html:is([lang="ru"],[lang="uk"],[lang="bg"],[lang="sr"],[lang="el"],[lang="ar"],[lang="he"],[lang="fa"],[lang="ur"],[lang="hi"],[lang="bn"],[lang="ta"],[lang="te"],[lang="th"],[lang="zh"],[lang="ja"],[lang="ko"]) .pitch-section h2 {
+  font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  font-weight:650;
+}
+/* Translation-safe header: no translated nav may occupy the CTA's reserved space. */
+.site .hdi, .hd .hdi { flex-wrap:nowrap; }
+.site .hdi .brand, .hd .hdi .brand { flex:none; }
+.site .hdi .oido-menu, .hd .hdi .oido-menu { flex:none; }
+.site .hdi .isw-top,
+.site .hdi .nv,
+.hd .hdi .invest-nav { min-width:0; }
+.site .hdi .isw-top button,
+.site .hdi .nv a,
+.hd .hdi .invest-nav a { overflow-wrap:normal;white-space:nowrap; }
+@media (max-width:1300px) {
+  html:not([lang="en"]) .site .hdi .isw-top,
+  html:not([lang="en"]) .site .hdi .nv,
+  html:not([lang="en"]) .hd .hdi .invest-nav { display:none!important; }
+  .site .hx { column-gap:clamp(18px,3vw,44px); }
+}
+@media (max-width:999px) {
+  .site .hx { grid-template-columns:minmax(0,1fr); }
+  .site .hero .h-xl { max-width:100%; }
+}
+@media (max-width:700px) {
+  .site .hero .h-xl,
+  html:not([lang="en"]) .site .hero .h-xl { font-size:clamp(34px,9.4vw,56px); }
+  .pitch-hero h1,
+  html:not([lang="en"]) .pitch-hero h1 { font-size:clamp(34px,9.5vw,54px); }
+  .site .hx, .site .hs { gap:20px; }
+  .site .hero .hs .lead, .pitch-hero-lead { font-size:16px; }
+  .site .rail-in .tkt h4,
+  .site .rail-in .tkt p,
+  .site .rail-in .tkt p span { overflow-wrap:anywhere;hyphens:auto; }
+}
+/* Prevent scroll effects from competing with the layout of translated paragraphs. */
+html:not([lang="en"]) .site .hero .h-xl br { display:none; }
+html[dir="rtl"] .site .hx,
+html[dir="rtl"] .pitch-hero-grid { direction:rtl; }
+html[dir="rtl"] .site .hs,
+html[dir="rtl"] .pitch-hero-lead,
+html[dir="rtl"] .pitch-section { text-align:start; }
+html[dir="rtl"] .site .hero .h-xl,
+html[dir="rtl"] .pitch-hero h1 { unicode-bidi:plaintext; }
