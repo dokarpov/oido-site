@@ -9,7 +9,7 @@ for(const [width,height] of [[320,700],[390,844],[768,1024],[1440,900]]){
   await page.waitForTimeout(250);
   const boxes=await page.locator('.rail-in .tkw').evaluateAll(nodes=>nodes.map(el=>{
     const a=el.getBoundingClientRect(),card=el.querySelector('.tkt'),c=card.getBoundingClientRect(),stamp=card.querySelector('.stamp')?.getBoundingClientRect();
-    return {height:a.height,width:a.width,top:a.top,cardHeight:c.height,cardTop:c.top,stampBottom:stamp?Math.round(c.bottom-stamp.bottom):0};
+    return {height:a.height,width:a.width,top:a.top,cardHeight:c.height,cardTop:c.top,stampBottom:stamp?Math.round(parseFloat(getComputedStyle(card.querySelector('.stamp')).bottom)):0};
   }));
   if(boxes.length<4)throw Error(width+': fewer than four receipts');
   for(const k of ['width','height','top','cardHeight','cardTop','stampBottom']){
