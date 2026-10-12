@@ -254,58 +254,76 @@ for (const vp of viewports) {
 }
 
 
-// The four-step setup scene keeps one stable stage and blends between adjacent steps.
+// The four-step setup scene is trigger-based: scroll starts a timed transition and never scrubs it backward.
 for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   const context=await browser.newContext({viewport,locale:'en-GB'});
   const page=await context.newPage();
   await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
   await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
 
-  const go=async fraction=>{
-    const y=await page.evaluate(({fraction,width})=>{
-      const sec=document.querySelector('[data-sec="setup"]');
-      const r=sec.getBoundingClientRect();
-      const top=scrollY+r.top;
-      const hd=width>=1000?69:65;
-      const range=Math.max(1,r.height-innerHeight+hd);
-      return Math.max(0,top-hd+range*fraction);
-    },{fraction,width:viewport.width});
-    await page.evaluate(y=>scrollTo(0,y),y);
-    await page.waitForTimeout(950);
-    return page.evaluate(()=>{
-      const site=document.querySelector('.site');
-      const panel=document.querySelector('.i-'+site.dataset.ind+'.bpanel');
-      const pr=panel.getBoundingClientRect();
-      return {
-        panelTop:pr.top,
-        panelHeight:pr.height,
-        sides:[...panel.querySelectorAll('.side')].map(x=>{
-          const cs=getComputedStyle(x);
-          return {opacity:Number(cs.opacity),visibility:cs.visibility,display:cs.display,top:x.getBoundingClientRect().top};
-        })
-      };
-    });
-  };
+  const yFor=async fraction=>page.evaluate(({fraction,width})=>{
+    const sec=document.querySelector('[data-sec="setup"]');
+    const r=sec.getBoundingClientRect();
+    const top=scrollY+r.top;
+    const hd=width>=1000?69:65;
+    const range=Math.max(1,r.height-innerHeight+hd);
+    return Math.max(0,top-hd+range*fraction);
+  },{fraction,width:viewport.width});
 
-  const states=[];
-  states.push(await go(.08));
+  const snap=()=>page.evaluate(()=>{
+    const site=document.querySelector('.site');
+    const panel=document.querySelector('.i-'+site.dataset.ind+'.bpanel');
+    const pr=panel.getBoundingClientRect();
+    const steps=[...document.querySelectorAll('[data-sec="setup"] .stp')];
+    return {
+      panelHeight:pr.height,
+      active:steps.findIndex(x=>x.getAttribute('aria-pressed')==='true'),
+      sides:[...panel.querySelectorAll('.side')].map(x=>{
+        const cs=getComputedStyle(x);
+        return {opacity:Number(cs.opacity),visibility:cs.visibility,display:cs.display};
+      })
+    };
+  });
 
-  // Near the first step boundary, two adjacent panels should coexist during the crossfade.
-  const blend=await go(.215);
-  states.push(blend);
-  const visible=blend.sides.filter(x=>x.visibility==='visible'&&x.opacity>.03);
-  if(visible.length<2)
-    throw new Error('setup step transition snaps instead of crossfading at '+viewport.width+': '+JSON.stringify(blend));
+  await page.evaluate(y=>scrollTo(0,y),await yFor(.02));
+  await page.waitForTimeout(150);
+  const before=await snap();
 
-  for(const fraction of [.31,.56,.82]) states.push(await go(fraction));
-  const heights=states.map(x=>x.panelHeight);
+  // Crossing the first threshold should START a transition; the scroll position itself
+  // must not instantly dictate the final visual state.
+  await page.evaluate(y=>scrollTo(0,y),await yFor(.16));
+  await page.waitForTimeout(180);
+  const during=await snap();
+  const duringVisible=during.sides.filter(x=>x.visibility==='visible'&&x.opacity>.03);
+  if(duringVisible.length<2)
+    throw new Error('setup transition is not time-based/crossfaded at '+viewport.width+': '+JSON.stringify(during));
+
+  await page.waitForTimeout(650);
+  const settled=await snap();
+  if(settled.active<1)
+    throw new Error('setup did not advance after trigger at '+viewport.width+': '+JSON.stringify(settled));
+
+  // Upward scrolling must not rewind the already reached step.
+  await page.evaluate(y=>scrollTo(0,y),await yFor(.01));
+  await page.waitForTimeout(500);
+  const up=await snap();
+  if(up.active<settled.active)
+    throw new Error('setup rewound on upward scroll at '+viewport.width+': '+JSON.stringify({settled,up}));
+
+  // A fast jump can queue later steps, but the stable stage must keep its dimensions.
+  await page.evaluate(y=>scrollTo(0,y),await yFor(.82));
+  await page.waitForTimeout(2100);
+  const final=await snap();
+  if(final.active!==3)
+    throw new Error('setup queue did not reach final step at '+viewport.width+': '+JSON.stringify(final));
+  const heights=[before.panelHeight,during.panelHeight,settled.panelHeight,up.panelHeight,final.panelHeight];
   if(Math.max(...heights)-Math.min(...heights)>1)
-    throw new Error('setup stage height jumps between steps at '+viewport.width+': '+JSON.stringify(states));
-  for(const state of states)
+    throw new Error('setup stage height jumps between steps at '+viewport.width+': '+JSON.stringify(heights));
+  for(const state of [before,during,settled,up,final])
     if(state.sides.some(x=>x.display==='none'))
-      throw new Error('setup side panels still use display switching at '+viewport.width+': '+JSON.stringify(state));
+      throw new Error('setup side panels use display switching at '+viewport.width+': '+JSON.stringify(state));
 
-  console.log('PASS stable crossfaded four-step setup '+viewport.width);
+  console.log('PASS trigger-based forward-only four-step setup '+viewport.width);
   await context.close();
 }
 
@@ -363,6 +381,32 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
     throw new Error('pain stage changes height while switching points at '+viewport.width+': '+JSON.stringify({before,blend,after}));
 
   console.log('PASS stable crossfaded four-point pain scene '+viewport.width);
+  await context.close();
+}
+
+// Automatic locale must ignore stale legacy language state and prefer the current device language.
+{
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
+  const page=await context.newPage();
+  await page.addInitScript(()=>{
+    localStorage.setItem('oido.locale','pl');
+    localStorage.removeItem('oido.locale.mode');
+    document.cookie='googtrans=/en/pl;path=/;SameSite=Lax';
+  });
+  await page.goto(base+'/index.html',{waitUntil:'networkidle'});
+  await page.waitForTimeout(250);
+  const state=await page.evaluate(()=>({
+    lang:document.documentElement.lang,
+    stored:localStorage.getItem('oido.locale'),
+    mode:localStorage.getItem('oido.locale.mode'),
+    picker:document.querySelector('.oido-lang')?.value,
+    cookie:document.cookie
+  }));
+  if(state.lang!=='en'||state.stored!==null||state.mode!==null||state.picker!=='auto')
+    throw new Error('automatic locale kept stale Polish state: '+JSON.stringify(state));
+  if(/googtrans=\/en\/pl/.test(state.cookie))
+    throw new Error('stale Polish Google cookie survived automatic mode: '+JSON.stringify(state));
+  console.log('PASS automatic locale clears stale Polish state');
   await context.close();
 }
 
