@@ -144,6 +144,9 @@
 .site[data-theme="light"]{--bg:#FFFFFF;--bg2:#F3F6FA;--card:#FFFFFF;--fg:#0E1726;--fg2:#3E4859;--fg3:#5B6576;--line:rgba(14,23,38,.12);--line2:rgba(14,23,38,.3);
  --acc:#0B7A5E;--accbg:#0B7A5E;--inv:#0E1726;--invfg:#FFFFFF;--paper:#FFFFFF;--rim:#B9BDC4;--rim2:#E3E5E8;--sh:0 40px 80px -44px rgba(14,23,38,.45)}
 .site *{box-sizing:border-box}
+.rail-in,.sc-stage,.pz-w,.su-g,.pile{position:relative;isolation:isolate}
+.sc-stage,.blr,.pile,.pz-r{transform:translateZ(0)}
+.stamp,.beam,.sb,.tag,.fr,.tapr{backface-visibility:hidden}
 .site a:not(.btn){color:inherit}
 .site :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
 .wrap{max-width:var(--max);margin:0 auto;padding:0 var(--g)}
@@ -226,7 +229,7 @@
 .tkt .clip{display:none}
 .tkt h4{margin:0 0 8px;font:600 12px/1.3 'Arc',sans-serif;font-stretch:100%;text-transform:uppercase;letter-spacing:.03em}
 .tkt p{margin:0;display:flex;justify-content:space-between;border-bottom:1px dashed #CDD3DC;padding:5px 0;font-variant-numeric:tabular-nums}
-.stamp{display:inline-block;margin-top:12px;padding:3px 9px;border:2px solid #0B7A5E;color:#0B7A5E;font:700 13px 'Arc',sans-serif;font-stretch:125%;letter-spacing:.04em;transform:rotate(-6deg);will-change:transform,opacity}
+.stamp{display:inline-block;margin-top:12px;padding:3px 9px;border:2px solid #0B7A5E;color:#0B7A5E;font:700 13px 'Arc',sans-serif;font-stretch:125%;letter-spacing:.04em;transform:rotate(-6deg);will-change:transform,opacity;backface-visibility:hidden;transition:transform .46s var(--e),opacity .3s ease}
 .tkt[data-t="1"]{transform:translateY(4px) rotate(1.2deg)}.tkt[data-t="3"]{transform:rotate(-1.2deg)}
 .hx{padding-top:40px;display:grid;gap:28px}
 .hero h1{font-size:46px}
@@ -249,7 +252,7 @@
 .sc-steps li span>:not(strong){display:none}
 .sc-stage{position:relative;height:420px}
 .sc-paper{position:absolute;left:0;top:30px;width:58%;transform:rotate(-3deg);z-index:1}
-.beam{position:absolute;left:-10px;right:-10px;top:0;height:3px;background:var(--acc);box-shadow:0 0 0 6px color-mix(in srgb,var(--acc) 22%,transparent);opacity:0;will-change:transform}
+.beam{position:absolute;left:-10px;right:-10px;top:0;height:3px;background:var(--acc);box-shadow:0 0 0 6px color-mix(in srgb,var(--acc) 22%,transparent);opacity:0;will-change:transform,opacity;backface-visibility:hidden;transition:transform .18s linear,opacity .24s ease}
 .sc-cap{display:block;margin-top:10px;font-size:12px;color:var(--fg3)}
 .sc-phone{position:absolute;right:0;top:0;z-index:2}
 .dv.w-scan{--w:178px}
@@ -287,7 +290,7 @@
 .stp[aria-pressed="false"]{filter:saturate(.5) brightness(.8)}
 .site[data-theme="light"] .stp[aria-pressed="false"]{filter:saturate(.55) brightness(1.08) opacity(.7)}
 .stp[aria-pressed="true"]{box-shadow:inset 0 -3px 0 currentColor}
-.sb{position:absolute;left:0;right:0;bottom:0;height:3px;background:currentColor;transform:scaleX(0);transform-origin:0 0;opacity:.5}
+.sb{position:absolute;left:0;right:0;bottom:0;height:3px;background:currentColor;transform:scaleX(0);transform-origin:0 0;opacity:.5;will-change:transform;transition:transform .22s var(--e)}
 .blr{position:relative;padding:12px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line)}
 .mcard{background:#fff;color:#0E1726;padding:12px 14px;font-size:14px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6)}
 .mh{display:flex;justify-content:space-between;align-items:center}
@@ -320,7 +323,7 @@
 /* sections */
 .sec{padding:88px 0 0}
 .mods .pile{position:relative;height:250px;margin-top:28px;overflow:hidden;clip-path:inset(0 -40px -40px -40px)}
-.tag{position:absolute;padding:10px 16px;box-shadow:inset 0 0 0 1.5px var(--fg);background:var(--bg);font:500 15px 'Arc',sans-serif;font-stretch:105%;white-space:nowrap;transform:rotate(var(--r));will-change:transform}
+.tag{position:absolute;padding:10px 16px;box-shadow:inset 0 0 0 1.5px var(--fg);background:var(--bg);font:500 15px 'Arc',sans-serif;font-stretch:105%;white-space:nowrap;transform:rotate(var(--r));will-change:transform,opacity;backface-visibility:hidden;transition:transform .42s var(--e),opacity .28s ease}
 .tag.f{background:var(--accbg);color:#fff;box-shadow:none}
 .alist{list-style:none;margin:32px 0 0;padding:0;display:grid}
 .alist li{display:flex;align-items:baseline;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font:300 22px/1.1 'Arc',sans-serif;font-stretch:125%;text-transform:uppercase}
@@ -797,17 +800,30 @@ document.addEventListener('focusout', function(){ site.classList.remove('kb'); }
 var HD = function(){ return wide() ? 69 : 65; };
 function prog(sec){ var r = sec.getBoundingClientRect(); return clamp((HD() - r.top) / Math.max(1, r.height - innerHeight + HD())); }
 function seen(el, a, b){ var r = el.getBoundingClientRect(), vh = innerHeight; return clamp((vh * (a || .95) - r.top) / (vh * (b || .6))); }
+var motionState = Object.create(null), motionSettling = false;
+function forward(key, raw){
+  raw = clamp(raw);
+  if (reduce) return 1;
+  var m = motionState[key] || (motionState[key] = {target:0,current:0});
+  if (raw > m.target) m.target = raw;
+  var d = m.target - m.current;
+  if (d > .0008){
+    m.current = Math.min(m.target, m.current + Math.max(.0015, d * .16));
+    motionSettling = true;
+  } else m.current = m.target;
+  return m.current;
+}
 function pick(key, auto){ var m = manual[key]; if (m && Math.abs(scrollY - m.y) < Math.max(140, innerHeight * .3)) return m.i; delete manual[key]; return auto; }
 
 // HERO: orders on the rail are stamped one by one
 var tk = $$('.tkt');
-function heroUpd(){ var p = reduce ? 1 : clamp(.34 + scrollY / (innerHeight * .7));
+function heroUpd(){ var p = reduce ? 1 : forward('hero', clamp(.34 + scrollY / (innerHeight * .7)));
   tk.forEach(function(t, i){ var s = $('.stamp', t), a = clamp((p * tk.length - i) / 1), e = ease(a);
     s.style.opacity = a > 0 ? 1 : 0; s.style.transform = 'rotate(-6deg) scale(' + (1.9 - .9 * e).toFixed(3) + ')'; s.style.opacity = (Math.min(1, a * 2.2)).toFixed(3); }); }
 
 // SCAN: the list is read line by line into the storefront
 var ssec = $('[data-sec="scan"]'), sst = $$('.sc-steps li');
-function scanUpd(){ var s = vis('.sc-stage'); if (!s) return; var p = reduce ? 1 : prog(ssec);
+function scanUpd(){ var s = vis('.sc-stage'); if (!s) return; var p = reduce ? 1 : forward('scan', prog(ssec));
   var lines = $$('.pp p:not(.pt)', s), rows = $$('.u-row', s).concat($$('.u-sug', s)), r = clamp((p - .12) / .62), n = Math.round(r * lines.length);
   lines.forEach(function(l, k){ l.classList.toggle('is-read', k < n); }); rows.forEach(function(x, k){ x.classList.toggle('is-in', k < n || n >= lines.length); });
   var b = $('.beam', s), h = $('.pp', s).offsetHeight; b.style.opacity = (r > 0 && r < 1) ? 1 : 0; b.style.transform = 'translateY(' + (r * h).toFixed(0) + 'px)';
@@ -831,7 +847,7 @@ function painsUpd(){ return; var w = vis('.pa-w'); if (!w) return; var its = $$(
 var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = $$('.stp');
 function setLang(l){ var i = {en: 0, ca: 1, es: 2}[l]; $$('[data-l]', blr).forEach(function(e){ if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i]; }); $$('.lg span', blr).forEach(function(s){ s.classList.toggle('is-on', s.dataset.l === l); }); }
 function fixed(on){ blr.classList.toggle('fixed', on); var r = vis('.mflag'); if (!r) return; var em = $('em', r); em.textContent = on ? em.dataset.ok : em.dataset.bad; $('.flag', r).textContent = on ? '✓ Fixed' : 'Check'; }
-function setupUpd(){ var p = reduce ? .99 : prog(usec), f = clamp(p) * 4 * .999, auto = Math.floor(f), q = f - auto;
+function setupUpd(){ var p = reduce ? .99 : forward('setup', prog(usec)), f = clamp(p) * 4 * .999, auto = Math.floor(f), q = f - auto;
   var i = pick('setup', auto); if (i !== auto) q = 1;
   stps.forEach(function(s, k){ s.setAttribute('aria-pressed', k === i); $('.sb', s).style.transform = 'scaleX(' + (k < i ? 1 : k === i ? q : 0).toFixed(3) + ')'; });
   blr.dataset.f = i; var sub;
@@ -845,20 +861,22 @@ stps.forEach(function(s, k){ s.addEventListener('click', function(){ manual.setu
 // MODULES: the tags fall into a pile
 var tags = Array.prototype.slice.call(site.querySelectorAll('.tag')), pile = $('.pile');
 tags.forEach(function(t){ t._oidoR = parseFloat(getComputedStyle(t).getPropertyValue('--r')) || 0; });
-function modsUpd(){ var p = reduce ? 1 : seen(pile, .95, .7);
+function modsUpd(){ var p = reduce ? 1 : forward('mods', seen(pile, .95, .7));
   tags.forEach(function(t, i){ var a = ease(clamp((p - i * .06) / .5)), r = t._oidoR;
     t.style.transform = 'translateY(' + (-(1 - a) * 260).toFixed(1) + 'px) rotate(' + (r + (1 - a) * (i % 2 ? 40 : -40)).toFixed(2) + 'deg)'; t.style.opacity = Math.min(1, a * 3).toFixed(3); }); }
 
 // CTA: ¡OÍDO! is stamped letter by letter
-var letters = [], big = document.body;
-function ctaUpd(){ var p = reduce ? 1 : seen(big, .9, .45);
+var letters = [], big = $('.ctaw') || document.getElementById('try');
+function ctaUpd(){ if (!big) return; var p = reduce ? 1 : forward('cta', seen(big, .9, .45));
   letters.forEach(function(l, i){ var a = ease(clamp((p - i * .08) / .45)); l.style.transform = 'translateY(' + ((1 - a) * -.5).toFixed(3) + 'em) scale(' + (1.25 - .25 * a).toFixed(3) + ')'; l.style.opacity = Math.min(1, a * 2).toFixed(3); }); }
 
 var ticking = false;
-function all(){ ticking = false; heroUpd(); scanUpd(); painsUpd(); setupUpd(); modsUpd(); ctaUpd();
-  site.classList.toggle('nofloat', document.getElementById('try').getBoundingClientRect().top < innerHeight - 80); }
-addEventListener('scroll', function(){ if (!ticking){ ticking = true; requestAnimationFrame(all); } }, {passive: true});
-addEventListener('resize', function(){ layout(); all(); });
+function schedule(){ if (!ticking){ ticking = true; requestAnimationFrame(all); } }
+function all(){ ticking = false; motionSettling = false; heroUpd(); scanUpd(); painsUpd(); setupUpd(); modsUpd(); ctaUpd();
+  site.classList.toggle('nofloat', document.getElementById('try').getBoundingClientRect().top < innerHeight - 80);
+  if (motionSettling) schedule(); }
+addEventListener('scroll', schedule, {passive: true});
+addEventListener('resize', function(){ layout(); schedule(); });
 setInd(ind);
 
 
@@ -874,10 +892,21 @@ function track(n, p){ window.dataLayer = window.dataLayer || []; window.dataLaye
 function prog(sec){ var hd = wide() ? 69 : 65, r = sec.getBoundingClientRect(); return clamp((hd - r.top) / Math.max(1, r.height - innerHeight + hd)); }
 // ---- pains: a scripted scenario per pain; the tap is shown before the next screen ----
 var sec = $('[data-sec="pains"]'), man = null, lastKey = '';
+var painMotion = {target:0,current:0}, painTick = false;
+function painForward(raw){
+  raw = clamp(raw);
+  if (reduce) return .99;
+  if (raw > painMotion.target) painMotion.target = raw;
+  var d = painMotion.target - painMotion.current;
+  if (d > .0008) painMotion.current = Math.min(painMotion.target, painMotion.current + Math.max(.0015, d * .16));
+  else painMotion.current = painMotion.target;
+  return painMotion.current;
+}
+function painSchedule(){ if (!painTick){ painTick = true; requestAnimationFrame(upd); } }
 function cardHTML(w, i){ var b = $$('.pz', w)[i]; return '<div class="pz-card" data-s="0"><span class="tqw"><span class="tq">' + $('.tq', b).innerHTML + '</span></span><div class="ans2"><b>' + $('.pz-a b', b).innerHTML + '</b><span>' + $('.pz-a span', b).innerHTML + '</span></div><span class="stp2">OÍDO ✓</span></div>'; }
 function ensureCur(w){ var c = $('.pz-cur', w); if (!c){ c = document.createElement('div'); c.className = 'pz-cur'; $('.pz-l', w).after(c); } return c; }
-function upd(){ var w = $('.i-' + site.dataset.ind + '.pz-w'); if (!w) return;
-  var p = reduce ? .99 : prog(sec), q0 = clamp((p - .04) / .92) * 4, auto = Math.min(3, Math.floor(q0)), q = q0 - auto;
+function upd(){ painTick = false; var w = $('.i-' + site.dataset.ind + '.pz-w'); if (!w) return;
+  var p = reduce ? .99 : painForward(prog(sec)), q0 = clamp((p - .04) / .92) * 4, auto = Math.min(3, Math.floor(q0)), q = q0 - auto;
   var a = auto; if (man && Math.abs(scrollY - man.y) < Math.max(160, innerHeight * .35)){ a = man.i; q = man.q; } else man = null;
   $$('.pz', w).forEach(function(b, i){ b.classList.toggle('is-on', i === a); b.classList.toggle('is-done', i < a); b.classList.toggle('is-stamp', i === a && q > .55); b.setAttribute('aria-pressed', i === a); });
   var scn = $$('.scn', w); scn.forEach(function(s, i){ s.classList.toggle('is-on', i === a); });
@@ -889,10 +918,11 @@ function upd(){ var w = $('.i-' + site.dataset.ind + '.pz-w'); if (!w) return;
     ring.classList.add('is-on'); ring.classList.toggle('is-press', lf > .75); } else ring.classList.remove('is-on', 'is-press');
   var cap = $('.pz-cap', w); $('b', cap).textContent = '0' + (a + 1) + ' · ' + (f + 1) + '/' + n; $('span', cap).textContent = fr[f].dataset.cap;
   var c = ensureCur(w), key = site.dataset.ind + a; if (lastKey !== key){ c.innerHTML = cardHTML(w, a); lastKey = key; }
-  var card = $('.pz-card', c); if (card) card.dataset.s = q > .3 ? '1' : '0'; }
-$$('.pz').forEach(function(b){ b.addEventListener('click', function(){ man = {i: +b.dataset.i, q: .62, y: scrollY}; upd(); track('pain_select', {item: +b.dataset.i + 1}); }); });
-var tk = false; addEventListener('scroll', function(){ if (!tk){ tk = true; requestAnimationFrame(function(){ tk = false; upd(); }); } }, {passive: true});
-addEventListener('resize', upd); $$('button[data-ind]').forEach(function(b){ b.addEventListener('click', function(){ lastKey = ''; man = null; setTimeout(upd, 0); }); }); upd();
+  var card = $('.pz-card', c); if (card) card.dataset.s = q > .3 ? '1' : '0';
+  if (!reduce && painMotion.current < painMotion.target - .0008) painSchedule(); }
+$('.pz').forEach(function(b){ b.addEventListener('click', function(){ man = {i: +b.dataset.i, q: .62, y: scrollY}; upd(); track('pain_select', {item: +b.dataset.i + 1}); }); });
+addEventListener('scroll', painSchedule, {passive: true});
+addEventListener('resize', painSchedule); $('button[data-ind]').forEach(function(b){ b.addEventListener('click', function(){ lastKey = ''; man = null; setTimeout(painSchedule, 0); }); }); upd();
 
 })();
 </script><script>
