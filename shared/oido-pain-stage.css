@@ -204,7 +204,24 @@
   .site .pains .pz-card .stp2{align-self:end;margin:0}
 }
 @media(min-width:768px) and (max-width:999.98px){
-  .site .pains .pz-w{--oido-pain-phone:250px}
+  .site .pains .pz-w{
+    --oido-pain-phone:250px;
+    width:100%;
+    min-width:0;
+    grid-template-columns:minmax(0,1fr);
+    grid-template-areas:'tabs' 'ph';
+    align-items:start;
+  }
+  .site .pains .pz-l{grid-area:tabs;min-width:0}
+  .site .pains .pz-r{
+    grid-area:ph;
+    width:100%;
+    justify-self:stretch;
+    justify-items:center;
+    min-width:0;
+  }
+  .site .pains .pz-ph{place-self:start center}
+  .site .pains .pz-cur{display:none}
 }
 @media(min-width:1000px){
   .site .pains .pz-w{--oido-pain-phone:276px}
