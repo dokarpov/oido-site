@@ -8,7 +8,7 @@ const e=i18n.indexOf('];',b);
 if(b<0||e<0)throw new Error('Language catalogue missing');
 const langs=[...i18n.slice(b,e).matchAll(/\['([a-z]{2,3})','[^']+'\]/g)]
  .map(m=>m[1]).filter(s=>s!=='auto');
-if(langs.length<40)throw new Error('Expected the full localization catalogue, got '+langs.length);
+if(langs.join(',')!=='en,es,ca')throw new Error('Unexpected production locale catalogue: '+langs.join(','));
 const rtl=new Set(['ar','he','fa','ur']);
 const samples={
  en:'Every order, heard.',
