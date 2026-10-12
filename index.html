@@ -1027,7 +1027,7 @@ function upd(){ painTick = false; var w = $('.i-' + site.dataset.ind + '.pz-w');
     card.classList.toggle('is-card-on', weight > .002);
     card.style.opacity = weight.toFixed(3);
     card.style.visibility = weight > .002 ? 'visible' : 'hidden';
-    card.style.transform = 'translate3d(0,' + ((1 - weight) * 6).toFixed(2) + 'px,0) scale(' + (.994 + .006 * weight).toFixed(4) + ')';
+    card.style.transform = 'translate3d(0,' + ((1 - weight) * 6).toFixed(2) + 'px,0)';
     if (i === base) card.dataset.s = q > .3 ? '1' : '0';
     else if (i === base + 1) card.dataset.s = '0';
   });
