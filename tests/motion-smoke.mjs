@@ -73,6 +73,7 @@ for(const vp of [{w:320,h:700},{w:375,h:812},{w:390,h:844},{w:430,h:932},{w:768,
       caption:rect(w.querySelector('.pz-cap')),
       quoteStage:rect(w.querySelector('.pz-cur')),
       quotes:[...w.querySelectorAll('.pz-cur>.pz-card')].map(rect),
+      quotePapers:[...w.querySelectorAll('.pz-cur>.pz-card .tq')].map(rect),
       scenes:[...w.querySelectorAll('.scn')].map(rect),
       frames:[...w.querySelectorAll('.scn .fr')].map(rect),
       screenOverflow:getComputedStyle(w.querySelector('.dv-s')).overflow,
@@ -125,6 +126,8 @@ for(const vp of [{w:320,h:700},{w:375,h:812},{w:390,h:844},{w:430,h:932},{w:768,
           if(Math.abs(q.height-snap.quoteStage.height)>1.2||Math.abs(q.width-snap.quoteStage.width)>1.2)
             throw Error(vp.w+' '+ind+': quote cards differ in size '+JSON.stringify({q,stage:snap.quoteStage}));
         }
+        if(snap.quotePapers.length!==4||Math.max(...snap.quotePapers.map(x=>x.height))-Math.min(...snap.quotePapers.map(x=>x.height))>1.2)
+          throw Error(vp.w+' '+ind+': scalloped receipts differ in visible height '+JSON.stringify(snap.quotePapers));
       }
     }
     baselineByIndustry[ind]=results[0];
