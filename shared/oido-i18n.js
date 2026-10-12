@@ -1,9 +1,10 @@
 (() => {
   'use strict';
 
-  const VERSION = '2026-10-12.1';
+  const VERSION = '2026-10-12.2';
   const KEY = 'oido.locale';
   const MODE_KEY = 'oido.locale.mode';
+  const MODE_VERSION_KEY = 'oido.locale.modeVersion';
   const GOOGLE_SCRIPT = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
   const RTL = new Set(['ar','fa','he','ur']);
   const LANGUAGES = [
@@ -87,6 +88,7 @@
       // Older builds stored detected/test languages as if they were preferences;
       // ignore those legacy values so a stale "pl" cannot keep winning forever.
       if (localStorage.getItem(MODE_KEY) !== 'manual') return null;
+      if (localStorage.getItem(MODE_VERSION_KEY) !== VERSION) return null;
       const v = localStorage.getItem(KEY);
       return v && v !== 'auto' ? supportedBase(v) : null;
     } catch { return null; }
@@ -143,6 +145,7 @@
       try {
         localStorage.setItem(KEY, explicit);
         localStorage.setItem(MODE_KEY, 'manual');
+        localStorage.setItem(MODE_VERSION_KEY, VERSION);
       } catch {}
       return explicit;
     }
@@ -350,9 +353,11 @@
         if (chosen === 'auto') {
           localStorage.removeItem(KEY);
           localStorage.removeItem(MODE_KEY);
+          localStorage.removeItem(MODE_VERSION_KEY);
         } else {
           localStorage.setItem(KEY, chosen);
           localStorage.setItem(MODE_KEY, 'manual');
+          localStorage.setItem(MODE_VERSION_KEY, VERSION);
         }
       } catch {}
 
@@ -591,7 +596,12 @@
   // Remove stale cookies/preferences from earlier builds before Google Translate
   // gets a chance to apply the wrong language during first paint.
   try {
-    if (!localStorage.getItem(MODE_KEY) && localStorage.getItem(KEY)) localStorage.removeItem(KEY);
+    var mode=localStorage.getItem(MODE_KEY), modeVersion=localStorage.getItem(MODE_VERSION_KEY);
+    if ((mode!=='manual' || modeVersion!==VERSION) && localStorage.getItem(KEY)) localStorage.removeItem(KEY);
+    if (mode==='manual' && modeVersion!==VERSION) {
+      localStorage.removeItem(MODE_KEY);
+      localStorage.removeItem(MODE_VERSION_KEY);
+    }
   } catch {}
   const eagerLocale = explicitLocale() || storedLocale() || browserLocale();
   if (!eagerLocale || eagerLocale === 'en') clearGoogleCookie();
