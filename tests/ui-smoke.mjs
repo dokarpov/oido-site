@@ -254,46 +254,55 @@ for (const vp of viewports) {
 }
 
 
-// The four-step setup scene keeps one stable stage and crossfades content without layout jumps.
+// The four-step setup scene keeps one stable stage and blends between adjacent steps.
 for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   const context=await browser.newContext({viewport,locale:'en-GB'});
   const page=await context.newPage();
   await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
-  const result=await page.evaluate(async () => {
-    const site=document.querySelector('.site');
-    const blr=document.querySelector('.blr');
-    const panel=document.querySelector('.i-'+site.dataset.ind+'.bpanel');
-    const out=[];
-    for (const step of ['0','1','2','3']) {
-      blr.dataset.f=step;
-      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
+
+  const go=async fraction=>{
+    const y=await page.evaluate(({fraction,width})=>{
+      const sec=document.querySelector('[data-sec="setup"]');
+      const r=sec.getBoundingClientRect();
+      const top=scrollY+r.top;
+      const hd=width>=1000?69:65;
+      const range=Math.max(1,r.height-innerHeight+hd);
+      return Math.max(0,top-hd+range*fraction);
+    },{fraction,width:viewport.width});
+    await page.evaluate(y=>scrollTo(0,y),y);
+    await page.waitForTimeout(950);
+    return page.evaluate(()=>{
+      const site=document.querySelector('.site');
+      const panel=document.querySelector('.i-'+site.dataset.ind+'.bpanel');
       const pr=panel.getBoundingClientRect();
-      const active=panel.querySelector('.side.s'+step);
-      const ar=active.getBoundingClientRect();
-      const cs=getComputedStyle(active);
-      out.push({
-        step,
+      return {
         panelTop:pr.top,
         panelHeight:pr.height,
-        sideTop:ar.top,
-        sideHeight:ar.height,
-        display:cs.display,
-        visibility:cs.visibility,
-        opacity:Number(cs.opacity),
-        transform:cs.transform
-      });
-    }
-    return out;
-  });
-  const heights=result.map(x=>x.panelHeight);
-  const tops=result.map(x=>x.panelTop);
-  if(Math.max(...heights)-Math.min(...heights)>1) throw new Error('setup stage height jumps between steps at '+viewport.width+': '+JSON.stringify(result));
-  if(Math.max(...tops)-Math.min(...tops)>1) throw new Error('setup stage position jumps between steps at '+viewport.width+': '+JSON.stringify(result));
-  for(const state of result){
-    if(state.display==='none'||state.visibility!=='visible'||state.opacity<0.95)
-      throw new Error('setup active side is not crossfade-visible at '+viewport.width+': '+JSON.stringify(result));
-  }
-  console.log('PASS stable four-step setup stage '+viewport.width);
+        sides:[...panel.querySelectorAll('.side')].map(x=>{
+          const cs=getComputedStyle(x);
+          return {opacity:Number(cs.opacity),visibility:cs.visibility,display:cs.display,top:x.getBoundingClientRect().top};
+        })
+      };
+    });
+  };
+
+  const states=[];
+  for(const fraction of [.08,.31,.56,.82]) states.push(await go(fraction));
+  const heights=states.map(x=>x.panelHeight);
+  if(Math.max(...heights)-Math.min(...heights)>1)
+    throw new Error('setup stage height jumps between steps at '+viewport.width+': '+JSON.stringify(states));
+  for(const state of states)
+    if(state.sides.some(x=>x.display==='none'))
+      throw new Error('setup side panels still use display switching at '+viewport.width+': '+JSON.stringify(state));
+
+  // Near a step boundary, two adjacent panels should coexist during the crossfade.
+  const blend=await go(.215);
+  const visible=blend.sides.filter(x=>x.visibility==='visible'&&x.opacity>.03);
+  if(visible.length<2)
+    throw new Error('setup step transition snaps instead of crossfading at '+viewport.width+': '+JSON.stringify(blend));
+
+  console.log('PASS stable crossfaded four-step setup '+viewport.width);
   await context.close();
 }
 
