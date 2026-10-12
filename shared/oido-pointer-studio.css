@@ -1,0 +1,53 @@
+/* Oído pointer studio — an intentional cursor + safe badge physics, desktop only.
+   Does not change document flow or interfere with anchor/wheel scrolling. */
+.oido-pointer{
+  position:fixed;top:0;left:0;width:30px;height:30px;z-index:2147483000;
+  display:grid;place-items:center;pointer-events:none;
+  border:2px solid #c9f24d;border-radius:50%;
+  background:rgba(14,23,38,.76);
+  box-shadow:inset 0 0 0 1px rgba(14,23,38,.45),0 0 0 1px rgba(255,255,255,.72),0 5px 18px rgba(0,0,0,.24);
+  transform:translate3d(-60px,-60px,0) translate(-50%,-50%);
+  opacity:0;will-change:transform,opacity;
+  transition:width 380ms cubic-bezier(.18,.9,.22,1.18),height 380ms cubic-bezier(.18,.9,.22,1.18),opacity 130ms ease;
+}
+.oido-pointer-core{height:5px;width:5px;background:#c9f24d;transform:rotate(45deg)}
+.oido-pointer[data-mode="link"]{width:38px;height:38px;background:rgba(14,23,38,.9)}
+.oido-pointer[data-mode="scatter"]{width:44px;height:44px;border-style:dashed;background:rgba(14,23,38,.8)}
+.oido-pointer[data-down="1"]{width:23px;height:23px}
+.oido-pointer-caption{
+  position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%) translateY(-3px);
+  min-width:48px;white-space:nowrap;text-align:center;
+  background:#c9f24d;color:#0e1726;
+  padding:4px 7px;font:750 10px/1.1 'FS',system-ui,sans-serif;
+  letter-spacing:.09em;text-transform:uppercase;
+  opacity:0;transition:opacity 130ms ease,transform 240ms cubic-bezier(.2,.85,.2,1);
+}
+.oido-pointer[data-mode="scatter"] .oido-pointer-caption,
+.oido-pointer[data-mode="link"] .oido-pointer-caption{
+  opacity:1;transform:translateX(-50%) translateY(0);
+}
+html.oido-custom-cursor .oido-pointer{opacity:1}
+@media(hover:hover) and (pointer:fine){
+  html.oido-custom-cursor,html.oido-custom-cursor body,
+  html.oido-custom-cursor :is(a,button,select,label,summary,[role="button"],[role="link"],.tag){
+    cursor:none!important;
+  }
+  html.oido-custom-cursor input:not([type="button"]):not([type="submit"]),html.oido-custom-cursor textarea,
+  html.oido-custom-cursor [contenteditable="true"]{cursor:text!important}
+  /* CSS individual translation and rotation compose with the original scroll transform. */
+  .site .pile .tag{
+    translate:var(--oido-scatter-x,0px) var(--oido-scatter-y,0px);
+    rotate:var(--oido-scatter-r,0deg);
+    will-change:translate,rotate,transform,opacity;
+  }
+  .site .pile{touch-action:auto}
+}
+@media(hover:none),(pointer:coarse){
+  .oido-pointer{display:none!important}
+  .site .pile .tag{translate:none!important;rotate:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .oido-pointer{transition:none}
+  .oido-pointer-caption{transition:none}
+  .site .pile .tag{translate:none!important;rotate:none!important}
+}
