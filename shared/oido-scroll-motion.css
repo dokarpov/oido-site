@@ -41,6 +41,11 @@
   .site .rail-in .tkt .stamp { left:16px; bottom:28px; }
 }
 @media(min-width:768px) and (max-width:999px){ .site .rail { --ticket-width:184px; --ticket-height:244px; } }
+/* Non-linear motion for the scanning beam and step-state elements. */
+.site .beam { transition:transform 480ms var(--oido-motion-soft),opacity 320ms var(--oido-motion-ease); }
+.site .sc-phone .u-row,.site .sc-phone .u-sug { transition:opacity 340ms var(--oido-motion-ease),transform 480ms var(--oido-motion-soft); }
+.site .fr { transition:opacity 380ms var(--oido-motion-ease),transform 520ms var(--oido-motion-ease); }
+.site .pz-cur>.pz-card { transition:opacity 440ms var(--oido-motion-ease),transform 520ms var(--oido-motion-soft),visibility 0s linear 440ms; }
 /* Don't let reveal transforms modify the page layout or interfere with product scrubbing. */
 .oido-scroll-motion-ready .oido-reveal:not(.is-visible) {
   opacity:0;
