@@ -440,6 +440,53 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   await context.close();
 }
 
+
+// The 4-step setup story is one-shot, but must never trap native reverse scrolling.
+{
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
+  const page=await context.newPage();
+  await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+  await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
+
+  const layout=await page.evaluate(()=>{
+    const sec=document.querySelector('[data-sec="setup"]');
+    const inner=sec.querySelector('.pinin');
+    return {
+      sectionHeight:sec.getBoundingClientRect().height,
+      viewport:innerHeight,
+      innerPosition:getComputedStyle(inner).position
+    };
+  });
+  if(layout.sectionHeight>layout.viewport*1.8)
+    throw new Error('setup still behaves like a long pinned scroll trap: '+JSON.stringify(layout));
+  if(layout.innerPosition==='sticky'||layout.innerPosition==='fixed')
+    throw new Error('setup visual remains pinned: '+JSON.stringify(layout));
+
+  const target=await page.evaluate(()=>{
+    const sec=document.querySelector('[data-sec="setup"]');
+    return scrollY+sec.getBoundingClientRect().top+Math.min(180,sec.getBoundingClientRect().height*.25);
+  });
+  await page.evaluate(y=>scrollTo(0,y),target);
+  await page.waitForTimeout(1100);
+  const down=await page.evaluate(()=>({
+    y:scrollY,
+    step:[...document.querySelectorAll('.stp')].findIndex(x=>x.getAttribute('aria-pressed')==='true')
+  }));
+  await page.evaluate(()=>scrollBy(0,-500));
+  await page.waitForTimeout(250);
+  const up=await page.evaluate(()=>({
+    y:scrollY,
+    step:[...document.querySelectorAll('.stp')].findIndex(x=>x.getAttribute('aria-pressed')==='true')
+  }));
+  if(!(up.y<down.y-300))
+    throw new Error('reverse native scroll was obstructed: '+JSON.stringify({down,up}));
+  if(up.step<down.step)
+    throw new Error('one-shot setup animation rewound while scrolling back: '+JSON.stringify({down,up}));
+
+  console.log('PASS setup animation does not trap reverse scroll');
+  await context.close();
+}
+
 // Verify the static-host Google Translate fallback without calling the external service in CI.
 {
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
