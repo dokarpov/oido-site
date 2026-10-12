@@ -88,7 +88,7 @@ for(const vp of [{w:320,h:700},{w:375,h:812},{w:390,h:844},{w:430,h:932},{w:768,
     if(siteInd!==ind)throw Error(vp.w+': could not select '+ind+' / got '+siteInd);
     const results=[];
     for(let step=0;step<4;step++){
-      await page.locator('.i-'+ind+'.pz-w .pz[data-i="'+step+'"]').click({force:true});
+      await page.evaluate(({ind,step})=>document.querySelector('.i-'+ind+'.pz-w .pz[data-i="'+step+'"]')?.click(),{ind,step});
       await page.waitForTimeout(50);
       results.push(await snapshot());
     }
