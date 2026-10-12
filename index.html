@@ -239,7 +239,7 @@
 .note{margin:0;font-size:13px;color:var(--fg3)}
 /* pinned sections */
 .pin>.pinin{position:sticky;top:65px;height:calc(100svh - 65px);display:flex;flex-direction:column;justify-content:flex-start;padding-top:24px;padding-bottom:76px}
-.scan{height:240vh}.pains{height:280vh}.setup{height:300vh}
+.scan{height:240vh}.pains{height:280vh}.setup{height:auto}.setup>.pinin{position:relative;top:auto;height:auto;min-height:0;padding-top:96px;padding-bottom:96px}
 /* scan */
 .sc-g{display:grid;gap:20px}
 .sc-steps{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
@@ -403,7 +403,7 @@ select.inp option{color:#0E1726}
  .hx{grid-template-columns:minmax(0,7fr) minmax(0,4fr);align-items:end;gap:48px;padding-top:56px}
  .hero h1{font-size:clamp(88px,8.6vw,124px)}
  .pin>.pinin{top:69px;height:calc(100vh - 69px);justify-content:center;padding-top:0;padding-bottom:0}
- .scan{height:260vh}.pains{height:320vh}.setup{height:340vh}
+ .scan{height:260vh}.pains{height:320vh}.setup{height:auto}.setup>.pinin{position:relative;top:auto;height:auto;min-height:0;justify-content:flex-start;padding-top:144px;padding-bottom:144px}
  .sc-g{grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:64px;align-items:center}
  .sc-t .disp2{font-size:clamp(40px,3.7vw,54px)}
  .sc-steps{grid-template-columns:1fr;gap:0;margin-top:40px}
