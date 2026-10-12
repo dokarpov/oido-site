@@ -949,7 +949,7 @@ function upd(){ painTick = false; var w = $('.i-' + site.dataset.ind + '.pz-w');
   var p = reduce ? .99 : painForward(prog(sec)), q0 = clamp((p - .04) / .92) * 4;
   var base = Math.min(3, Math.floor(q0)), q = base === 3 ? clamp(q0 - 3) : q0 - base, manualStep = false;
   if (man && Math.abs(scrollY - man.y) < Math.max(160, innerHeight * .35)){ base = man.i; q = man.q; manualStep = true; } else man = null;
-  var blend = (!manualStep && base < 3) ? ease(clamp((q - .78) / .22)) : 0;
+  var blendRaw = (!manualStep && base < 3) ? clamp((q - .78) / .22) : 0, blend = 1 - Math.pow(1 - blendRaw, 3);
   var visual = blend > .5 && base < 3 ? base + 1 : base;
 
   $$('.pz', w).forEach(function(b, i){
