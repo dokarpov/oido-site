@@ -562,10 +562,12 @@
   async function translate(locale,status) {
     const target = supportedBase(locale);
     window.__oidoI18n = {locale:target,provider:'none',supported:[...SUPPORTED],version:VERSION};
+    const notifyReady=()=>document.dispatchEvent(new CustomEvent('oido:translation-ready',{detail:{locale:target,provider:window.__oidoI18n.provider}}));
 
     if (target === 'en') {
       restoreEnglish();
       if (status) status.textContent = 'English';
+      notifyReady();
       return;
     }
 
@@ -574,6 +576,7 @@
         window.__oidoI18n.provider = 'edge';
         applyDirection(target);
         if (status) status.textContent = 'Language: ' + target;
+        notifyReady();
         return;
       }
     } catch {}
@@ -582,10 +585,12 @@
       await translateWithGoogle(target);
       window.__oidoI18n.provider = 'google';
       if (status) status.textContent = 'Language: ' + target;
+      notifyReady();
     } catch (err) {
       window.__oidoI18n.provider = 'error';
       if (status) status.textContent = 'Translation unavailable; showing English';
       restoreEnglish();
+      notifyReady();
     }
   }
 
