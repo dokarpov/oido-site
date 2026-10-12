@@ -1,26 +1,17 @@
 (() => {
   'use strict';
 
-  const VERSION = '2026-10-12.2';
+  const VERSION = '2026-10-12.3';
   const KEY = 'oido.locale';
   const MODE_KEY = 'oido.locale.mode';
   const MODE_VERSION_KEY = 'oido.locale.modeVersion';
   const GOOGLE_SCRIPT = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
   const RTL = new Set(['ar','fa','he','ur']);
+  // Production-approved locales only. Other browser languages safely fall back to English.
   const LANGUAGES = [
     ['auto','Automatic'],
-    ['en','English'],['es','Español'],['ca','Català'],['fr','Français'],['de','Deutsch'],
-    ['it','Italiano'],['pt','Português'],['nl','Nederlands'],['pl','Polski'],['cs','Čeština'],
-    ['sk','Slovenčina'],['ro','Română'],['hu','Magyar'],['el','Ελληνικά'],['sv','Svenska'],
-    ['da','Dansk'],['no','Norsk'],['fi','Suomi'],['ru','Русский'],['uk','Українська'],
-    ['tr','Türkçe'],['ar','العربية'],['he','עברית'],['fa','فارسی'],['zh','中文'],
-    ['ja','日本語'],['ko','한국어'],['hi','हिन्दी'],['bn','বাংলা'],['ur','اردو'],
-    ['id','Bahasa Indonesia'],['ms','Bahasa Melayu'],['vi','Tiếng Việt'],['th','ไทย'],
-    ['fil','Filipino'],['bg','Български'],['hr','Hrvatski'],['sr','Српски'],['sl','Slovenščina'],
-    ['et','Eesti'],['lv','Latviešu'],['lt','Lietuvių'],['is','Íslenska'],['ga','Gaeilge'],
-    ['af','Afrikaans'],['sw','Kiswahili'],['ta','தமிழ்'],['te','తెలుగు']
-  ];
-  const SUPPORTED = new Set(LANGUAGES.slice(1).map(([code]) => code));
+    ['en','English'],['es','Español'],['ca','Català']
+  ];  const SUPPORTED = new Set(LANGUAGES.slice(1).map(([code]) => code));
   const GOOGLE_CODE = {he:'iw', zh:'zh-CN', fil:'tl'};
   const COUNTRY_LANGUAGE = {
     ES:'es',AD:'ca',PT:'pt',FR:'fr',DE:'de',AT:'de',IT:'it',PL:'pl',
