@@ -280,16 +280,16 @@
 .su-h .sub{display:none}
 .su-g{display:grid;gap:12px;margin-top:16px}
 .stps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.stp{appearance:none;border:0;text-align:left;font:inherit;cursor:pointer;position:relative;overflow:hidden;min-height:76px;padding:10px;display:flex;flex-direction:column;gap:6px;color:#fff;opacity:.58;filter:saturate(.72) brightness(.9);will-change:opacity,filter;transition:none}
+.stp{appearance:none;border:0;text-align:left;font:inherit;cursor:pointer;position:relative;overflow:hidden;min-height:76px;padding:10px;display:flex;flex-direction:column;gap:6px;color:#fff;opacity:.52;will-change:opacity,transform;transform:translateZ(0);transition:opacity .46s var(--e),transform .46s var(--e)}
 .stp:nth-child(1){background:#2C3646}.stp:nth-child(2){background:#0A3F33}.stp:nth-child(3){background:#0B7A5E}.stp:nth-child(4){background:#2BB58C;color:#0E1726}
 .site[data-theme="light"] .stp:nth-child(1){background:#E3E8EF;color:#0E1726}
 .stp b{font:300 22px/1 'Arc',sans-serif;font-stretch:125%}
 .stp strong{display:block;font-weight:600;font-size:12px;line-height:1.25}
 .stp span>:not(strong){display:none}
 .stp span{font-size:12px}
-.site[data-theme="light"] .stp{filter:saturate(.8) brightness(1.02)}
+.site[data-theme="light"] .stp{opacity:.56}
 .stp:focus-visible{outline:2px solid currentColor;outline-offset:-3px}
-.sb{position:absolute;left:0;right:0;bottom:0;height:3px;background:currentColor;transform:scaleX(0);transform-origin:0 0;opacity:.55;will-change:transform;transition:none}
+.sb{position:absolute;left:0;right:0;bottom:0;height:3px;background:currentColor;transform:scaleX(0);transform-origin:0 0;opacity:.55;will-change:transform;transition:transform .62s cubic-bezier(.22,.75,.18,1)}
 .blr{position:relative;padding:12px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line)}
 .bpanel{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"card" "side";align-items:start}
 .side-stage{grid-area:side;position:relative;min-height:138px;margin-top:8px;isolation:isolate;contain:layout paint}
@@ -307,8 +307,8 @@
 .blr.fixed .mflag .flag{background:transparent;color:#0B7A5E}
 .blr[data-f="0"] .mr{opacity:.15}.blr[data-f="0"] .mr.rd{opacity:1}
 .mfoot{display:none;margin:10px 0 0;font-size:11px;color:#5B6576}
-.side{position:absolute;inset:0;display:block;margin:0;background:#fff;color:#0E1726;padding:12px;font-size:13px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,8px,0) scale(.994);transform-origin:50% 50%;will-change:transform,opacity;backface-visibility:hidden;transition:none}
-.blr[data-f="0"] .s0,.blr[data-f="1"] .s1,.blr[data-f="2"] .s2,.blr[data-f="3"] .s3{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0) scale(1);transition-delay:0s}
+.side{position:absolute;inset:0;display:block;margin:0;background:#fff;color:#0E1726;padding:12px;font-size:13px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,10px,0) scale(.992);transform-origin:50% 50%;will-change:transform,opacity;backface-visibility:hidden;transition:opacity .48s ease,transform .58s var(--e),visibility 0s linear .58s}
+.side.is-live{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0) scale(1);transition-delay:0s}
 .sk{margin:0 0 8px;font:600 11px 'Arc',sans-serif;letter-spacing:.04em;color:#5B6576}
 .sq{margin:6px 0;font-weight:600}.sv{margin:6px 0 0;color:#3E4859}
 .side .pp{height:58px;overflow:hidden}
@@ -846,88 +846,89 @@ function painsUpd(){ return; var w = vis('.pa-w'); if (!w) return; var its = $$(
   ans.forEach(function(x, i){ x.classList.toggle('is-on', i === a); }); }
 [].forEach(function(it){ it.addEventListener('click', function(){ manual.pains = {i: +it.dataset.i, y: scrollY}; all(); track('pain_select', {item: +it.dataset.i + 1}); }); });
 
-// SETUP: four steps; one-way scroll progress with compositor-smooth blending
+// SETUP: scroll only triggers the next step; motion itself is time-based and never rewinds
 var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = Array.from(site.querySelectorAll('.stp'));
-var setupLang = null, setupFixed = null, setupPulse = null;
-function smoothstep(t){ t = clamp(t); return t*t*(3-2*t); }
-function pulseSetupCard(){
-  var card = vis('.mcard') || $('.mcard',blr);
-  if (!card || reduce || !card.animate) return;
-  if (setupPulse) try{ setupPulse.cancel(); }catch(e){}
-  setupPulse = card.animate([{opacity:.82,transform:'translateZ(0)'},{opacity:1,transform:'translateZ(0)'}],{duration:240,easing:'cubic-bezier(.2,.8,.2,1)'});
-}
+var setupCurrent = -1, setupTarget = -1, setupRunning = false, setupTimers = [];
+function clearSetupTimers(){ setupTimers.forEach(clearTimeout); setupTimers = []; }
+function setupLater(fn,ms){ var id=setTimeout(fn,ms); setupTimers.push(id); return id; }
 function setLang(l){
-  if (setupLang === l) return;
   var i = {en:0,ca:1,es:2}[l];
   Array.from(blr.querySelectorAll('[data-l]')).forEach(function(e){
     if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i];
   });
   Array.from(blr.querySelectorAll('.lg span')).forEach(function(x){ x.classList.toggle('is-on', x.dataset.l === l); });
-  if (setupLang !== null) pulseSetupCard();
-  setupLang = l;
 }
 function fixed(on){
-  if (setupFixed === on) return;
   blr.classList.toggle('fixed',on);
   var r = vis('.mflag'); if (!r) return;
   var em = $('em',r);
   em.textContent = on ? em.dataset.ok : em.dataset.bad;
   $('.flag',r).textContent = on ? '✓ Fixed' : 'Check';
-  if (setupFixed !== null) pulseSetupCard();
-  setupFixed = on;
+}
+function paintSetup(step){
+  step = Math.max(0,Math.min(3,step));
+  stps.forEach(function(node,k){
+    node.setAttribute('aria-pressed',k===step);
+    node.style.opacity = k===step ? '1' : (k<step ? '.76' : '.52');
+    node.style.transform = k===step ? 'translate3d(0,-2px,0)' : 'translate3d(0,0,0)';
+    $('.sb',node).style.transform = 'scaleX(' + (k<=step ? 1 : 0) + ')';
+  });
+  var panel = vis('.bpanel') || blr, sides = Array.from(panel.querySelectorAll('.side'));
+  sides.forEach(function(side,k){ side.classList.toggle('is-live',k===step); });
+  blr.dataset.f = step;
+
+  var rows = Array.from((vis('.mcard') || blr).querySelectorAll('.mr'));
+  rows.forEach(function(r){ r.classList.toggle('rd',step>0); });
+  if(step===0){
+    fixed(false); setLang('en');
+    rows.forEach(function(r,k){ setupLater(function(){ r.classList.add('rd'); },120+k*95); });
+  } else if(step===1){
+    fixed(false); setLang('en');
+    setupLater(function(){ fixed(true); },260);
+  } else if(step===2){
+    fixed(true); setLang('en');
+    setupLater(function(){ setLang('ca'); },260);
+    setupLater(function(){ setLang('es'); },700);
+  } else {
+    fixed(true); setLang('es');
+  }
+}
+function runSetupQueue(){
+  if(setupRunning || setupCurrent>=setupTarget) return;
+  setupRunning = true;
+  var next = setupCurrent + 1;
+  clearSetupTimers();
+  requestAnimationFrame(function(){
+    paintSetup(next);
+    setupCurrent = next;
+    setupLater(function(){
+      setupRunning = false;
+      if(setupCurrent<setupTarget) runSetupQueue();
+    },640);
+  });
 }
 function setupUpd(){
-  var p = reduce ? .999 : forward('setup',prog(usec));
-  var f = clamp(p) * 4 * .999, auto = Math.floor(f), q = f - auto;
-  var i = pick('setup',auto), manualStep = i !== auto;
-  if (manualStep) q = 1;
-
-  // The stage is continuously blended during the last 45% of each step.
-  // No CSS transition chases the per-frame JS values, avoiding the rubber-band jump.
-  var blend = (!manualStep && i < 3) ? smoothstep((q - .55) / .45) : 0;
-  var active = (!manualStep && blend > .62 && i < 3) ? i + 1 : i;
-
-  stps.forEach(function(step,k){
-    step.setAttribute('aria-pressed',k === active);
-    var fill = k < i ? 1 : (k === i ? q : 0);
-    var weight = k === i ? 1-blend : (k === i+1 ? blend : 0);
-    if (i === 3 && k === 3) weight = 1;
-    step.style.opacity = (.58 + .42*weight).toFixed(4);
-    step.style.filter = 'saturate(' + (.72 + .28*weight).toFixed(4) + ') brightness(' + (.90 + .10*weight).toFixed(4) + ')';
-    $('.sb',step).style.transform = 'scaleX(' + fill.toFixed(4) + ')';
-  });
-
-  var panel = vis('.bpanel') || blr, sides = Array.from(panel.querySelectorAll('.side'));
-  sides.forEach(function(side,k){
-    var w = k === i ? 1-blend : (k === i+1 ? blend : 0);
-    if (i === 3 && k === 3) w = 1;
-    side.style.opacity = w.toFixed(4);
-    side.style.visibility = w > .001 ? 'visible' : 'hidden';
-    side.style.pointerEvents = w > .72 ? 'auto' : 'none';
-    side.style.transform = 'translate3d(0,' + ((1-w)*10).toFixed(2) + 'px,0) scale(' + (.99+.01*w).toFixed(4) + ')';
-  });
-
-  // State changes happen at the true step boundary, after the visual crossfade,
-  // not halfway through it.
-  blr.dataset.f = i;
-  var rows = Array.from((vis('.mcard') || blr).querySelectorAll('.mr')), sub;
-  if (i === 0){
-    sub = Math.min(rows.length,Math.floor(smoothstep(q) * (rows.length + .999)));
-    rows.forEach(function(r,k){ r.classList.toggle('rd',k < sub); });
-    fixed(false); setLang('en');
-  } else if (i === 1){
-    fixed(q > .58); setLang('en');
-  } else if (i === 2){
-    setLang(q < .38 ? 'en' : q < .72 ? 'ca' : 'es');
-    fixed(true);
-  } else {
-    fixed(true);
+  if(reduce){
+    setupTarget = 3;
+    if(setupCurrent!==3){ clearSetupTimers(); setupCurrent=3; paintSetup(3); }
+    return;
   }
+  var p = prog(usec);
+  // Deliberately use thresholds: scroll is the trigger, not the animation timeline.
+  var wanted = p < .08 ? 0 : p < .34 ? 1 : p < .60 ? 2 : 3;
+  var manualPick = manual.setup && Math.abs(scrollY-manual.setup.y)<Math.max(140,innerHeight*.3) ? manual.setup.i : -1;
+  if(manualPick>=0) wanted = manualPick;
+  if(wanted>setupTarget) setupTarget=wanted;
+  if(setupCurrent<0){ setupCurrent=0; paintSetup(0); }
+  runSetupQueue();
 }
 stps.forEach(function(step,k){
   step.addEventListener('click',function(){
     manual.setup = {i:k,y:scrollY};
-    setupUpd();
+    if(k>setupTarget) setupTarget=k;
+    if(k<=setupCurrent){
+      clearSetupTimers(); setupCurrent=k; setupTarget=Math.max(setupTarget,k); paintSetup(k);
+    } else runSetupQueue();
     track('setup_step',{step:k+1});
   });
 });
