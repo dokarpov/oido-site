@@ -1,0 +1,63 @@
+/* Oído motion foundations: fixed geometry, opt-in reveals, scroll never locked. 2026-10-12 */
+:root { --oido-motion-ease: cubic-bezier(.22,1,.36,1); --oido-motion-soft: cubic-bezier(.2,.8,.2,1); }
+/* Receipts: identical size and anchor. Content cannot change the stage or the stamp's position. */
+.site .rail { --ticket-width:172px; --ticket-height:240px; }
+.site .rail-in { align-items:flex-start; min-height:calc(var(--ticket-height) + 16px); }
+.site .rail-in .tkw {
+  flex:0 0 var(--ticket-width) !important;
+  width:var(--ticket-width) !important;
+  min-width:var(--ticket-width) !important;
+  height:var(--ticket-height) !important;
+  align-self:flex-start;
+  transform:none !important;
+  position:relative;
+}
+.site .rail-in .tkw .tkt {
+  display:block;
+  position:relative;
+  box-sizing:border-box;
+  height:var(--ticket-height) !important;
+  min-height:var(--ticket-height) !important;
+  max-height:var(--ticket-height) !important;
+  width:100% !important;
+  padding:18px 14px 28px;
+  overflow:hidden;
+  transform:none !important;
+}
+.site .rail-in .tkt h4 { min-height:2.5em; margin:0 0 7px; line-height:1.25; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; }
+.site .rail-in .tkt p { min-height:29px; line-height:1.35; gap:6px; align-items:baseline; }
+.site .rail-in .tkt p span:last-child { flex:none; font-variant-numeric:tabular-nums; }
+.site .rail-in .tkt .stamp {
+  position:absolute;
+  left:14px;
+  bottom:26px;
+  margin:0;
+  transform-origin:50% 50%;
+  transition:transform 560ms var(--oido-motion-ease),opacity 400ms var(--oido-motion-ease);
+}
+@media(min-width:1000px){
+  .site .rail { --ticket-width:208px; --ticket-height:252px; }
+  .site .rail-in .tkt { padding:20px 16px 30px; }
+  .site .rail-in .tkt .stamp { left:16px; bottom:28px; }
+}
+@media(min-width:768px) and (max-width:999px){ .site .rail { --ticket-width:184px; --ticket-height:244px; } }
+/* Don't let reveal transforms modify the page layout or interfere with product scrubbing. */
+.oido-scroll-motion-ready .oido-reveal:not(.is-visible) {
+  opacity:0;
+  transform:translate3d(0,22px,0) scale(.985);
+}
+.oido-scroll-motion-ready .oido-reveal {
+  transition:opacity 630ms var(--oido-motion-ease),transform 760ms var(--oido-motion-ease);
+  transition-delay:var(--oido-stagger,0ms);
+  will-change:opacity,transform;
+}
+.oido-scroll-motion-ready .oido-reveal.is-visible { opacity:1;transform:translate3d(0,0,0) scale(1); }
+/* The earlier investor view-timeline rules started immediately while scrolling; the new idle observer owns them. */
+.pitch-section .sh,.pitch-section .rv-up { animation:none !important; }
+@media(prefers-reduced-motion:reduce) {
+  .oido-scroll-motion-ready .oido-reveal,
+  .oido-scroll-motion-ready .oido-reveal:not(.is-visible) {
+    opacity:1!important;transform:none!important;transition:none!important;will-change:auto;
+  }
+  .site .rail-in .tkt .stamp { transition:none!important; }
+}
