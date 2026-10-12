@@ -487,6 +487,38 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   await context.close();
 }
 
+
+// Completed one-way scenes must not become scroll traps on the way back up.
+{
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
+  const page=await context.newPage();
+  await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+  await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
+
+  for(const selector of ['[data-sec="scan"]','[data-sec="pains"]']){
+    const y=await page.evaluate(sel=>{
+      const el=document.querySelector(sel);
+      return scrollY+el.getBoundingClientRect().top+Math.min(220,el.offsetHeight*.35);
+    },selector);
+    await page.evaluate(v=>scrollTo(0,v),y);
+    await page.waitForTimeout(900);
+    const down=await page.evaluate(()=>scrollY);
+    await page.mouse.wheel(0,-420);
+    await page.waitForTimeout(220);
+    const up=await page.evaluate(()=>scrollY);
+    if(!(up<down-120)) throw new Error(selector+' traps upward scroll: '+JSON.stringify({down,up}));
+    const style=await page.evaluate(sel=>{
+      const el=document.querySelector(sel);
+      const pin=el.querySelector(':scope > .pinin');
+      return {height:getComputedStyle(el).height,pinPosition:getComputedStyle(pin).position};
+    },selector);
+    if(style.pinPosition==='sticky') throw new Error(selector+' is still sticky: '+JSON.stringify(style));
+  }
+
+  console.log('PASS reverse scrolling remains native through one-way scenes');
+  await context.close();
+}
+
 // Verify the static-host Google Translate fallback without calling the external service in CI.
 {
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
