@@ -21,7 +21,7 @@ The public-facing site and investor overview use separate HTML entry points in t
 | Investor / partner view | live |
 | Responsive browser validation | passing at 320, 375, 390, 430, 768 and 1440 px widths |
 | Automatic locale selection + compact manual language menu | implemented |
-| Common-language catalogue | 36 languages |
+| Production locale catalogue | English, Spanish and Catalan only; other languages fall back to English |
 | Edge/IP-country locale fallback + runtime translation | implemented for Cloudflare Pages/Workers, **not active on GitHub Pages** |
 | Payment settlement | **not live / not claimed** |
 | Paying merchants, GMV, revenue | **not yet claimed as verified** |
