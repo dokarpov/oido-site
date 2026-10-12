@@ -253,6 +253,50 @@ for (const vp of viewports) {
   await context.close();
 }
 
+
+// The four-step setup scene keeps one stable stage and crossfades content without layout jumps.
+for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
+  const context=await browser.newContext({viewport,locale:'en-GB'});
+  const page=await context.newPage();
+  await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+  const result=await page.evaluate(async () => {
+    const site=document.querySelector('.site');
+    const blr=document.querySelector('.blr');
+    const panel=document.querySelector('.i-'+site.dataset.ind+'.bpanel');
+    const out=[];
+    for (const step of ['0','1','2','3']) {
+      blr.dataset.f=step;
+      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+      const pr=panel.getBoundingClientRect();
+      const active=panel.querySelector('.side.s'+step);
+      const ar=active.getBoundingClientRect();
+      const cs=getComputedStyle(active);
+      out.push({
+        step,
+        panelTop:pr.top,
+        panelHeight:pr.height,
+        sideTop:ar.top,
+        sideHeight:ar.height,
+        display:cs.display,
+        visibility:cs.visibility,
+        opacity:Number(cs.opacity),
+        transform:cs.transform
+      });
+    }
+    return out;
+  });
+  const heights=result.map(x=>x.panelHeight);
+  const tops=result.map(x=>x.panelTop);
+  if(Math.max(...heights)-Math.min(...heights)>1) throw new Error('setup stage height jumps between steps at '+viewport.width+': '+JSON.stringify(result));
+  if(Math.max(...tops)-Math.min(...tops)>1) throw new Error('setup stage position jumps between steps at '+viewport.width+': '+JSON.stringify(result));
+  for(const state of result){
+    if(state.display==='none'||state.visibility!=='visible'||state.opacity<0.95)
+      throw new Error('setup active side is not crossfade-visible at '+viewport.width+': '+JSON.stringify(result));
+  }
+  console.log('PASS stable four-step setup stage '+viewport.width);
+  await context.close();
+}
+
 // Verify the static-host Google Translate fallback without calling the external service in CI.
 {
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
