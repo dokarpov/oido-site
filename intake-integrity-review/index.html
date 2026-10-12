@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#111311" />
+  <meta name="description" content="Intake Integrity is a control layer before CRM and 1C. Validate intake, route uncertainty to human review, and keep a defensible decision trail." />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Intake Integrity — Every first record matters" />
+  <meta property="og:description" content="A control layer between first contact and the systems that follow." />
+  <title>Intake Integrity — Every first record matters</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;450;500;550;600;650;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="preload" href="./assets/01_object_desktop.webp" as="image" media="(min-width: 701px)" />
+  <link rel="preload" href="./assets/02_object_mobile.webp" as="image" media="(max-width: 700px)" />
+  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./refinement.css" />
+  <script src="./script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div id="progress" aria-hidden="true"></div>
+  <header class="site-header" id="siteHeader">
+    <a class="brand" href="#top" aria-label="Intake Integrity home">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M4 25V8M12 25V15C12 10 16 8 19 8C22 8 25 11 25 15V19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="25" cy="25" r="3.5" fill="#FF5F00"/></svg></span>
+      <span class="brand-text">intake<span class="brand-divider">/</span>integrity<span class="brand-dot">.</span></span>
+    </a>
+    <nav class="main-nav" id="mainNav" aria-label="Main navigation">
+      <a href="#problem">The problem</a>
+      <a href="#approach">Our approach</a>
+      <a href="#demo">Explore the system</a>
+    </nav>
+    <a class="header-action" href="https://github.com/dokarpov/intake-integrity-lab" target="_blank" rel="noopener noreferrer"><span>Explore the build</span><span aria-hidden="true">↗</span></a>
+    <button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation" aria-controls="mainNav" aria-expanded="false"><span></span><span></span></button>
+  </header>
+  <main id="main">
+    <section class="hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-picture" aria-hidden="true"><picture><source media="(max-width: 700px)" srcset="./assets/02_object_mobile.webp" /><img src="./assets/01_object_desktop.webp" alt="" fetchpriority="high" /></picture></div>
+      <div class="hero-noise" aria-hidden="true"></div>
+      <div class="hero-grid site-gutter">
+        <div class="hero-copy">
+          <p class="eyebrow hero-eyebrow"><span class="orange-square"></span> Before the CRM · Before the consequences</p>
+          <h1 id="hero-title">Every <em>first</em><br />record matters<span class="hero-punct">.</span></h1>
+          <div class="hero-bottom-copy"><p>Your systems remember what they're told. Make the first decision worth remembering.</p><div class="hero-actions"><a class="pill-link orange-link" href="#demo">Explore the system <span aria-hidden="true">↗</span></a><a class="under-link" href="#approach">See the approach <span aria-hidden="true">↘</span></a></div></div>
+        </div>
+        <div class="hero-counter" aria-hidden="true"><span>001 /</span> Where trust begins</div>
+      </div>
+      <div class="hero-rail site-gutter"><span>Sales intake, identity &amp; evidence control</span><span class="scroll-indicator"><span class="scroll-line"></span>Scroll to understand</span></div>
+    </section>
+
+    <section class="manifesto" id="problem" aria-labelledby="problem-title">
+      <div class="section-line site-gutter"><span>01 / The invisible risk</span><span>Integrity begins upstream.</span></div>
+      <div class="manifesto-main site-gutter">
+        <p class="micro-index">THE ASSUMPTION</p>
+        <h2 class="giant-heading" id="problem-title">One small<br /><em>mistake.</em><br />Everywhere<br />after.</h2>
+        <div class="manifesto-aside"><p class="lead">A wrong identity doesn't stay in a form.</p><p>It can travel into contracts, billing, ownership, access and reporting. The first record shouldn't be treated as a fact before it's been checked.</p><a href="#approach" class="text-arrow">Make the boundary visible <span aria-hidden="true">↗</span></a></div>
+      </div>
+      <div class="manifesto-image" aria-hidden="true"><img src="./assets/05_selection_grid_desktop.webp" alt="" loading="lazy" /></div>
+      <div class="statement-band site-gutter"><span>Not another CRM.</span><span>Not just deduplication.</span><span>A decision boundary.</span></div>
+    </section>
+
+    <section class="transition-story" id="approach" aria-label="From incoming data to a defensible decision">
+      <div class="story-sticky site-gutter" id="storySticky">
+        <div class="story-intro"><p class="eyebrow eyebrow-muted"><span class="orange-square"></span> 02 / From signal to decision</p><div class="story-copy" aria-live="off">
+          <div class="story-line story-step is-active" data-story-step="0"><h2>First comes<br /><i>the signal.</i></h2><p>Every enquiry starts as a fragment. A name. A source. A context. Nothing should be assumed.</p></div>
+          <div class="story-line story-step" data-story-step="1"><h2>Then comes<br /><i>the question.</i></h2><p>Is this the right person, the right role, the right consent? Uncertainty is not the same as error.</p></div>
+          <div class="story-line story-step" data-story-step="2"><h2>What remains<br /><i>is evidence.</i></h2><p>A routed decision, a clear owner and a trace of what happened—before downstream delivery.</p></div>
+        </div><div class="story-phase"><span id="phaseNum">01</span><span class="story-phases">/ 03</span><div class="mini-rail"><span id="miniRailFill"></span></div></div></div>
+        <div class="story-stage" aria-hidden="true">
+          <div class="scene-visual" id="sceneVisual">
+            <img class="scene-image scene-image-signal" id="sceneSignal" src="./assets/09_signal_field_desktop.webp" alt="" loading="lazy" />
+            <img class="scene-image scene-image-question" id="sceneQuestion" src="./assets/06_focus_lens_desktop.webp" alt="" loading="lazy" />
+            <div class="scene-film"></div>
+          </div>
+          <div class="record-shell" id="recordShell"><div class="record-top"><span class="tiny-symbol">ii.</span><span class="record-id">INTAKE / 0042</span><span class="record-signal"></span></div><div class="record-type">Identity check</div><div class="record-name">Celia Torres</div><div class="record-sep"></div><div class="record-row"><span>Role</span><strong>Buyer / billing contact</strong></div><div class="record-row"><span>Identity</span><strong class="record-warn">Needs review</strong></div><div class="record-row"><span>Decision</span><strong>Human review required</strong></div><div class="record-status"><span></span> Evidence retained</div></div>
+          <div class="scene-caption" id="sceneCaption">An incoming signal / 001</div>
+        </div>
+        <span class="story-label">From intake to a defensible decision.</span>
+      </div>
+    </section>
+
+    <section class="blueprint" id="architecture" aria-labelledby="architecture-title">
+      <div class="section-line site-gutter"><span>03 / The architecture</span><span>One deliberate boundary</span></div>
+      <div class="blueprint-layout site-gutter"><div class="blueprint-title"><p class="eyebrow eyebrow-muted">A safer route for every signal</p><h2 id="architecture-title">Handle the<br />uncertain.<br /><span>Preserve</span> the<br />decision.</h2><p>Even when identity matching is turned off, the control boundary still matters.</p></div>
+        <div class="blueprint-diagram" id="blueprintDiagram" role="img" aria-label="Sales or web intake moves through validation and consent, optional identity resolution, human review if uncertain, then canonical delivery through a durable outbox to CRM or 1C, with decision evidence recorded in an append-only ledger.">
+          <svg viewBox="0 0 820 725" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><pattern id="gridblue" width="26" height="26" patternUnits="userSpaceOnUse"><path d="M 26 0 L 0 0 0 26" stroke="#cbc8c1" stroke-width=".6" /></pattern></defs><rect width="820" height="725" fill="url(#gridblue)"/><g class="blueprint-routes"><path d="M410 115V175 M410 261V321 M410 404V463 M410 541V605" stroke="#b4b0a7" stroke-width="2"/><path class="blueprint-active" id="activePath" d="M410 115V175 M410 261V321 M410 404V463 M410 541V605" stroke="#fb5f00" stroke-width="4" stroke-linecap="round"/><path d="M605 363H698V645H599" stroke="#a5a29a" stroke-width="2" stroke-dasharray="5 8"/></g>
+            <g class="bp-node"><rect x="245" y="28" width="330" height="88" rx="2" fill="#171a19"/><text x="269" y="61" class="bp-small" fill="#afa99f">01  /  INCOMING</text><text x="269" y="93" class="bp-large" fill="#fff">Web · Sales · Partner</text></g>
+            <g class="bp-node"><rect x="245" y="175" width="330" height="86" rx="2" fill="#fbf8f2" stroke="#aeaaa2"/><text x="269" y="207" class="bp-small" fill="#7e7b73">02  /  GATE</text><text x="269" y="240" class="bp-large" fill="#242522">Validate &amp; consent</text></g>
+            <g class="bp-node"><rect x="245" y="321" width="330" height="83" rx="2" fill="#fbf8f2" stroke="#aeaaa2"/><text x="269" y="351" class="bp-small" fill="#7e7b73">03  /  ROUTE</text><text x="269" y="383" class="bp-large" fill="#242522">Resolve or review</text></g>
+            <g class="bp-node"><rect x="245" y="463" width="330" height="78" rx="2" fill="#ff5f00"/><text x="269" y="494" class="bp-small" fill="#5f2300">04  /  SAFE DELIVERY</text><text x="269" y="523" class="bp-large" fill="#191813">Durable outbox</text></g>
+            <g class="bp-node"><rect x="245" y="605" width="330" height="80" rx="2" fill="#171a19"/><text x="269" y="635" class="bp-small" fill="#afa99f">05  /  DESTINATION</text><text x="269" y="664" class="bp-large" fill="#fff">CRM / 1C</text></g>
+            <path d="M575 362H635" stroke="#89867f" stroke-width="1.5"/><circle cx="635" cy="362" r="4" fill="#ff5f00"/><text x="648" y="353" class="bp-side">Every</text><text x="648" y="370" class="bp-side">decision</text><text x="648" y="388" class="bp-side">logged</text>
+            <g><circle cx="410" cy="145" r="7" fill="#ff5f00"/><circle cx="410" cy="291" r="7" fill="#ff5f00"/><circle cx="410" cy="432" r="7" fill="#ff5f00"/><circle cx="410" cy="574" r="7" fill="#ff5f00"/></g>
+          </svg>
+          <div class="diagram-caption"><span>Switchable identity resolution</span><span>Off · Local · External</span></div>
+        </div></div>
+    </section>
+
+    <section class="product" id="demo" aria-labelledby="product-title">
+      <div class="product-texture" aria-hidden="true"><picture><source media="(max-width: 700px)" srcset="./assets/04_product_orange_mobile.webp" /><img src="./assets/03_product_orange_desktop.webp" alt="" loading="lazy" /></picture></div>
+      <div class="product-content site-gutter"><div class="section-line product-line"><span>04 / The product</span><span>Interactive / simulated</span></div>
+        <div class="product-head"><div><p class="eyebrow">The operator view</p><h2 id="product-title">Control looks<br /><em>like clarity.</em></h2></div><p>Choose an incoming signal. See the decision boundary respond—without hiding uncertainty or pretending the demo is production data.</p></div>
+        <div class="demo-frame" id="demoFrame">
+          <div class="demo-topbar"><div class="demo-traffic" aria-hidden="true"><span></span><span></span><span></span></div><span class="demo-url">intake / operator console</span><span class="demo-mode"><span></span> local simulation</span></div>
+          <div class="demo-workspace">
+            <div class="demo-sidebar"><div class="demo-brand"><span class="demo-brand-icon">ii.</span><span>integrity<span style="color:#fb5f00">.</span><small>Control plane</small></span></div>
+              <span class="nav-cap">WORKSPACE</span><div class="demo-nav"><button class="is-selected" data-demo-tab="queue" type="button"><span class="demo-nav-icon">▤</span> Review queue <small id="queueBadge">1</small></button><button data-demo-tab="ledger" type="button"><span class="demo-nav-icon">≡</span> Audit trail</button><button data-demo-tab="policy" type="button"><span class="demo-nav-icon">◇</span> Policy gates</button></div><div class="demo-side-foot"><span class="demo-indicator"></span> Local demonstration<br /><small>Illustrative, synthetic data</small></div>
+            </div>
+            <div class="demo-main"><div class="demo-mobile-tabs" role="group" aria-label="Operator view"><button class="is-selected" data-demo-tab="queue" type="button">Queue</button><button data-demo-tab="ledger" type="button">Audit trail</button><button data-demo-tab="policy" type="button">Policies</button></div><div class="demo-breadcrumb">CONTROL ROOM <span>/</span> <span id="demoBreadcrumb">REVIEW QUEUE</span></div><div class="demo-main-head"><div><p id="demoSectionLabel">INCOMING SIGNAL / 0042</p><h3 id="demoTitle">Every exception has an owner.</h3></div><span class="demo-live">● Simulated input</span></div>
+              <div class="case-picker" role="group" aria-label="Choose an intake scenario"><button class="case-button is-active" data-case="ambiguous" type="button" aria-pressed="true"><span>01</span> Ambiguous identity</button><button class="case-button" data-case="missing" type="button" aria-pressed="false"><span>02</span> Missing consent</button><button class="case-button" data-case="valid" type="button" aria-pressed="false"><span>03</span> Valid signal</button><button class="case-button" data-case="retry" type="button" aria-pressed="false"><span>04</span> Retry detected</button></div>
+              <div class="demo-card-grid" id="demoCards"><div class="demo-record"><div class="record-card-top"><span>INCOMING RECORD</span><span class="subtle-icon">↗</span></div><div class="record-avatar-line"><span class="record-avatar" id="demoAvatar">CT</span><div><strong id="demoName">Celia Torres</strong><small id="demoContext">Partner intake · Buyer / billing contact</small></div></div><div class="kv-row"><span>Source</span><strong id="demoSource">Partner enquiry</strong></div><div class="kv-row"><span>Identity signal</span><strong id="demoIdentity">Potential overlapping record</strong></div><div class="kv-row"><span>Consent</span><strong id="demoConsent">Recorded</strong></div></div>
+                <div class="demo-decision"><div class="record-card-top"><span>DECISION ROUTE</span><span class="routing-dot" id="routeDot"></span></div><span class="decision-tag" id="demoTag">Human review</span><h4 id="demoDecision">Don't merge on a guess.</h4><p id="demoReason">A plausible match is not a confirmed identity. Route the ambiguity to a human before delivery.</p><div class="decision-footer"><span>Next action</span><strong id="demoNext">Assign reviewer ↗</strong></div></div></div>
+              <div class="event-strip" id="eventStrip"><div><span class="event-number">01</span><strong>Intake received</strong><small>Captured</small></div><div><span class="event-number">02</span><strong>Policy evaluated</strong><small id="eventPolicy">Requires human review</small></div><div><span class="event-number">03</span><strong>Decision retained</strong><small id="eventOutcome">Delivery on hold</small></div></div>
+              <div class="demo-tab-panel" id="demoTabPanel" hidden></div>
+            </div>
+          </div>
+        </div>
+        <div class="product-footnote"><span>An interactive interpretation of the implemented operator workflow.</span><span>No real customer records. No invented performance metrics.</span></div>
+      </div>
+    </section>
+
+    <section class="capabilities site-gutter" id="capabilities" aria-labelledby="capabilities-title">
+      <div class="section-line"><span>05 / What stays in control</span><span>Boundaries over assumptions</span></div>
+      <div class="capabilities-head"><h2 id="capabilities-title">Built for the<br /><span>edge cases.</span></h2><p>Not just the perfect lead that flows straight through. The messy signals too.</p></div>
+      <div class="capabilities-grid">
+        <article class="capability-card"><div class="capability-media"><img loading="lazy" src="./assets/06_focus_lens_desktop.webp" alt="Abstract orange optical lens examining selected records" /></div><div class="capability-meta"><span>01 / Identity</span><span>↗</span></div><h3>Know what you<br />don't know.</h3><p>Optional matching with a route for uncertainty. The browser never gets to declare a match on its own.</p></article>
+        <article class="capability-card"><div class="capability-media"><img loading="lazy" src="./assets/08_precision_match_desktop.webp" alt="A sculptural white block aligned above a bright orange layer" /></div><div class="capability-meta"><span>02 / Governance</span><span>↗</span></div><h3>Human judgment,<br />where it belongs.</h3><p>Review assignments, clear resolution reasons, and policy controls for decisions that shouldn't be automatic.</p></article>
+        <article class="capability-card"><div class="capability-media"><img loading="lazy" src="./assets/09_signal_field_desktop.webp" alt="One orange signal threads through a field of pale lines" /></div><div class="capability-meta"><span>03 / Traceability</span><span>↗</span></div><h3>Every action<br />leaves a trail.</h3><p>Idempotent delivery, a durable outbox, and an append-only audit architecture for verifiable decisions.</p></article>
+      </div>
+    </section>
+
+    <section class="evidence" id="evidence" aria-labelledby="evidence-title"><div class="evidence-image" aria-hidden="true"><img loading="lazy" src="./assets/10_outcome_portal_desktop.webp" alt="" /></div><div class="evidence-content site-gutter"><div class="section-line"><span>06 / What is real</span><span>Evidence over theatre</span></div><div class="evidence-center"><p class="eyebrow">Engineering status / public repository</p><h2 id="evidence-title">Proof, not<br /><span>promises.</span></h2><div class="evidence-number"><strong>76<span>/76</span></strong><span>local tests passing in v0.6.2</span></div><p>PostgreSQL integration and browser smoke tests run in CI. Production customer deployment and compliance certification are <strong>not</strong> claimed.</p><a class="pill-link ghost-link" target="_blank" rel="noopener noreferrer" href="https://github.com/dokarpov/intake-integrity-lab">Inspect the implementation <span aria-hidden="true">↗</span></a></div></div></section>
+
+    <section class="closing site-gutter" aria-labelledby="closing-title"><div class="section-line"><span>07 / The invitation</span><span>Begin before the beginning</span></div><div class="closing-inner"><p class="eyebrow">Make every handoff defensible.</p><h2 id="closing-title">The best time<br />to protect a record<br />is <em>before it exists.</em></h2><div class="closing-bottom"><p>Explore the clean-room implementation, test the interaction, and see where the control boundary fits in your system.</p><a href="https://github.com/dokarpov/intake-integrity-lab" target="_blank" rel="noopener noreferrer" class="closing-arrow" aria-label="Open Intake Integrity Lab on GitHub">↗</a></div></div></section>
+  </main>
+  <footer class="footer site-gutter"><a class="footer-brand" href="#top">intake/integrity<span>.</span></a><div class="footer-middle">A deliberate first decision.<br />A defensible record after.</div><div class="footer-right"><a href="https://github.com/dokarpov/intake-integrity-lab" target="_blank" rel="noopener noreferrer">Source ↗</a><a href="#top">Back to top ↑</a></div><p class="footer-disclaimer">Concept website. Interactive examples are synthetic. Technical capabilities refer to the public v0.6.2 implementation, not a live production deployment.</p></footer>
+</body>
+</html>
