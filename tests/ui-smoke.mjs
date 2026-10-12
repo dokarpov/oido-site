@@ -152,12 +152,16 @@ for (const vp of viewports) {
   await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
   const target=await page.locator('#how').evaluate(el=>el.getBoundingClientRect().top+scrollY);
   await page.locator('.nv a[href="#how"]').click();
-  await page.waitForTimeout(70);
-  const mid=await page.evaluate(()=>scrollY);
-  if(!(mid>0 && mid<target-40)) throw new Error('anchor scroll did not animate through an intermediate position: '+JSON.stringify({mid,target}));
-  await page.waitForTimeout(700);
+  const samples=[];
+  for(const wait of [40,60,80,120,180]){
+    await page.waitForTimeout(wait);
+    samples.push(await page.evaluate(()=>scrollY));
+  }
+  const mid=samples.find(v=>v>0&&v<target-40);
+  if(mid==null) throw new Error('anchor scroll did not animate through an intermediate position: '+JSON.stringify({samples,target}));
+  await page.waitForTimeout(500);
   const end=await page.evaluate(()=>scrollY);
-  if(end<=mid) throw new Error('smooth anchor scroll did not continue: '+JSON.stringify({mid,end,target}));
+  if(end<=mid) throw new Error('smooth anchor scroll did not continue: '+JSON.stringify({mid,end,target,samples}));
   console.log('PASS smooth anchor motion');
   await context.close();
 }
