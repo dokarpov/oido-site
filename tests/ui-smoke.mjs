@@ -162,6 +162,97 @@ for (const vp of viewports) {
   await context.close();
 }
 
+
+// Scroll-driven scenes must advance smoothly and never rewind when the reader scrolls upward.
+{
+  const context=await browser.newContext({viewport:{width:1440,height:1000},locale:'en-GB'});
+  const page=await context.newPage();
+  await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+  await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
+
+  const sceneY=async (selector,fraction)=>page.evaluate(({selector,fraction})=>{
+    const el=document.querySelector(selector);
+    const r=el.getBoundingClientRect();
+    const top=scrollY+r.top;
+    const hd=69;
+    const range=Math.max(1,r.height-innerHeight+hd);
+    return Math.max(0,top-hd+range*fraction);
+  },{selector,fraction});
+
+  const snap=async ()=>page.evaluate(()=>{
+    const ind=document.querySelector('.site').dataset.ind;
+    const scan=document.querySelector('.i-'+ind+'.sc-stage');
+    const setup=document.querySelector('[data-sec="setup"]');
+    const pain=document.querySelector('.i-'+ind+'.pz-w');
+    const matrixY=el=>{
+      if(!el)return 0;
+      const tr=getComputedStyle(el).transform;
+      if(!tr||tr==='none')return 0;
+      try{return new DOMMatrixReadOnly(tr).m42||0;}catch{return 0;}
+    };
+    const activeIndex=(nodes,cls)=>Math.max(0,[...nodes].findIndex(n=>cls(n)));
+    return {
+      scanRows:[...scan.querySelectorAll('.u-row,.u-sug')].filter(x=>x.classList.contains('is-in')).length,
+      scanStep:activeIndex(document.querySelectorAll('.sc-steps li'),x=>x.classList.contains('is-on')),
+      beamY:matrixY(scan.querySelector('.beam')),
+      setupStep:activeIndex(setup.querySelectorAll('.stp'),x=>x.getAttribute('aria-pressed')==='true'),
+      painStep:activeIndex(pain.querySelectorAll('.pz'),x=>x.classList.contains('is-on'))
+    };
+  });
+
+  const scanDown=await sceneY('[data-sec="scan"]',.76);
+  await page.evaluate(y=>scrollTo(0,y),scanDown);
+  await page.waitForTimeout(1000);
+  const scanA=await snap();
+  const scanUp=await sceneY('[data-sec="scan"]',.20);
+  await page.evaluate(y=>scrollTo(0,y),scanUp);
+  await page.waitForTimeout(650);
+  const scanB=await snap();
+  if(scanB.scanRows<scanA.scanRows||scanB.scanStep<scanA.scanStep||scanB.beamY+1<scanA.beamY)
+    throw new Error('scan animation rewound on upward scroll: '+JSON.stringify({scanA,scanB}));
+
+  const setupDown=await sceneY('[data-sec="setup"]',.78);
+  await page.evaluate(y=>scrollTo(0,y),setupDown);
+  await page.waitForTimeout(1000);
+  const setupA=await snap();
+  const setupUp=await sceneY('[data-sec="setup"]',.24);
+  await page.evaluate(y=>scrollTo(0,y),setupUp);
+  await page.waitForTimeout(650);
+  const setupB=await snap();
+  if(setupB.setupStep<setupA.setupStep)
+    throw new Error('setup animation rewound on upward scroll: '+JSON.stringify({setupA,setupB}));
+
+  const painDown=await sceneY('[data-sec="pains"]',.70);
+  await page.evaluate(y=>scrollTo(0,y),painDown);
+  await page.waitForTimeout(1100);
+  const painA=await snap();
+  const painUp=await sceneY('[data-sec="pains"]',.20);
+  await page.evaluate(y=>scrollTo(0,y),painUp);
+  await page.waitForTimeout(650);
+  const painB=await snap();
+  if(painB.painStep<painA.painStep)
+    throw new Error('pain scenario rewound on upward scroll: '+JSON.stringify({painA,painB}));
+
+  const motionCss=await page.evaluate(()=>({
+    stamp:getComputedStyle(document.querySelector('.stamp')).transitionDuration,
+    beam:getComputedStyle(document.querySelector('.beam')).transitionDuration,
+    bar:getComputedStyle(document.querySelector('.sb')).transitionDuration,
+    tag:getComputedStyle(document.querySelector('.tag')).transitionDuration,
+    containers:['.rail-in','.sc-stage','.pz-w','.su-g','.pile'].map(sel=>({
+      sel,
+      isolation:getComputedStyle(document.querySelector(sel)).isolation,
+      position:getComputedStyle(document.querySelector(sel)).position
+    }))
+  }));
+  for(const [key,value] of Object.entries({stamp:motionCss.stamp,beam:motionCss.beam,bar:motionCss.bar,tag:motionCss.tag}))
+    if(!value||value.split(',').every(v=>parseFloat(v)===0)) throw new Error(key+' has no smoothing transition: '+JSON.stringify(motionCss));
+  for(const c of motionCss.containers)
+    if(c.isolation!=='isolate'||c.position==='static') throw new Error('motion surface is not locally contained: '+JSON.stringify(c));
+
+  console.log('PASS forward-only contained motion');
+  await context.close();
+}
+
 // Verify the static-host Google Translate fallback without calling the external service in CI.
 {
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
