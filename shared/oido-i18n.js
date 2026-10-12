@@ -104,7 +104,6 @@
   }
 
   async function publicIpLocale() {
-    if (!EDGE_STATIC_HOST) return null;
     try {
       const ctl = new AbortController();
       const timer = setTimeout(() => ctl.abort(), 1100);
