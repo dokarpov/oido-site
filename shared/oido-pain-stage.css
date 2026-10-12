@@ -97,6 +97,9 @@
   overflow-wrap:anywhere;
   hyphens:auto;
 }
+/* Frame animation cannot resize the phone viewport during a crossfade. */
+.site .pains .pz-ph .scn .fr{transform:translate3d(0,6px,0);transition:opacity 390ms cubic-bezier(.22,1,.36,1),transform 510ms cubic-bezier(.22,1,.36,1)}
+.site .pains .pz-ph .scn .fr.is-on{transform:none}
 /* Mobile quotation/answer area occupies the same height as the phone,
    regardless of content, language, or current scenario. */
 @media(max-width:767px){
