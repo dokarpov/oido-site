@@ -309,6 +309,63 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   await context.close();
 }
 
+
+// The four numbered pain scenarios also stay in one stage and crossfade instead of display-jumping.
+for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
+  const context=await browser.newContext({viewport,locale:'en-GB'});
+  const page=await context.newPage();
+  await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+  await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
+
+  const go=async fraction=>{
+    const y=await page.evaluate(({fraction,width})=>{
+      const sec=document.querySelector('[data-sec="pains"]');
+      const r=sec.getBoundingClientRect();
+      const top=scrollY+r.top;
+      const hd=width>=1000?69:65;
+      const range=Math.max(1,r.height-innerHeight+hd);
+      return Math.max(0,top-hd+range*fraction);
+    },{fraction,width:viewport.width});
+    await page.evaluate(y=>scrollTo(0,y),y);
+    await page.waitForTimeout(1100);
+    return page.evaluate(()=>{
+      const site=document.querySelector('.site');
+      const w=document.querySelector('.i-'+site.dataset.ind+'.pz-w');
+      const stage=w.querySelector('.pz-r');
+      const sr=stage.getBoundingClientRect();
+      return {
+        top:sr.top,
+        height:sr.height,
+        scenes:[...w.querySelectorAll('.scn')].map(x=>({
+          display:getComputedStyle(x).display,
+          visibility:getComputedStyle(x).visibility,
+          opacity:Number(getComputedStyle(x).opacity)
+        })),
+        cards:[...w.querySelectorAll('.pz-cur>.pz-card')].map(x=>({
+          visibility:getComputedStyle(x).visibility,
+          opacity:Number(getComputedStyle(x).opacity)
+        }))
+      };
+    });
+  };
+
+  const before=await go(.16);
+  const blend=await go(.245);
+  const after=await go(.33);
+  if(blend.scenes.some(x=>x.display==='none'))
+    throw new Error('pain scene still display-switches at '+viewport.width+': '+JSON.stringify(blend));
+  if(blend.scenes.filter(x=>x.visibility==='visible'&&x.opacity>.03).length<2)
+    throw new Error('pain phone scenarios snap instead of crossfading at '+viewport.width+': '+JSON.stringify(blend));
+  if(blend.cards.filter(x=>x.visibility==='visible'&&x.opacity>.03).length<2)
+    throw new Error('pain text cards snap instead of crossfading at '+viewport.width+': '+JSON.stringify(blend));
+  const heights=[before.height,blend.height,after.height];
+  if(Math.max(...heights)-Math.min(...heights)>1)
+    throw new Error('pain stage changes height while switching points at '+viewport.width+': '+JSON.stringify({before,blend,after}));
+
+  console.log('PASS stable crossfaded four-point pain scene '+viewport.width);
+  await context.close();
+}
+
 // Verify the static-host Google Translate fallback without calling the external service in CI.
 {
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
