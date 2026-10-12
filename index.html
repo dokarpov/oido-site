@@ -847,7 +847,7 @@ function painsUpd(){ return; var w = vis('.pa-w'); if (!w) return; var its = $$(
 [].forEach(function(it){ it.addEventListener('click', function(){ manual.pains = {i: +it.dataset.i, y: scrollY}; all(); track('pain_select', {item: +it.dataset.i + 1}); }); });
 
 // SETUP: four steps; every change follows a visible tap
-var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = $('.stp'), setupLang = null, setupFixed = null;
+var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = Array.from(site.querySelectorAll('.stp')), setupLang = null, setupFixed = null;
 function soften(el){
   if (!el || reduce || !el.animate) return;
   var old = el._oidoSoftAnim; if (old) try { old.cancel(); } catch(e){}
@@ -856,8 +856,8 @@ function soften(el){
 function setLang(l){
   if (setupLang === l) return;
   var i = {en: 0, ca: 1, es: 2}[l], card = vis('.mcard') || $('.mcard', blr);
-  $('[data-l]', blr).forEach(function(e){ if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i]; });
-  $('.lg span', blr).forEach(function(s){ s.classList.toggle('is-on', s.dataset.l === l); });
+  Array.from(blr.querySelectorAll('[data-l]')).forEach(function(e){ if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i]; });
+  Array.from(blr.querySelectorAll('.lg span')).forEach(function(s){ s.classList.toggle('is-on', s.dataset.l === l); });
   if (setupLang !== null) soften(card);
   setupLang = l;
 }
@@ -938,7 +938,7 @@ function painForward(raw){
   return painMotion.current;
 }
 function painSchedule(){ if (!painTick){ painTick = true; requestAnimationFrame(upd); } }
-function cardHTML(w, i){ var b = $('.pz', w)[i]; return '<div class="pz-card" data-card="' + i + '" data-s="0"><span class="tqw"><span class="tq">' + $('.tq', b).innerHTML + '</span></span><div class="ans2"><b>' + $('.pz-a b', b).innerHTML + '</b><span>' + $('.pz-a span', b).innerHTML + '</span></div><span class="stp2">OÍDO ✓</span></div>'; }
+function cardHTML(w, i){ var b = Array.from(w.querySelectorAll('.pz'))[i]; return '<div class="pz-card" data-card="' + i + '" data-s="0"><span class="tqw"><span class="tq">' + $('.tq', b).innerHTML + '</span></span><div class="ans2"><b>' + $('.pz-a b', b).innerHTML + '</b><span>' + $('.pz-a span', b).innerHTML + '</span></div><span class="stp2">OÍDO ✓</span></div>'; }
 function ensureCur(w){
   var c = $('.pz-cur', w);
   if (!c){ c = document.createElement('div'); c.className = 'pz-cur'; $('.pz-l', w).after(c); }
