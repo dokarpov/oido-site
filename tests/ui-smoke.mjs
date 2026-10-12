@@ -254,30 +254,29 @@ for (const vp of viewports) {
 }
 
 
-// The four-step setup scene is trigger-based: scroll starts a timed transition and never scrubs it backward.
+// The four-step setup scene is a single autoplay timeline: scroll starts it once, then it runs forward on time.
 for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   const context=await browser.newContext({viewport,locale:'en-GB'});
   const page=await context.newPage();
   await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
   await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
 
-  const yFor=async fraction=>page.evaluate(({fraction,width})=>{
-    const sec=document.querySelector('[data-sec="setup"]');
-    const r=sec.getBoundingClientRect();
-    const top=scrollY+r.top;
-    const hd=width>=1000?69:65;
-    const range=Math.max(1,r.height-innerHeight+hd);
-    return Math.max(0,top-hd+range*fraction);
-  },{fraction,width:viewport.width});
-
+  const place=async ratio=>{
+    const y=await page.evaluate(({ratio})=>{
+      const sec=document.querySelector('[data-sec="setup"]');
+      const top=scrollY+sec.getBoundingClientRect().top;
+      return Math.max(0,top-innerHeight*ratio);
+    },{ratio});
+    await page.evaluate(y=>scrollTo(0,y),y);
+  };
   const snap=()=>page.evaluate(()=>{
     const site=document.querySelector('.site');
     const panel=document.querySelector('.i-'+site.dataset.ind+'.bpanel');
-    const pr=panel.getBoundingClientRect();
     const steps=[...document.querySelectorAll('[data-sec="setup"] .stp')];
     return {
-      panelHeight:pr.height,
+      height:panel.getBoundingClientRect().height,
       active:steps.findIndex(x=>x.getAttribute('aria-pressed')==='true'),
+      tops:steps.map(x=>x.getBoundingClientRect().top),
       sides:[...panel.querySelectorAll('.side')].map(x=>{
         const cs=getComputedStyle(x);
         return {opacity:Number(cs.opacity),visibility:cs.visibility,display:cs.display};
@@ -285,45 +284,45 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
     };
   });
 
-  await page.evaluate(y=>scrollTo(0,y),await yFor(.02));
-  await page.waitForTimeout(150);
-  const before=await snap();
+  await place(.80);
+  await page.waitForTimeout(220);
+  const idle=await snap();
+  if(idle.active!==0) throw new Error('setup started before entering trigger zone at '+viewport.width+': '+JSON.stringify(idle));
 
-  // Crossing the first threshold should START a transition; the scroll position itself
-  // must not instantly dictate the final visual state.
-  await page.evaluate(y=>scrollTo(0,y),await yFor(.16));
-  await page.waitForTimeout(180);
-  const during=await snap();
-  const duringVisible=during.sides.filter(x=>x.visibility==='visible'&&x.opacity>.03);
-  if(duringVisible.length<2)
-    throw new Error('setup transition is not time-based/crossfaded at '+viewport.width+': '+JSON.stringify(during));
+  await place(.68);
+  await page.waitForTimeout(1100);
+  const blend01=await snap();
+  if(blend01.active!==1) throw new Error('setup autoplay did not reach step 2 at '+viewport.width+': '+JSON.stringify(blend01));
+  if(blend01.sides.filter(x=>x.visibility==='visible'&&x.opacity>.03).length<2)
+    throw new Error('setup step 1→2 is not crossfaded at '+viewport.width+': '+JSON.stringify(blend01));
 
-  await page.waitForTimeout(650);
-  const settled=await snap();
-  if(settled.active<1)
-    throw new Error('setup did not advance after trigger at '+viewport.width+': '+JSON.stringify(settled));
-
-  // Upward scrolling must not rewind the already reached step.
-  await page.evaluate(y=>scrollTo(0,y),await yFor(.01));
   await page.waitForTimeout(500);
-  const up=await snap();
-  if(up.active<settled.active)
-    throw new Error('setup rewound on upward scroll at '+viewport.width+': '+JSON.stringify({settled,up}));
+  const settled1=await snap();
 
-  // A fast jump can queue later steps, but the stable stage must keep its dimensions.
-  await page.evaluate(y=>scrollTo(0,y),await yFor(.82));
-  await page.waitForTimeout(2100);
+  await place(.95);
+  await page.waitForTimeout(850);
+  const forward2=await snap();
+  if(forward2.active<2) throw new Error('setup rewound/stalled after upward scroll at '+viewport.width+': '+JSON.stringify({settled1,forward2}));
+
+  await page.waitForTimeout(1250);
   const final=await snap();
-  if(final.active!==3)
-    throw new Error('setup queue did not reach final step at '+viewport.width+': '+JSON.stringify(final));
-  const heights=[before.panelHeight,during.panelHeight,settled.panelHeight,up.panelHeight,final.panelHeight];
+  if(final.active!==3) throw new Error('setup autoplay did not finish at '+viewport.width+': '+JSON.stringify(final));
+
+  const states=[idle,blend01,settled1,forward2,final];
+  for(let i=1;i<states.length;i++){
+    for(let k=0;k<states[i].tops.length;k++){
+      if(Math.abs(states[i].tops[k]-states[i-1].tops[k])>1)
+        throw new Error('setup tab hops vertically at '+viewport.width+': '+JSON.stringify(states.map(x=>x.tops)));
+    }
+  }
+  const heights=states.map(x=>x.height);
   if(Math.max(...heights)-Math.min(...heights)>1)
     throw new Error('setup stage height jumps between steps at '+viewport.width+': '+JSON.stringify(heights));
-  for(const state of [before,during,settled,up,final])
+  for(const state of states)
     if(state.sides.some(x=>x.display==='none'))
       throw new Error('setup side panels use display switching at '+viewport.width+': '+JSON.stringify(state));
 
-  console.log('PASS trigger-based forward-only four-step setup '+viewport.width);
+  console.log('PASS one-shot smooth forward setup '+viewport.width);
   await context.close();
 }
 
@@ -390,7 +389,8 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   const page=await context.newPage();
   await page.addInitScript(()=>{
     localStorage.setItem('oido.locale','pl');
-    localStorage.removeItem('oido.locale.mode');
+    localStorage.setItem('oido.locale.mode','manual');
+    localStorage.setItem('oido.locale.modeVersion','2026-10-11.7');
     document.cookie='googtrans=/en/pl;path=/;SameSite=Lax';
   });
   await page.goto(base+'/index.html',{waitUntil:'networkidle'});
@@ -407,6 +407,31 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   if(/googtrans=\/en\/pl/.test(state.cookie))
     throw new Error('stale Polish Google cookie survived automatic mode: '+JSON.stringify(state));
   console.log('PASS automatic locale clears stale Polish state');
+  await context.close();
+}
+
+// If the device/browser does not expose a supported language, automatic mode falls back to network/IP country.
+{
+  const context=await browser.newContext({viewport:{width:390,height:844},locale:'zz-ZZ'});
+  const page=await context.newPage();
+  await page.route('https://ipapi.co/country/', async route => route.fulfill({status:200,contentType:'text/plain',body:'ES'}));
+  await page.route('https://translate.google.com/translate_a/element.js**', async route => {
+    await route.fulfill({contentType:'application/javascript',body:`
+      window.google={translate:{}};
+      google.translate.TranslateElement=function(opts,id){
+        var host=document.getElementById(id);var s=document.createElement('select');s.className='goog-te-combo';
+        ['en','es'].forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v;s.appendChild(o);});host.appendChild(s);
+      };
+      google.translate.TranslateElement.InlineLayout={SIMPLE:1};
+      window.googleTranslateElementInit();
+    `});
+  });
+  await page.goto(base+'/index.html',{waitUntil:'networkidle'});
+  await page.waitForTimeout(250);
+  const state=await page.evaluate(()=>({lang:document.documentElement.lang,picker:document.querySelector('.oido-lang')?.value,mode:localStorage.getItem('oido.locale.mode')}));
+  if(state.lang!=='es'||state.picker!=='auto'||state.mode!==null)
+    throw new Error('IP-country fallback did not select Spanish automatically: '+JSON.stringify(state));
+  console.log('PASS automatic locale falls back to IP country');
   await context.close();
 }
 
