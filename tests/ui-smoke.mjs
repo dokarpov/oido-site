@@ -288,19 +288,22 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   };
 
   const states=[];
-  for(const fraction of [.08,.31,.56,.82]) states.push(await go(fraction));
+  states.push(await go(.08));
+
+  // Near the first step boundary, two adjacent panels should coexist during the crossfade.
+  const blend=await go(.215);
+  states.push(blend);
+  const visible=blend.sides.filter(x=>x.visibility==='visible'&&x.opacity>.03);
+  if(visible.length<2)
+    throw new Error('setup step transition snaps instead of crossfading at '+viewport.width+': '+JSON.stringify(blend));
+
+  for(const fraction of [.31,.56,.82]) states.push(await go(fraction));
   const heights=states.map(x=>x.panelHeight);
   if(Math.max(...heights)-Math.min(...heights)>1)
     throw new Error('setup stage height jumps between steps at '+viewport.width+': '+JSON.stringify(states));
   for(const state of states)
     if(state.sides.some(x=>x.display==='none'))
       throw new Error('setup side panels still use display switching at '+viewport.width+': '+JSON.stringify(state));
-
-  // Near a step boundary, two adjacent panels should coexist during the crossfade.
-  const blend=await go(.215);
-  const visible=blend.sides.filter(x=>x.visibility==='visible'&&x.opacity>.03);
-  if(visible.length<2)
-    throw new Error('setup step transition snaps instead of crossfading at '+viewport.width+': '+JSON.stringify(blend));
 
   console.log('PASS stable crossfaded four-step setup '+viewport.width);
   await context.close();
