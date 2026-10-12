@@ -30,7 +30,7 @@
 }
 /* Phone shell and every screen own the exact same rectangle. Text does not size it. */
 .site .pains .pz-ph>.dv.w-pz {
-  --w:100%;
+  --w:var(--oido-pain-phone);
   position:absolute;
   inset:0;
   width:100%;
