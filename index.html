@@ -280,7 +280,7 @@
 .su-h .sub{display:none}
 .su-g{display:grid;gap:12px;margin-top:16px}
 .stps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.stp{appearance:none;border:0;text-align:left;font:inherit;cursor:pointer;position:relative;overflow:hidden;min-height:76px;padding:10px;display:flex;flex-direction:column;gap:6px;color:#fff;transition:filter .28s var(--e),box-shadow .32s var(--e)}
+.stp{appearance:none;border:0;text-align:left;font:inherit;cursor:pointer;position:relative;overflow:hidden;min-height:76px;padding:10px;display:flex;flex-direction:column;gap:6px;color:#fff;transition:filter .46s var(--e),opacity .46s var(--e),box-shadow .46s var(--e)}
 .stp:nth-child(1){background:#2C3646}.stp:nth-child(2){background:#0A3F33}.stp:nth-child(3){background:#0B7A5E}.stp:nth-child(4){background:#2BB58C;color:#0E1726}
 .site[data-theme="light"] .stp:nth-child(1){background:#E3E8EF;color:#0E1726}
 .stp b{font:300 22px/1 'Arc',sans-serif;font-stretch:125%}
@@ -290,7 +290,7 @@
 .stp[aria-pressed="false"]{filter:saturate(.5) brightness(.8)}
 .site[data-theme="light"] .stp[aria-pressed="false"]{filter:saturate(.55) brightness(1.08) opacity(.7)}
 .stp[aria-pressed="true"]{box-shadow:inset 0 -3px 0 currentColor}
-.sb{position:absolute;left:0;right:0;bottom:0;height:3px;background:currentColor;transform:scaleX(0);transform-origin:0 0;opacity:.5;will-change:transform;transition:transform .22s var(--e)}
+.sb{position:absolute;left:0;right:0;bottom:0;height:3px;background:currentColor;transform:scaleX(0);transform-origin:0 0;opacity:.5;will-change:transform;transition:transform .16s linear}
 .blr{position:relative;padding:12px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line)}
 .bpanel{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"card" "side";align-items:start}
 .mcard{grid-area:card;background:#fff;color:#0E1726;padding:12px 14px;font-size:14px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6);will-change:opacity;backface-visibility:hidden}
@@ -307,7 +307,7 @@
 .blr.fixed .mflag .flag{background:transparent;color:#0B7A5E}
 .blr[data-f="0"] .mr{opacity:.15}.blr[data-f="0"] .mr.rd{opacity:1}
 .mfoot{display:none;margin:10px 0 0;font-size:11px;color:#5B6576}
-.side{grid-area:side;display:block;margin-top:8px;background:#fff;color:#0E1726;padding:12px;font-size:13px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,8px,0) scale(.992);will-change:transform,opacity;backface-visibility:hidden;transition:opacity .3s ease,transform .42s var(--e),visibility 0s linear .42s}
+.side{grid-area:side;display:block;margin-top:8px;background:#fff;color:#0E1726;padding:12px;font-size:13px;box-shadow:0 24px 48px -24px rgba(0,0,0,.6);opacity:0;visibility:hidden;pointer-events:none;transform:translate3d(0,12px,0) scale(.988);will-change:transform,opacity;backface-visibility:hidden;transition:opacity .52s ease,transform .62s var(--e),visibility 0s linear .64s}
 .blr[data-f="0"] .s0,.blr[data-f="1"] .s1,.blr[data-f="2"] .s2,.blr[data-f="3"] .s3{opacity:1;visibility:visible;pointer-events:auto;transform:translate3d(0,0,0) scale(1);transition-delay:0s}
 .sk{margin:0 0 8px;font:600 11px 'Arc',sans-serif;letter-spacing:.04em;color:#5B6576}
 .sq{margin:6px 0;font-weight:600}.sv{margin:6px 0 0;color:#3E4859}
@@ -846,52 +846,97 @@ function painsUpd(){ return; var w = vis('.pa-w'); if (!w) return; var its = $$(
   ans.forEach(function(x, i){ x.classList.toggle('is-on', i === a); }); }
 [].forEach(function(it){ it.addEventListener('click', function(){ manual.pains = {i: +it.dataset.i, y: scrollY}; all(); track('pain_select', {item: +it.dataset.i + 1}); }); });
 
-// SETUP: four steps; every change follows a visible tap
-var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = Array.from(site.querySelectorAll('.stp')), setupLang = null, setupFixed = null;
-function soften(el){
-  if (!el || reduce || !el.animate) return;
-  var old = el._oidoSoftAnim; if (old) try { old.cancel(); } catch(e){}
-  el._oidoSoftAnim = el.animate([{opacity:.64},{opacity:1}],{duration:280,easing:'cubic-bezier(.2,.8,.2,1)'});
-}
+// SETUP: four steps; scroll starts a one-way timeline instead of scrubbing it
+var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = Array.from(site.querySelectorAll('.stp'));
+var setupLang = null, setupFixed = null;
+var setupRun = {started:reduce, start:reduce ? -1 : 0, manual:null, done:reduce};
+var SETUP_STEP_MS = 1500, SETUP_TOTAL_MS = SETUP_STEP_MS * 4;
+
 function setLang(l){
   if (setupLang === l) return;
-  var i = {en: 0, ca: 1, es: 2}[l], card = vis('.mcard') || $('.mcard', blr);
-  Array.from(blr.querySelectorAll('[data-l]')).forEach(function(e){ if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i]; });
-  Array.from(blr.querySelectorAll('.lg span')).forEach(function(s){ s.classList.toggle('is-on', s.dataset.l === l); });
-  if (setupLang !== null) soften(card);
+  var i = {en:0,ca:1,es:2}[l];
+  Array.from(blr.querySelectorAll('[data-l]')).forEach(function(e){
+    if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i];
+  });
+  Array.from(blr.querySelectorAll('.lg span')).forEach(function(x){ x.classList.toggle('is-on', x.dataset.l === l); });
   setupLang = l;
 }
 function fixed(on){
   if (setupFixed === on) return;
-  blr.classList.toggle('fixed', on); var r = vis('.mflag'); if (!r) return;
-  var em = $('em', r); em.textContent = on ? em.dataset.ok : em.dataset.bad; $('.flag', r).textContent = on ? '✓ Fixed' : 'Check';
-  if (setupFixed !== null) soften(r);
+  blr.classList.toggle('fixed', on);
+  var r = vis('.mflag'); if (!r) return;
+  var em = $('em', r);
+  em.textContent = on ? em.dataset.ok : em.dataset.bad;
+  $('.flag', r).textContent = on ? '✓ Fixed' : 'Check';
   setupFixed = on;
 }
-function setupUpd(){ var p = reduce ? .99 : forward('setup', prog(usec)), f = clamp(p) * 4 * .999, auto = Math.floor(f), q = f - auto;
-  var i = pick('setup', auto), manualStep = i !== auto; if (manualStep) q = 1;
-  var blend = (!manualStep && i < 3) ? ease(clamp((q - .70) / .30)) : 0;
-  var visualStep = blend > .5 && i < 3 ? i + 1 : i;
-  stps.forEach(function(s, k){
-    s.setAttribute('aria-pressed', k === visualStep);
-    $('.sb', s).style.transform = 'scaleX(' + (k < i ? 1 : k === i ? q : 0).toFixed(3) + ')';
+function setupShouldStart(){
+  if (!usec) return false;
+  var r = usec.getBoundingClientRect();
+  return r.top < innerHeight * .78 && r.bottom > innerHeight * .22;
+}
+function setupTimeline(now){
+  if (reduce) return .9999;
+  if (!setupRun.started && setupShouldStart()){
+    setupRun.started = true;
+    setupRun.start = now;
+  }
+  if (!setupRun.started) return 0;
+  if (setupRun.manual !== null) return Math.min(.9999,(setupRun.manual + .86) / 4);
+  var p = clamp((now - setupRun.start) / SETUP_TOTAL_MS);
+  if (p >= .999){
+    setupRun.done = true;
+    return .9999;
+  }
+  motionSettling = true;
+  return p;
+}
+function setupUpd(){
+  var now = performance.now(), p = setupTimeline(now), f = p * 4;
+  var i = Math.min(3,Math.floor(f)), q = i === 3 ? clamp(f - 3) : f - i;
+
+  stps.forEach(function(step,k){
+    step.setAttribute('aria-pressed', k === i);
+    var fill = k < i ? 1 : (k === i ? q : 0);
+    $('.sb',step).style.transform = 'scaleX(' + fill.toFixed(3) + ')';
   });
+
   var panel = vis('.bpanel') || blr, sides = Array.from(panel.querySelectorAll('.side'));
-  sides.forEach(function(side, k){
+  var blend = i < 3 ? ease(clamp((q - .68) / .32)) : 0;
+  sides.forEach(function(side,k){
     var w = k === i ? 1 - blend : (k === i + 1 ? blend : 0);
     if (i === 3 && k === 3) w = 1;
     side.style.opacity = w.toFixed(3);
     side.style.visibility = w > .002 ? 'visible' : 'hidden';
-    side.style.pointerEvents = w > .65 ? 'auto' : 'none';
-    side.style.transform = 'translate3d(0,' + ((1 - w) * 8).toFixed(2) + 'px,0) scale(' + (.992 + .008 * w).toFixed(4) + ')';
+    side.style.pointerEvents = w > .7 ? 'auto' : 'none';
+    side.style.transform = 'translate3d(0,' + ((1-w)*12).toFixed(2) + 'px,0) scale(' + (.988 + .012*w).toFixed(4) + ')';
   });
-  blr.dataset.f = visualStep; var sub;
-  if (i === 0){ sub = Math.floor(q * 5); Array.from((vis('.mcard') || blr).querySelectorAll('.mr')).forEach(function(r, k){ r.classList.toggle('rd', k < sub); }); fixed(false); setLang('en'); }
-  if (i === 1){ sub = q > .45 ? 1 : 0; fixed(!!sub); setLang('en'); }
-  if (i === 2){ sub = q < .3 ? 0 : q < .65 ? 1 : 2; setLang(['en', 'ca', 'es'][sub]); fixed(true); }
-  if (i === 3){ sub = q > .5 ? 1 : 0; fixed(true); }
-  last.s = i * 10 + sub; }
-stps.forEach(function(s, k){ s.addEventListener('click', function(){ manual.setup = {i: k, y: scrollY}; last.s = -1; all(); track('setup_step', {step: k + 1}); }); });
+
+  blr.dataset.f = i;
+  var rows = Array.from((vis('.mcard') || blr).querySelectorAll('.mr')), sub;
+  if (i === 0){
+    sub = Math.min(rows.length,Math.floor(ease(q) * (rows.length + .999)));
+    rows.forEach(function(r,k){ r.classList.toggle('rd',k < sub); });
+    fixed(false); setLang('en');
+  } else if (i === 1){
+    fixed(q > .52); setLang('en');
+  } else if (i === 2){
+    setLang(q < .38 ? 'en' : q < .72 ? 'ca' : 'es');
+    fixed(true);
+  } else {
+    fixed(true);
+  }
+}
+
+stps.forEach(function(step,k){
+  step.addEventListener('click',function(){
+    setupRun.started = true;
+    setupRun.manual = k;
+    setupRun.done = true;
+    setupUpd();
+    track('setup_step',{step:k+1});
+  });
+});
 
 // MODULES: the tags fall into a pile
 var tags = Array.prototype.slice.call(site.querySelectorAll('.tag')), pile = $('.pile');
