@@ -205,3 +205,19 @@ html[dir="rtl"] .pitch-hero-lead,
 html[dir="rtl"] .pitch-section { text-align:start; }
 html[dir="rtl"] .site .hero .h-xl,
 html[dir="rtl"] .pitch-hero h1 { unicode-bidi:plaintext; }
+
+/* Language popover must stay in the viewport on 768–1024px tablets too. */
+@media (max-width:1024px){
+ .oido-menu-panel {
+   position:fixed!important;
+   right:16px!important;
+   left:auto!important;
+   top:calc(env(safe-area-inset-top,0px) + 76px)!important;
+   width:min(320px,calc(100vw - 32px))!important;
+   max-width:calc(100vw - 32px)!important;
+   z-index:999!important;
+ }
+}
+@media (max-width:700px){
+ .oido-menu-panel{top:calc(env(safe-area-inset-top,0px) + 62px)!important;right:12px!important;width:min(360px,calc(100vw - 24px))!important;max-width:calc(100vw - 24px)!important;}
+}
