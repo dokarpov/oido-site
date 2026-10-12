@@ -280,7 +280,7 @@
 .su-h .sub{display:none}
 .su-g{display:grid;gap:12px;margin-top:16px}
 .stps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
-.stp{appearance:none;border:0;text-align:left;font:inherit;cursor:pointer;position:relative;overflow:hidden;min-height:76px;padding:10px;display:flex;flex-direction:column;gap:6px;color:#fff;opacity:.52;will-change:opacity,transform;transform:translateZ(0);transition:opacity .46s var(--e),transform .46s var(--e)}
+.stp{appearance:none;border:0;text-align:left;font:inherit;cursor:pointer;position:relative;overflow:hidden;min-height:76px;padding:10px;display:flex;flex-direction:column;gap:6px;color:#fff;opacity:.52;will-change:opacity;transform:translateZ(0);transition:opacity .5s cubic-bezier(.22,.75,.18,1)}
 .stp:nth-child(1){background:#2C3646}.stp:nth-child(2){background:#0A3F33}.stp:nth-child(3){background:#0B7A5E}.stp:nth-child(4){background:#2BB58C;color:#0E1726}
 .site[data-theme="light"] .stp:nth-child(1){background:#E3E8EF;color:#0E1726}
 .stp b{font:300 22px/1 'Arc',sans-serif;font-stretch:125%}
@@ -293,7 +293,8 @@
 .blr{position:relative;padding:12px;background:var(--bg2);box-shadow:inset 0 0 0 1px var(--line)}
 .bpanel{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"card" "side";align-items:start}
 .side-stage{grid-area:side;position:relative;min-height:138px;margin-top:8px;isolation:isolate;contain:layout paint}
-.mcard{grid-area:card;background:#fff;color:#0E1726;padding:12px 14px;font-size:14px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6);will-change:opacity;backface-visibility:hidden}
+.mcard{grid-area:card;background:#fff;color:#0E1726;padding:12px 14px;font-size:14px;box-shadow:0 24px 48px -28px rgba(0,0,0,.6);will-change:opacity;backface-visibility:hidden;contain:paint;transform:translateZ(0)}
+.mcard [data-l],.mcard .mflag em,.mcard .mflag .flag{will-change:opacity,transform}
 .mh{display:flex;justify-content:space-between;align-items:center}
 .mt{font:600 18px 'Arc',sans-serif;font-stretch:110%}
 .lv{font:500 11px 'Arc',sans-serif;padding:3px 8px;box-shadow:inset 0 0 0 1px #CDD3DC;color:#5B6576;transition:background-color .32s var(--e),color .32s var(--e),box-shadow .32s var(--e)}
@@ -846,92 +847,94 @@ function painsUpd(){ return; var w = vis('.pa-w'); if (!w) return; var its = $$(
   ans.forEach(function(x, i){ x.classList.toggle('is-on', i === a); }); }
 [].forEach(function(it){ it.addEventListener('click', function(){ manual.pains = {i: +it.dataset.i, y: scrollY}; all(); track('pain_select', {item: +it.dataset.i + 1}); }); });
 
-// SETUP: scroll only triggers the next step; motion itself is time-based and never rewinds
+// SETUP: scroll only STARTS one smooth timeline; it never scrubs or rewinds
 var usec = $('[data-sec="setup"]'), blr = $('.blr'), stps = Array.from(site.querySelectorAll('.stp'));
-var setupCurrent = -1, setupTarget = -1, setupRunning = false, setupTimers = [];
-function clearSetupTimers(){ setupTimers.forEach(clearTimeout); setupTimers = []; }
+var setupCurrent = 0, setupStarted = false, setupCancelled = false, setupTimers = [], setupSwapTimers = [];
+function clearSetupTimers(){ setupTimers.forEach(clearTimeout); setupTimers=[]; setupSwapTimers.forEach(clearTimeout); setupSwapTimers=[]; }
 function setupLater(fn,ms){ var id=setTimeout(fn,ms); setupTimers.push(id); return id; }
+function swapText(el,value){
+  if(!el || el.textContent===value) return;
+  if(reduce || !el.animate){ el.textContent=value; return; }
+  try{
+    if(el._oidoSwap) el._oidoSwap.cancel();
+    var changed=false;
+    el._oidoSwap=el.animate([
+      {opacity:1,transform:'translate3d(0,0,0)',offset:0},
+      {opacity:0,transform:'translate3d(0,-3px,0)',offset:.44},
+      {opacity:0,transform:'translate3d(0,3px,0)',offset:.46},
+      {opacity:1,transform:'translate3d(0,0,0)',offset:1}
+    ],{duration:360,easing:'cubic-bezier(.22,.75,.18,1)'});
+    var id=setTimeout(function(){ if(!changed){ changed=true; el.textContent=value; } },158);
+    setupSwapTimers.push(id);
+  }catch(e){ el.textContent=value; }
+}
 function setLang(l){
-  var i = {en:0,ca:1,es:2}[l];
+  var i={en:0,ca:1,es:2}[l];
   Array.from(blr.querySelectorAll('[data-l]')).forEach(function(e){
-    if (e.dataset.l.indexOf('|') > 0) e.textContent = e.dataset.l.split('|')[i];
+    if(e.dataset.l.indexOf('|')>0) swapText(e,e.dataset.l.split('|')[i]);
   });
-  Array.from(blr.querySelectorAll('.lg span')).forEach(function(x){ x.classList.toggle('is-on', x.dataset.l === l); });
+  Array.from(blr.querySelectorAll('.lg span')).forEach(function(x){ x.classList.toggle('is-on',x.dataset.l===l); });
 }
 function fixed(on){
   blr.classList.toggle('fixed',on);
-  var r = vis('.mflag'); if (!r) return;
-  var em = $('em',r);
-  em.textContent = on ? em.dataset.ok : em.dataset.bad;
-  $('.flag',r).textContent = on ? '✓ Fixed' : 'Check';
+  var r=vis('.mflag'); if(!r) return;
+  var em=$('em',r), flag=$('.flag',r);
+  swapText(em,on?em.dataset.ok:em.dataset.bad);
+  swapText(flag,on?'✓ Fixed':'Check');
 }
 function paintSetup(step){
-  step = Math.max(0,Math.min(3,step));
+  step=Math.max(0,Math.min(3,step));
+  setupCurrent=step;
   stps.forEach(function(node,k){
     node.setAttribute('aria-pressed',k===step);
-    node.style.opacity = k===step ? '1' : (k<step ? '.76' : '.52');
-    node.style.transform = k===step ? 'translate3d(0,-2px,0)' : 'translate3d(0,0,0)';
-    $('.sb',node).style.transform = 'scaleX(' + (k<=step ? 1 : 0) + ')';
+    node.style.opacity=k===step?'1':(k<step?'.76':'.52');
+    node.style.transform='translateZ(0)';
+    $('.sb',node).style.transform='scaleX('+(k<=step?1:0)+')';
   });
-  var panel = vis('.bpanel') || blr, sides = Array.from(panel.querySelectorAll('.side'));
+  var panel=vis('.bpanel')||blr, sides=Array.from(panel.querySelectorAll('.side'));
   sides.forEach(function(side,k){ side.classList.toggle('is-live',k===step); });
-  blr.dataset.f = step;
+  blr.dataset.f=step;
 
-  var rows = Array.from((vis('.mcard') || blr).querySelectorAll('.mr'));
+  var rows=Array.from((vis('.mcard')||blr).querySelectorAll('.mr'));
   rows.forEach(function(r){ r.classList.toggle('rd',step>0); });
+
   if(step===0){
     fixed(false); setLang('en');
-    rows.forEach(function(r,k){ setupLater(function(){ r.classList.add('rd'); },120+k*95); });
-  } else if(step===1){
+    rows.forEach(function(r,k){ setupLater(function(){ if(!setupCancelled) r.classList.add('rd'); },140+k*90); });
+  }else if(step===1){
     fixed(false); setLang('en');
-    setupLater(function(){ fixed(true); },260);
-  } else if(step===2){
+    setupLater(function(){ if(!setupCancelled) fixed(true); },300);
+  }else if(step===2){
     fixed(true); setLang('en');
-    setupLater(function(){ setLang('ca'); },260);
-    setupLater(function(){ setLang('es'); },700);
-  } else {
+    setupLater(function(){ if(!setupCancelled) setLang('ca'); },320);
+    setupLater(function(){ if(!setupCancelled) setLang('es'); },760);
+  }else{
     fixed(true); setLang('es');
   }
 }
-function runSetupQueue(){
-  if(setupRunning || setupCurrent>=setupTarget) return;
-  setupRunning = true;
-  var next = setupCurrent + 1;
+function startSetup(){
+  if(setupStarted) return;
+  setupStarted=true; setupCancelled=false;
   clearSetupTimers();
-  requestAnimationFrame(function(){
-    paintSetup(next);
-    setupCurrent = next;
-    setupLater(function(){
-      setupRunning = false;
-      if(setupCurrent<setupTarget) runSetupQueue();
-    },640);
-  });
+  paintSetup(0);
+  if(reduce){ paintSetup(3); return; }
+  setupLater(function(){ if(!setupCancelled) paintSetup(1); },980);
+  setupLater(function(){ if(!setupCancelled) paintSetup(2); },1960);
+  setupLater(function(){ if(!setupCancelled) paintSetup(3); },3040);
 }
 function setupUpd(){
-  if(reduce){
-    setupTarget = 3;
-    if(setupCurrent!==3){ clearSetupTimers(); setupCurrent=3; paintSetup(3); }
-    return;
-  }
-  var p = prog(usec);
-  // Deliberately use thresholds: scroll is the trigger, not the animation timeline.
-  var wanted = p < .08 ? 0 : p < .34 ? 1 : p < .60 ? 2 : 3;
-  var manualPick = manual.setup && Math.abs(scrollY-manual.setup.y)<Math.max(140,innerHeight*.3) ? manual.setup.i : -1;
-  if(manualPick>=0) wanted = manualPick;
-  if(wanted>setupTarget) setupTarget=wanted;
-  if(setupCurrent<0){ setupCurrent=0; paintSetup(0); }
-  runSetupQueue();
+  if(setupStarted) return;
+  var r=usec.getBoundingClientRect();
+  // Trigger once when the scene is comfortably entering the viewport.
+  if(r.top < innerHeight*.72 && r.bottom > 0) startSetup();
 }
 stps.forEach(function(step,k){
   step.addEventListener('click',function(){
-    manual.setup = {i:k,y:scrollY};
-    if(k>setupTarget) setupTarget=k;
-    if(k<=setupCurrent){
-      clearSetupTimers(); setupCurrent=k; setupTarget=Math.max(setupTarget,k); paintSetup(k);
-    } else runSetupQueue();
+    setupStarted=true; setupCancelled=true; clearSetupTimers(); paintSetup(k);
     track('setup_step',{step:k+1});
   });
 });
+paintSetup(0);
 
 // MODULES: the tags fall into a pile
 var tags = Array.prototype.slice.call(site.querySelectorAll('.tag')), pile = $('.pile');
