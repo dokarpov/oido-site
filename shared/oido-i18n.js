@@ -1,8 +1,9 @@
 (() => {
   'use strict';
 
-  const VERSION = '2026-10-11.7';
+  const VERSION = '2026-10-12.1';
   const KEY = 'oido.locale';
+  const MODE_KEY = 'oido.locale.mode';
   const GOOGLE_SCRIPT = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
   const RTL = new Set(['ar','fa','he','ur']);
   const LANGUAGES = [
@@ -20,6 +21,14 @@
   ];
   const SUPPORTED = new Set(LANGUAGES.slice(1).map(([code]) => code));
   const GOOGLE_CODE = {he:'iw', zh:'zh-CN', fil:'tl'};
+  const COUNTRY_LANGUAGE = {
+    ES:'es',AD:'ca',PT:'pt',FR:'fr',DE:'de',AT:'de',IT:'it',PL:'pl',
+    NL:'nl',BE:'nl',CZ:'cs',SK:'sk',RO:'ro',HU:'hu',GR:'el',SE:'sv',
+    DK:'da',NO:'no',FI:'fi',RU:'ru',UA:'uk',TR:'tr',IL:'he',CN:'zh',
+    JP:'ja',KR:'ko',IN:'hi',BD:'bn',ID:'id',MY:'ms',VN:'vi',TH:'th',
+    BG:'bg',HR:'hr',RS:'sr',SI:'sl',EE:'et',LV:'lv',LT:'lt',IS:'is',
+    IE:'en',GB:'en',US:'en',CA:'en',AU:'en',NZ:'en',ZA:'en'
+  };
   const EDGE_STATIC_HOST = /(^|\.)github\.io$/i.test(location.hostname);
   const UI = {
     en:{menu:'Menu',language:'Language',automatic:'Automatic',manual:'Manual',theme:'Switch light / dark'},
@@ -74,6 +83,10 @@
 
   function storedLocale() {
     try {
+      // Only an explicit manual choice may override automatic detection.
+      // Older builds stored detected/test languages as if they were preferences;
+      // ignore those legacy values so a stale "pl" cannot keep winning forever.
+      if (localStorage.getItem(MODE_KEY) !== 'manual') return null;
       const v = localStorage.getItem(KEY);
       return v && v !== 'auto' ? supportedBase(v) : null;
     } catch { return null; }
@@ -85,7 +98,26 @@
       const b = base(lang);
       if (SUPPORTED.has(b)) return b;
     }
-    return 'en';
+    return null;
+  }
+
+  async function publicIpLocale() {
+    if (!EDGE_STATIC_HOST) return null;
+    try {
+      const ctl = new AbortController();
+      const timer = setTimeout(() => ctl.abort(), 1100);
+      const res = await fetch('https://ipapi.co/country/', {
+        signal:ctl.signal,
+        credentials:'omit',
+        referrerPolicy:'no-referrer',
+        headers:{accept:'text/plain'}
+      });
+      clearTimeout(timer);
+      if (!res.ok) return null;
+      const country = String(await res.text()).trim().toUpperCase();
+      const lang = COUNTRY_LANGUAGE[country];
+      return lang && SUPPORTED.has(lang) ? lang : null;
+    } catch { return null; }
   }
 
   async function edgeLocale() {
@@ -108,14 +140,20 @@
   async function chooseLocale() {
     const explicit = explicitLocale();
     if (explicit) {
-      try { localStorage.setItem(KEY, explicit); } catch {}
+      try {
+        localStorage.setItem(KEY, explicit);
+        localStorage.setItem(MODE_KEY, 'manual');
+      } catch {}
       return explicit;
     }
     const forced = storedLocale();
     if (forced) return forced;
+
+    // Automatic mode: device/browser preference first, then network/IP country
+    // only as a fallback. We never access or store a Wi-Fi SSID (browsers do not expose it).
     const browser = browserLocale();
-    if (browser && browser !== 'en') return browser;
-    return (await edgeLocale()) || browser || 'en';
+    if (browser) return browser;
+    return (await edgeLocale()) || (await publicIpLocale()) || 'en';
   }
 
   function googleCode(locale) {
@@ -309,8 +347,13 @@
     select.addEventListener('change', () => {
       const chosen = select.value;
       try {
-        if (chosen === 'auto') localStorage.removeItem(KEY);
-        else localStorage.setItem(KEY, chosen);
+        if (chosen === 'auto') {
+          localStorage.removeItem(KEY);
+          localStorage.removeItem(MODE_KEY);
+        } else {
+          localStorage.setItem(KEY, chosen);
+          localStorage.setItem(MODE_KEY, 'manual');
+        }
       } catch {}
 
       if (chosen === 'auto') {
@@ -545,7 +588,13 @@
   // On GitHub Pages there is no server-side translation runtime. Start the
   // browser translator as early as possible so a selected/device language
   // does not sit in English for several seconds before translation begins.
+  // Remove stale cookies/preferences from earlier builds before Google Translate
+  // gets a chance to apply the wrong language during first paint.
+  try {
+    if (!localStorage.getItem(MODE_KEY) && localStorage.getItem(KEY)) localStorage.removeItem(KEY);
+  } catch {}
   const eagerLocale = explicitLocale() || storedLocale() || browserLocale();
+  if (!eagerLocale || eagerLocale === 'en') clearGoogleCookie();
   if (EDGE_STATIC_HOST && eagerLocale && eagerLocale !== 'en') {
     setGoogleCookie(eagerLocale);
     loadGoogleTranslate().catch(() => {});
