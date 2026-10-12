@@ -837,7 +837,7 @@ function heroUpd(){ var p = reduce ? 1 : forward('hero', clamp(.34 + scrollY / (
     s.style.opacity = a > 0 ? 1 : 0; s.style.transform = 'rotate(-6deg) scale(' + (1.9 - .9 * e).toFixed(3) + ')'; s.style.opacity = (Math.min(1, a * 2.2)).toFixed(3); }); }
 
 // SCAN: the list is read line by line into the storefront
-var ssec = $('[data-sec="scan"]'), sst = $('.sc-steps li');
+var ssec = $('[data-sec="scan"]'), sst = Array.prototype.slice.call(site.querySelectorAll('.sc-steps li'));
 var scanStarted=false, scanP=0, scanT0=0, scanRaf=0;
 function startScan(){
   if(scanStarted) return;
