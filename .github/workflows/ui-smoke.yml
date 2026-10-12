@@ -47,6 +47,8 @@ jobs:
           echo $! > /tmp/oido-http.pid
           sleep 2
       - run: npm run test:ui
+      - name: Stress-test every supported locale across both sites
+        run: node tests/i18n-layout-smoke.mjs
       - name: Verify fixed receipts and scroll-idle motion
         run: node tests/motion-smoke.mjs
       - name: Verify custom cursor, badge scattering, and active scroll scenes
