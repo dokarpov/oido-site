@@ -950,16 +950,12 @@ function ctaUpd(){ if (!big) return; var p = reduce ? 1 : forward('cta', seen(bi
 
 var ticking = false;
 function schedule(){ if (!ticking){ ticking = true; requestAnimationFrame(all); } }
-var oidoScrollIdleTimer=0;
-function scheduleAfterScroll(){
-  if(reduce){schedule();return;}
-  clearTimeout(oidoScrollIdleTimer);
-  oidoScrollIdleTimer=setTimeout(schedule,170);
-}
+/* Pinned product scenes MUST update on each scroll frame. Debouncing broke the
+   narrative: only separate section entrances should wait for scroll idle. */
 function all(){ ticking = false; motionSettling = false; heroUpd(); scanUpd(); painsUpd(); setupUpd(); modsUpd(); ctaUpd();
   site.classList.toggle('nofloat', document.getElementById('try').getBoundingClientRect().top < innerHeight - 80);
   if (motionSettling) schedule(); }
-addEventListener('scroll', scheduleAfterScroll, {passive: true});
+addEventListener('scroll', schedule, {passive: true});
 addEventListener('resize', function(){ layout(); schedule(); });
 setInd(ind);
 
@@ -1055,12 +1051,9 @@ function upd(){ painTick = false; var w = $('.i-' + site.dataset.ind + '.pz-w');
   }
   if (!reduce && painMotion.current < painMotion.target - .0008) painSchedule(); }
 Array.prototype.slice.call(site.querySelectorAll('.pz')).forEach(function(b){ b.addEventListener('click', function(){ man = {i: +b.dataset.i, q: .62, y: scrollY}; upd(); track('pain_select', {item: +b.dataset.i + 1}); }); });
-var oidoPainIdleTimer=0;
-addEventListener('scroll',function(){
-  if(reduce){painSchedule();return;}
-  clearTimeout(oidoPainIdleTimer);
-  oidoPainIdleTimer=setTimeout(painSchedule,170);
-},{passive:true});
+/* Same rule for interactive storyboards: progress continuously, never lag
+   behind the reader's scroll position. */
+addEventListener('scroll',painSchedule,{passive:true});
 addEventListener('resize', painSchedule); Array.prototype.slice.call(site.querySelectorAll('button[data-ind]')).forEach(function(b){ b.addEventListener('click', function(){ lastKey = ''; man = null; setTimeout(painSchedule, 0); }); }); upd();
 
 })();
