@@ -620,4 +620,39 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   }
   await writeFile('artifacts/ui/deck-component-reference.json',JSON.stringify(extracted,null,2));
 }
+
+// Export only UI component fragments and their matched CSS for deck, not full site.
+{
+ const {writeFile,readFile}=await import('node:fs/promises');
+ const raw=await readFile('index.html','utf8');
+ const faces=[...raw.matchAll(/@font-face\s*\{[^}]+\}/g)].map(x=>x[0]).filter(x=>/font-family:'(?:FD|FS)'/.test(x)).join('\n');
+ await writeFile('artifacts/ui/oido-display-body-fonts.css',faces);
+ const ctx=await browser.newContext({viewport:{width:1440,height:1000},locale:'en-GB'});
+ const p=await ctx.newPage();
+ await p.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+ const out=await p.evaluate(()=>{
+   const include=/(\.site(?:[, .:{>#]|$)|\.sc-|\.scan|\.pp-|\.pp\b|\.pz-|\.pains|\.dv-|\.dv\b|\.w-scan|\.w-pz|\.blr\b|\.bpanel|\.su-|\.mcard|\.mh\b|\.mr\b|\.mtabs|\.lg\b|\.flag\b|\.mflag|\.side\b|\.i-rest|\.i-cafe|\.i-salon|\.i-studio|\.dy-|\.day\b|\.sbar\b|\.pin\b|\.pinin|\.wrap\b|\.stp\b|\.stps|\.sb\b|\.scn\b)/;
+   const styles=[];
+   function walk(rules,media=''){
+     for(const rule of rules||[]){
+       if(rule.type===1){
+         if(include.test(rule.selectorText||''))styles.push(media?(media+'{'+rule.cssText+'}'):rule.cssText);
+       } else if(rule.cssRules){
+         const newMedia=rule.conditionText?'@media '+rule.conditionText:media;
+         walk(rule.cssRules,newMedia);
+       }
+     }
+   }
+   for(const sheet of document.styleSheets) try{walk(sheet.cssRules)}catch(e){}
+   const ids=['.sc-stage','.pz-w','.blr','.dy-g','.dy-v','.pile','.sc-g','.su-g'];
+   const components={};
+   for(const name of ids){const el=document.querySelector(name);if(el)components[name]=el.outerHTML}
+   const indControls=[...document.querySelectorAll('[data-ind]')].slice(0,15).map(x=>x.outerHTML.slice(0,400));
+   return {styles:styles.join('\n'),components,controls:indControls};
+ });
+ await writeFile('artifacts/ui/oido-component-css.css',out.styles);
+ await writeFile('artifacts/ui/oido-component-markup.json',JSON.stringify(out.components));
+ await writeFile('artifacts/ui/oido-sector-controls.json',JSON.stringify(out.controls));
+ await ctx.close();
+}
 await browser.close();
