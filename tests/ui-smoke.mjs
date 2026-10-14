@@ -500,7 +500,7 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
 }
 
 
-// Completed one-way scenes must not become scroll traps on the way back up.
+// Scroll-controlled sticky scenes must preserve native movement in both directions.
 {
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
   const page=await context.newPage();
@@ -524,10 +524,10 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
       const pin=el.querySelector(':scope > .pinin');
       return {height:getComputedStyle(el).height,pinPosition:getComputedStyle(pin).position};
     },selector);
-    if(style.pinPosition==='sticky') throw new Error(selector+' is still sticky: '+JSON.stringify(style));
+    if(style.pinPosition!=='sticky') throw new Error(selector+' lost its scroll-scrubbed sticky stage: '+JSON.stringify(style));
   }
 
-  console.log('PASS reverse scrolling remains native through one-way scenes');
+  console.log('PASS native reverse scrolling remains unblocked inside sticky product scenes');
   await context.close();
 }
 
