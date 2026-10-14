@@ -212,8 +212,8 @@ for (const vp of viewports) {
   await page.evaluate(y=>scrollTo(0,y),scanUp);
   await page.waitForTimeout(650);
   const scanB=await snap();
-  if(scanB.scanRows<scanA.scanRows||scanB.scanStep<scanA.scanStep||scanB.beamY+1<scanA.beamY)
-    throw new Error('scan animation rewound on upward scroll: '+JSON.stringify({scanA,scanB}));
+  if(scanA.scanRows<=scanB.scanRows||scanA.beamY<=scanB.beamY+1)
+    throw new Error('scan must advance on scroll down and rewind on scroll up: '+JSON.stringify({scanA,scanB}));
 
   const setupDown=await sceneY('[data-sec="setup"]',.78);
   await page.evaluate(y=>scrollTo(0,y),setupDown);
@@ -234,8 +234,8 @@ for (const vp of viewports) {
   await page.evaluate(y=>scrollTo(0,y),painUp);
   await page.waitForTimeout(650);
   const painB=await snap();
-  if(painB.painStep<painA.painStep)
-    throw new Error('pain scenario rewound on upward scroll: '+JSON.stringify({painA,painB}));
+  if(painA.painStep<=painB.painStep)
+    throw new Error('pain scene must follow scroll position in both directions: '+JSON.stringify({painA,painB}));
 
   const motionCss=await page.evaluate(()=>({
     stamp:getComputedStyle(document.querySelector('.stamp')).transitionDuration,
@@ -253,7 +253,7 @@ for (const vp of viewports) {
   for(const c of motionCss.containers)
     if(c.isolation!=='isolate'||c.position==='static') throw new Error('motion surface is not locally contained: '+JSON.stringify(c));
 
-  console.log('PASS forward-only contained motion');
+  console.log('PASS scroll-scrubbed scan/pains, one-way setup, contained motion');
   await context.close();
 }
 
@@ -332,7 +332,7 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
 }
 
 
-// The four numbered pain scenarios also stay in one stage and crossfade instead of display-jumping.
+// The four numbered pain scenarios follow the scroll position, crossfading without display-jumping.
 for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   const context=await browser.newContext({viewport,locale:'en-GB'});
   const page=await context.newPage();
@@ -372,9 +372,8 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   };
 
   const before=await go(.16);
-  // This is a one-shot, time-driven transition. A fixed scroll fraction and a
-  // second 1100ms sleep can skip its narrow overlap window. Sample the actual
-  // rendered blend without changing the site's motion or its scroll behavior.
+  // This crossfade is scroll-driven, so it must stay at the same blend
+  // fraction while the reader pauses, and reverse on upward scroll.
   let blend=null;
   for(let attempt=0;attempt<80;attempt++){
     const candidate=await go(.245,0);
@@ -383,6 +382,9 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
     await page.waitForTimeout(50);
   }
   if(!blend) throw new Error('pain crossfade not observed within the animation window at '+viewport.width);
+  const still=await go(.245,0);
+  if(Math.abs(still.scenes[0].opacity-blend.scenes[0].opacity)>.06)
+    throw new Error('pain blend advanced without scroll input at '+viewport.width+': '+JSON.stringify({blend,still}));
   const after=await go(.33);
   if(blend.scenes.some(x=>x.display==='none'))
     throw new Error('pain scene still display-switches at '+viewport.width+': '+JSON.stringify(blend));
@@ -498,7 +500,7 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
 }
 
 
-// Completed one-way scenes must not become scroll traps on the way back up.
+// Scroll-controlled sticky scenes must preserve native movement in both directions.
 {
   const context=await browser.newContext({viewport:{width:390,height:844},locale:'en-GB'});
   const page=await context.newPage();
@@ -522,10 +524,10 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
       const pin=el.querySelector(':scope > .pinin');
       return {height:getComputedStyle(el).height,pinPosition:getComputedStyle(pin).position};
     },selector);
-    if(style.pinPosition==='sticky') throw new Error(selector+' is still sticky: '+JSON.stringify(style));
+    if(style.pinPosition!=='sticky') throw new Error(selector+' lost its scroll-scrubbed sticky stage: '+JSON.stringify(style));
   }
 
-  console.log('PASS reverse scrolling remains native through one-way scenes');
+  console.log('PASS native reverse scrolling remains unblocked inside sticky product scenes');
   await context.close();
 }
 

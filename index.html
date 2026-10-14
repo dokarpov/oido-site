@@ -1,14 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
-/* Scroll-triggered motion must never trap navigation. Scenes stay in normal flow;
-   entering them starts a one-way timeline, while the page itself scrolls normally both ways. */
-.site:not(.static) .scan,.site:not(.static) .pains{height:auto!important}
-.site:not(.static) .scan>.pinin,.site:not(.static) .pains>.pinin{
-  position:relative!important;top:auto!important;height:auto!important;min-height:0!important;
-  justify-content:flex-start!important;padding-top:96px!important;padding-bottom:96px!important
-}
-@media (min-width:1000px){
-  .site:not(.static) .scan>.pinin,.site:not(.static) .pains>.pinin{padding-top:144px!important;padding-bottom:144px!important}
-}
+/* The scan and pain demos are native-scroll scrubbed scenes.
+   Their existing sticky frames keep the illustrations visible while scrolling.
+   Reverse scroll remains native and returns to earlier frames. */
 </style><style id="oido-simple-enquiry">
 .try{scroll-margin-top:calc(76px + env(safe-area-inset-top,0px))}
 .lead-layout{grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);align-items:start;gap:clamp(24px,5vw,88px)}
@@ -838,21 +831,8 @@ function heroUpd(){ var p = reduce ? 1 : forward('hero', clamp(.34 + scrollY / (
 
 // SCAN: the list is read line by line into the storefront
 var ssec = $('[data-sec="scan"]'), sst = Array.prototype.slice.call(site.querySelectorAll('.sc-steps li'));
-var scanStarted=false, scanP=0, scanT0=0, scanRaf=0;
-function startScan(){
-  if(scanStarted) return;
-  scanStarted=true; scanT0=performance.now();
-  if(reduce){ scanP=1; schedule(); return; }
-  function tick(now){
-    scanP=clamp((now-scanT0)/2400);
-    schedule();
-    if(scanP<1) scanRaf=requestAnimationFrame(tick);
-  }
-  scanRaf=requestAnimationFrame(tick);
-}
 function scanUpd(){ var s = vis('.sc-stage'); if (!s) return;
-  if(!scanStarted){ var sr=ssec.getBoundingClientRect(); if(sr.top<innerHeight*.82&&sr.bottom>0) startScan(); }
-  var p = reduce ? 1 : scanP;
+  var p = reduce ? 1 : prog(ssec);
   var lines = $$('.pp p:not(.pt)', s), rows = $$('.u-row', s).concat($$('.u-sug', s)), r = clamp((p - .12) / .62), n = Math.round(r * lines.length);
   lines.forEach(function(l, k){ l.classList.toggle('is-read', k < n); }); rows.forEach(function(x, k){ x.classList.toggle('is-in', k < n || n >= lines.length); });
   var b = $('.beam', s), h = $('.pp', s).offsetHeight; b.style.opacity = (r > 0 && r < 1) ? 1 : 0; b.style.transform = 'translateY(' + (r * h).toFixed(0) + 'px)';
@@ -997,19 +977,8 @@ function track(n, p){ window.dataLayer = window.dataLayer || []; window.dataLaye
 function prog(sec){ var hd = wide() ? 69 : 65, r = sec.getBoundingClientRect(); return clamp((hd - r.top) / Math.max(1, r.height - innerHeight + hd)); }
 // ---- pains: a scripted scenario per pain; the tap is shown before the next screen ----
 var sec = $('[data-sec="pains"]'), man = null, lastKey = '';
-var painMotion = {current:0}, painTick = false, painStarted=false, painT0=0, painRaf=0;
+var painTick = false;
 function painSchedule(){ if (!painTick){ painTick = true; requestAnimationFrame(upd); } }
-function startPain(){
-  if(painStarted) return;
-  painStarted=true; painT0=performance.now();
-  if(reduce){ painMotion.current=.99; painSchedule(); return; }
-  function tick(now){
-    painMotion.current=Math.min(.99,(now-painT0)/5600);
-    painSchedule();
-    if(painMotion.current<.99) painRaf=requestAnimationFrame(tick);
-  }
-  painRaf=requestAnimationFrame(tick);
-}
 function cardHTML(w, i){ var b = Array.from(w.querySelectorAll('.pz'))[i]; return '<div class="pz-card" data-card="' + i + '" data-s="0"><span class="tqw"><span class="tq">' + $('.tq', b).innerHTML + '</span></span><div class="ans2"><b>' + $('.pz-a b', b).innerHTML + '</b><span>' + $('.pz-a span', b).innerHTML + '</span></div><span class="stp2">OÍDO ✓</span></div>'; }
 function ensureCur(w){
   var c = $('.pz-cur', w);
@@ -1018,8 +987,7 @@ function ensureCur(w){
   return c;
 }
 function upd(){ painTick = false; var w = $('.i-' + site.dataset.ind + '.pz-w'); if (!w) return;
-  if(!painStarted){ var rr=sec.getBoundingClientRect(); if(rr.top<innerHeight*.82&&rr.bottom>0) startPain(); }
-  var p = reduce ? .99 : painMotion.current, q0 = clamp((p - .04) / .92) * 4;
+  var p = reduce ? .99 : prog(sec), q0 = clamp((p - .04) / .92) * 4;
   var base = Math.min(3, Math.floor(q0)), q = base === 3 ? clamp(q0 - 3) : q0 - base, manualStep = false;
   if (man && Math.abs(scrollY - man.y) < Math.max(160, innerHeight * .35)){ base = man.i; q = man.q; manualStep = true; } else man = null;
   var blendRaw = (!manualStep && base < 3) ? clamp((q - .78) / .22) : 0, blend = 1 - Math.pow(1 - blendRaw, 3);
@@ -1079,7 +1047,7 @@ function upd(){ painTick = false; var w = $('.i-' + site.dataset.ind + '.pz-w');
   }
 }
 Array.prototype.slice.call(site.querySelectorAll('.pz')).forEach(function(b){ b.addEventListener('click', function(){ man = {i: +b.dataset.i, q: .62, y: scrollY}; upd(); track('pain_select', {item: +b.dataset.i + 1}); }); });
-/* Scroll only detects first entry; the timeline then runs independently. */
+/* Each scroll update renders the corresponding product frame; scrolling back reverses the story. */
 addEventListener('scroll',painSchedule,{passive:true});
 addEventListener('resize', painSchedule); Array.prototype.slice.call(site.querySelectorAll('button[data-ind]')).forEach(function(b){ b.addEventListener('click', function(){ lastKey = ''; man = null; setTimeout(painSchedule, 0); }); }); upd();
 
