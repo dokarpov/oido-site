@@ -606,4 +606,85 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   await context.close();
 }
 
+
+// Review-only export of the on-page scan and storefront components for the deck.
+{
+  const {readFile,writeFile}=await import('node:fs/promises');
+  const src=await readFile('index.html','utf8');
+  const sections=['scan','pains','setup','day'];
+  const extracted={};
+  for(const name of sections){
+    const marker='data-sec="'+name+'"';
+    const at=src.indexOf(marker);
+    extracted[name]=at<0?'':src.slice(Math.max(0,at-120),at+3600);
+  }
+  await writeFile('artifacts/ui/deck-component-reference.json',JSON.stringify(extracted,null,2));
+}
+
+// Export only UI component fragments and their matched CSS for deck, not full site.
+{
+ const {writeFile,readFile}=await import('node:fs/promises');
+ const raw=await readFile('index.html','utf8');
+ const faces=[...raw.matchAll(/@font-face\s*\{[^}]+\}/g)].map(x=>x[0]).filter(x=>/font-family:'(?:FD|FS)'/.test(x)).join('\n');
+ await writeFile('artifacts/ui/oido-display-body-fonts.css',faces);
+ const ctx=await browser.newContext({viewport:{width:1440,height:1000},locale:'en-GB'});
+ const p=await ctx.newPage();
+ await p.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+ const out=await p.evaluate(()=>{
+   const include=/(\.site(?:[, .:{>#]|$)|\.sc-|\.scan|\.pp-|\.pp\b|\.pz-|\.pains|\.dv-|\.dv\b|\.w-scan|\.w-pz|\.blr\b|\.bpanel|\.su-|\.mcard|\.mh\b|\.mr\b|\.mtabs|\.lg\b|\.flag\b|\.mflag|\.side\b|\.i-rest|\.i-cafe|\.i-salon|\.i-studio|\.dy-|\.day\b|\.sbar\b|\.pin\b|\.pinin|\.wrap\b|\.stp\b|\.stps|\.sb\b|\.scn\b)/;
+   const styles=[];
+   function walk(rules,media=''){
+     for(const rule of rules||[]){
+       if(rule.type===1){
+         if(include.test(rule.selectorText||''))styles.push(media?(media+'{'+rule.cssText+'}'):rule.cssText);
+       } else if(rule.cssRules){
+         const newMedia=rule.conditionText?'@media '+rule.conditionText:media;
+         walk(rule.cssRules,newMedia);
+       }
+     }
+   }
+   for(const sheet of document.styleSheets) try{walk(sheet.cssRules)}catch(e){}
+   const ids=['.sc-stage','.pz-w','.blr','.dy-g','.dy-v','.pile','.sc-g','.su-g'];
+   const components={};
+   for(const name of ids){const el=document.querySelector(name);if(el)components[name]=el.outerHTML}
+   const indControls=[...document.querySelectorAll('[data-ind]')].slice(0,15).map(x=>x.outerHTML.slice(0,400));
+   return {styles:styles.join('\n'),components,controls:indControls};
+ });
+ await writeFile('artifacts/ui/oido-component-css.css',out.styles);
+ await writeFile('artifacts/ui/oido-component-markup.json',JSON.stringify(out.components));
+ await writeFile('artifacts/ui/oido-sector-controls.json',JSON.stringify(out.controls));
+ await ctx.close();
+}
+
+// A narrowly scoped stylesheet capture: declarations used by the exported product components.
+{
+ const {writeFile,readFile}=await import('node:fs/promises');
+ const src=await readFile('index.html','utf8');
+ const p=await browser.newPage({viewport:{width:1440,height:1000}});
+ await p.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+ const css=await p.evaluate(()=>{
+   const roots=['.sc-stage','.pz-w','.blr','.dy-v','.pile','.sc-g','.su-g'];
+   const classes=new Set(['site','wrap','pin','pinin','h-l','iv']);
+   for(const q of roots){
+     const root=document.querySelector(q);if(!root)continue;
+     for(const e of [root,...root.querySelectorAll('*')]){
+       for(const c of e.classList)classes.add(c);
+     }
+   }
+   const out=[];
+   function scan(rules,media=''){
+     for(const r of rules||[]){
+       if(r.type===1){
+         const cs=(r.selectorText||'').match(/\.[\w-]+/g)||[];
+         const keep=cs.some(c=>classes.has(c.slice(1)))||/^(body|html|:root|button|svg|small|img)(?:\s|,|:|\{)/.test(r.selectorText||'');
+         if(keep)out.push(media?(media+'{'+r.cssText+'}'):r.cssText);
+       }else if(r.cssRules)scan(r.cssRules,r.conditionText?'@media '+r.conditionText:media);
+     }
+   }
+   for(const sh of document.styleSheets)try{scan(sh.cssRules)}catch(e){}
+   return out.join('\n');
+ });
+ await writeFile('artifacts/ui/oido-complete-component-styles.css',css);
+ await p.close();
+}
 await browser.close();
