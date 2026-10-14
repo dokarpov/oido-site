@@ -606,4 +606,51 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   await context.close();
 }
 
+
+// Temporary non-production deck asset capture. Do not merge this branch.
+{
+  const ctx=await browser.newContext({viewport:{width:1440,height:900},locale:'en-GB',deviceScaleFactor:1.4});
+  const p=await ctx.newPage();
+  await p.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+  await p.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
+  const setSector=async sector=>p.evaluate(x=>{
+    const b=[...document.querySelectorAll('button[data-ind]')].find(b=>b.dataset.ind===x);
+    if(b) b.click();
+  },sector);
+  const go=async (section,fraction=.32)=>p.evaluate(({section,fraction})=>{
+    const sec=document.querySelector('[data-sec="'+section+'"]')||document.getElementById(section);
+    if(!sec) return false;
+    const r=sec.getBoundingClientRect(),start=scrollY+r.top,range=Math.max(1,r.height-innerHeight+69);
+    scrollTo(0,Math.max(0,start-69+range*fraction));
+    return true;
+  },{section,fraction});
+  const cap=async (name,section,fraction)=>{
+    await go(section,fraction);
+    await p.waitForTimeout(700);
+    await p.screenshot({path:'artifacts/ui/deck-'+name+'.png',fullPage:false,animations:'disabled'});
+  };
+  for(const sector of ['rest','cafe','salon','studio']){
+    await setSector(sector);
+    await cap(sector+'-scan-input','scan',.11);
+    await cap(sector+'-scan-storefront','scan',.87);
+    await cap(sector+'-pains-order','pains',.16);
+    await cap(sector+'-pains-language','pains',.39);
+    await cap(sector+'-pains-extras','pains',.64);
+    await cap(sector+'-pains-feedback','pains',.89);
+    await go('setup',.2);
+    await p.evaluate(()=>{const b=document.querySelector('[data-sec="setup"] .stp[data-st="2"]');b&&b.click();});
+    await p.waitForTimeout(500);
+    await p.screenshot({path:'artifacts/ui/deck-'+sector+'-setup-translate.png',fullPage:false,animations:'disabled'});
+  }
+  await setSector('rest');
+  for(const [name,section,fraction] of [
+    ['day-overview','day',.22],
+    ['module-stack','mods',.45],
+    ['pricing-plans','plans',.4],
+    ['hero-more','how',0],
+    ['setup-go-live','setup',.22]
+  ]) await cap(name,section,fraction);
+  await ctx.close();
+}
+
 await browser.close();
