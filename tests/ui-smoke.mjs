@@ -655,4 +655,36 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
  await writeFile('artifacts/ui/oido-sector-controls.json',JSON.stringify(out.controls));
  await ctx.close();
 }
+
+// A narrowly scoped stylesheet capture: declarations used by the exported product components.
+{
+ const {writeFile,readFile}=await import('node:fs/promises');
+ const src=await readFile('index.html','utf8');
+ const p=await browser.newPage({viewport:{width:1440,height:1000}});
+ await p.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
+ const css=await p.evaluate(()=>{
+   const roots=['.sc-stage','.pz-w','.blr','.dy-v','.pile','.sc-g','.su-g'];
+   const classes=new Set(['site','wrap','pin','pinin','h-l','iv']);
+   for(const q of roots){
+     const root=document.querySelector(q);if(!root)continue;
+     for(const e of [root,...root.querySelectorAll('*')]){
+       for(const c of e.classList)classes.add(c);
+     }
+   }
+   const out=[];
+   function scan(rules,media=''){
+     for(const r of rules||[]){
+       if(r.type===1){
+         const cs=(r.selectorText||'').match(/\.[\w-]+/g)||[];
+         const keep=cs.some(c=>classes.has(c.slice(1)))||/^(body|html|:root|button|svg|small|img)(?:\s|,|:|\{)/.test(r.selectorText||'');
+         if(keep)out.push(media?(media+'{'+r.cssText+'}'):r.cssText);
+       }else if(r.cssRules)scan(r.cssRules,r.conditionText?'@media '+r.conditionText:media);
+     }
+   }
+   for(const sh of document.styleSheets)try{scan(sh.cssRules)}catch(e){}
+   return out.join('\n');
+ });
+ await writeFile('artifacts/ui/oido-complete-component-styles.css',css);
+ await p.close();
+}
 await browser.close();
