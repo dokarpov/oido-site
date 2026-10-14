@@ -339,7 +339,7 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   await page.goto(base+'/index.html?lang=en',{waitUntil:'networkidle'});
   await page.evaluate(()=>{document.documentElement.style.scrollBehavior='auto';});
 
-  const go=async fraction=>{
+  const go=async (fraction, waitMs=1100)=>{
     const y=await page.evaluate(({fraction,width})=>{
       const sec=document.querySelector('[data-sec="pains"]');
       const r=sec.getBoundingClientRect();
@@ -349,7 +349,7 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
       return Math.max(0,top-hd+range*fraction);
     },{fraction,width:viewport.width});
     await page.evaluate(y=>scrollTo(0,y),y);
-    await page.waitForTimeout(1100);
+    if(waitMs) await page.waitForTimeout(waitMs);
     return page.evaluate(()=>{
       const site=document.querySelector('.site');
       const w=document.querySelector('.i-'+site.dataset.ind+'.pz-w');
@@ -372,7 +372,17 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   };
 
   const before=await go(.16);
-  const blend=await go(.245);
+  // This is a one-shot, time-driven transition. A fixed scroll fraction and a
+  // second 1100ms sleep can skip its narrow overlap window. Sample the actual
+  // rendered blend without changing the site's motion or its scroll behavior.
+  let blend=null;
+  for(let attempt=0;attempt<80;attempt++){
+    const candidate=await go(.245,0);
+    const overlaps=items=>items.filter(x=>x.visibility==='visible'&&x.opacity>.03).length>=2;
+    if(overlaps(candidate.scenes)&&overlaps(candidate.cards)){blend=candidate;break;}
+    await page.waitForTimeout(50);
+  }
+  if(!blend) throw new Error('pain crossfade not observed within the animation window at '+viewport.width);
   const after=await go(.33);
   if(blend.scenes.some(x=>x.display==='none'))
     throw new Error('pain scene still display-switches at '+viewport.width+': '+JSON.stringify(blend));
