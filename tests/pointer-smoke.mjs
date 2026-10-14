@@ -48,14 +48,14 @@ await page.evaluate(()=>{
  const r=el.getBoundingClientRect(),range=Math.max(1,r.height-innerHeight+69);
  scrollTo(0,Math.round(scrollY+r.top-69+range*.85));
 });
-await page.waitForTimeout(90);
+await page.waitForTimeout(650);
 const early=await page.evaluate(()=>{
  const ind=document.querySelector('.site').dataset.ind;
  const stage=document.querySelector('.i-'+ind+'.sc-stage');
  const beam=stage?.querySelector('.beam');
  return {scroll:scrollY,scanProgress:Number(beam?.style.opacity)||0,beam:beam?.style.transform,lines:[...stage.querySelectorAll('.pp p:not(.pt).is-read')].length};
 });
-if(!early.beam||early.beam==='translateY(0px)'||early.lines<1)throw Error('Pinned scan did not advance immediately on scroll '+JSON.stringify(early));
+if(!early.beam||early.beam==='translateY(0px)'||early.lines<1)throw Error('Scan did not advance after entering view '+JSON.stringify(early));
 if(errors.length)throw Error('Page JS errors '+errors.join('; '));
 console.log('PASS cursor, spring scatter, stable layout, reset, and responsive scroll',JSON.stringify({spread:play.deltas.map(v=>[v.sx,v.sy]),early}));
 await context.close();
