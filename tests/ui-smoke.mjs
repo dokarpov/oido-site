@@ -606,4 +606,18 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
   await context.close();
 }
 
+
+// Review-only export of the on-page scan and storefront components for the deck.
+{
+  const {readFile,writeFile}=await import('node:fs/promises');
+  const src=await readFile('index.html','utf8');
+  const sections=['scan','pains','setup','day'];
+  const extracted={};
+  for(const name of sections){
+    const marker='data-sec="'+name+'"';
+    const at=src.indexOf(marker);
+    extracted[name]=at<0?'':src.slice(Math.max(0,at-120),at+3600);
+  }
+  await writeFile('artifacts/ui/deck-component-reference.json',JSON.stringify(extracted,null,2));
+}
 await browser.close();
