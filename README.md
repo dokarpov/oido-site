@@ -6,6 +6,20 @@
 
 **Status:** pre-incorporation, bootstrapped, pre-seed working browser beta. The public website demonstrates a product concept and pilot offering; production payment settlement, paying merchants, GMV, and revenue are **not** being claimed as verified.
 
+## Product case for reviewers
+
+**Role and scope:** Daria Karpova is presented as CPO in the public [investor overview](https://dokarpov.github.io/oido-site/investors/), with responsibility for product strategy, pilot design and merchant evidence. This is a founding product exploration, not a claim of a commercially validated company.
+
+| Product question | Current decision / learning |
+| --- | --- |
+| Which merchant task should become easier? | Turn an existing menu or service list into a multilingual browser storefront and QR/link without replacing the current till or booking tools. |
+| Where should the product intervene? | Merchant reviews uncertain extraction, guest browses and completes illustrative actions, business sees resulting activity. |
+| What trade-off remains open? | A broad commerce proposition needs narrower segment, activation and operating-cost validation before claiming a repeatable business. |
+| What can be inspected? | Live marketing site, investor/product walkthrough, synthetic browser states, implementation and design QA. |
+| What cannot yet be concluded? | Willingness to pay, retained merchant usage, payment conversion, settled GMV or validated unit economics. |
+
+The next product decision should be informed by **observed merchant setup, guest completion, repeated use and accepted payment terms**, not the number of mock screens or feature concepts. See [validation criteria](docs/VALIDATION.md).
+
 ## Public site
 
 - **For businesses:** https://dokarpov.github.io/oido-site/
