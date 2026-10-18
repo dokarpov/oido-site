@@ -17,7 +17,7 @@ try{
   assert.equal(await page.locator('#review-area tbody tr').count(),6);
   assert.equal(await page.locator('#share').isVisible(),true);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'merchant overflow '+size.width);
-  const faces=await page.evaluate(async()=>{await document.fonts.ready;return {title:document.fonts.check('24px FD'),body:document.fonts.check('16px FS')};});
+  const faces=await page.evaluate(async()=>{await document.fonts.ready;await document.fonts.load('600 24px FD');await document.fonts.load('400 16px FS');return {title:document.fonts.check('600 24px FD'),body:document.fonts.check('400 16px FS')};});
   assert.equal(faces.title,true,'website FD font missing '+size.width);
   assert.equal(faces.body,true,'website FS font missing '+size.width);
   await page.screenshot({path:'artifacts/pilot-visual/merchant-'+size.width+'.png',fullPage:true});
