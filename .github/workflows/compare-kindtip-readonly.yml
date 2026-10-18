@@ -1,0 +1,27 @@
+name: Compare existing Diego app and Oído preview safely
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/compare-kindtip-readonly.yml"
+  workflow_dispatch:
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install read-only browser tools
+        run: |
+          npm install --no-save playwright@1.56.0
+          npx playwright install --with-deps chromium
+      - name: Read-only public endpoint and UX inspection
+        run: node tests/compare-kindtip-readonly.mjs
+      - name: Save UI screenshots for manual comparison
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: kindtip-and-oido-readonly-screenshots
+          path: artifacts/compare-kindtip/
