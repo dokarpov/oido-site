@@ -1,0 +1,54 @@
+name: Oído pilot end-to-end
+
+on:
+  pull_request:
+    paths:
+      - "pilot/**"
+      - "functions/api/pilot/**"
+      - "tests/pilot-*.mjs"
+      - ".github/workflows/pilot.yml"
+  workflow_dispatch:
+
+jobs:
+  pilot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Domain and syntax
+        run: |
+          node --check pilot/core.js
+          node --check pilot/merchant.js
+          node --check pilot/guest.js
+          node --check 'functions/api/pilot/[[path]].js'
+          node tests/pilot-unit.mjs
+      - name: Install integration runner
+        run: |
+          npm install --no-save wrangler@4 playwright@1.56.0
+          npx playwright install --with-deps chromium
+      - name: Initialize local D1
+        run: |
+          npx wrangler d1 execute oido-pilot-test --local --config pilot/wrangler.test.toml --persist-to .wrangler/pilot-state --file pilot/schema.sql
+      - name: Start local Pages Functions pilot
+        env:
+          PILOT_ADMIN_TOKEN: ci-pilot-admin-testing-secret-00000000
+        run: |
+          npx wrangler pages dev . --config pilot/wrangler.test.toml --d1 DB=00000000-0000-0000-0000-000000000001 --binding PILOT_ADMIN_TOKEN=$PILOT_ADMIN_TOKEN --persist-to .wrangler/pilot-state --port 8788 >/tmp/oido-pilot.log 2>&1 &
+          echo $! > /tmp/oido-pilot.pid
+          for i in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:8788/api/pilot/health | grep -q '"ready":true'; then exit 0; fi
+            sleep 2
+          done
+          cat /tmp/oido-pilot.log
+          exit 1
+      - name: Real D1 and browser journeys
+        env:
+          PILOT_BASE_URL: http://127.0.0.1:8788
+          PILOT_ADMIN_TOKEN: ci-pilot-admin-testing-secret-00000000
+        run: node tests/pilot-e2e.mjs
+      - name: Diagnostics on failure
+        if: failure()
+        run: tail -n 120 /tmp/oido-pilot.log || true
