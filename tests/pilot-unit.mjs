@@ -19,6 +19,5 @@ assert.throws(()=>checkItem({label:'Latte',priceCents:NaN}),/Price/);
 assert.deepEqual(checkItem({label:'Latte ',priceCents:125}),{label:'Latte',priceCents:125});
 assert.throws(()=>checkIdempotency('short'),/idempotency/);
 const csv=csvRequests([{public_ref:'abc',status:'submitted',is_test:0,item_label:'=HYPERLINK("bad")',price_cents:310,created_at:'2026-10-18'}]);
-assert.match(csv,/'=HYPERLINK/); // preliminary check serialization includes the label text
 assert.match(csv,/'\'=HYPERLINK/); // spreadsheet formula neutralized with literal apostrophe
 console.log('PASS pilot domain parser, review guards, idempotency and safe CSV');
