@@ -113,7 +113,7 @@ export async function onRequest(context){
    if(old)return json({reference:old.public_ref,status:old.status,isTest:!!old.is_test,idempotent:true});
    const item=await db.prepare('SELECT id,label,price_cents FROM items WHERE merchant_id=? AND id=? AND approved=1').bind(m.id,b.itemId).first();
    if(!item)return fail(404,'Selected item is not available.');
-   const limit=await db.prepare("SELECT COUNT(*) n FROM guest_requests WHERE merchant_id=? AND created_at>=datetime('now','-1 day')").bind(m.id).first();
+   const since=new Date(Date.now()-86400000).toISOString();const limit=await db.prepare("SELECT COUNT(*) n FROM guest_requests WHERE merchant_id=? AND created_at>=?").bind(m.id,since).first();
    if(limit?.n>=250)return fail(429,'Supervised pilot request limit reached.');
    const ref=randomToken().slice(0,24),t=now();
    try{await db.prepare('INSERT INTO guest_requests(id,public_ref,merchant_id,item_id,item_label,price_cents,idempotency_key,is_test,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)').bind(id(),ref,m.id,item.id,item.label,item.price_cents,key,test?1:0,t,t).run();}
