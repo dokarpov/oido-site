@@ -6,6 +6,9 @@ on:
       - ".github/workflows/live-visual-review.yml"
       - "pilot-preview/**"
   workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/live-visual-review.yml"
 jobs:
   live:
     runs-on: ubuntu-latest
@@ -16,9 +19,12 @@ jobs:
         run: |
           base="https://dokarpov.github.io/oido-site/pilot-preview"
           for i in $(seq 1 48); do
-            if curl -fsSL --connect-timeout 8 --max-time 18 "$base/index.html" | grep -q "LIVE VISUAL REVIEW" \
-               && curl -fsSL --connect-timeout 8 --max-time 18 "$base/guest.html?m=demo-la-curandera\&test=1" | grep -q "LIVE VISUAL REVIEW" \
-               && curl -fsSL --connect-timeout 8 --max-time 18 "$base/mock-api.js" | grep -q "NOT the Cloudflare D1 API"; then
+            if curl -fsSL --connect-timeout 8 --max-time 18 "$base/index.html" -o /tmp/oido-preview-merchant.html \
+               && curl -fsSL --connect-timeout 8 --max-time 18 "$base/guest.html?m=demo-la-curandera&test=1" -o /tmp/oido-preview-guest.html \
+               && curl -fsSL --connect-timeout 8 --max-time 18 "$base/mock-api.js" -o /tmp/oido-preview-transport.js \
+               && grep -q "LIVE VISUAL REVIEW" /tmp/oido-preview-merchant.html \
+               && grep -q "LIVE VISUAL REVIEW" /tmp/oido-preview-guest.html \
+               && grep -q "NOT the Cloudflare D1 API" /tmp/oido-preview-transport.js; then
                 echo "PASS live URLs and visual demo assets are publicly reachable."
                 exit 0
             fi
