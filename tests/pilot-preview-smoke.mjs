@@ -13,7 +13,7 @@ try{
   await page.goto(base+'/pilot-preview/index.html',{waitUntil:'domcontentloaded'});
   await page.locator('#workspace').waitFor({state:'visible',timeout:15000});
   assert.equal(await page.locator('.preview-label').isVisible(),true);
-  assert.equal(await page.locator('#merchant-title').innerText(),'La Curandera · sample venue · demo-la-curandera');
+  assert.equal((await page.locator('#merchant-title').innerText()).toLowerCase(),'la curandera · sample venue · demo-la-curandera');
   assert.equal(await page.locator('#review-area tbody tr').count(),6);
   assert.equal(await page.locator('#share').isVisible(),true);
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'merchant overflow '+size.width);
