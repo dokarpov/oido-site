@@ -30,7 +30,7 @@ export function checkIdempotency(v){
   if(typeof v!=='string'||!/^[a-zA-Z0-9_-]{12,100}$/.test(v)) throw new Error('An idempotency key is required.');
   return v;
 }
-export function csvEscape(v){return '"'+String(v??'').replace(/"/g,'""').replace(/[\r\n]/g,' ')+'"';}
+export function csvEscape(v){let s=String(v??'').replace(/[\r\n]/g,' ');if(/^[=+@\-\t]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}
 export function csvRequests(rows){
   return ['reference,status,kind,item,price_eur,created_at',
     ...rows.map(r=>[r.public_ref,r.status,r.is_test?'test':'pilot',r.item_label,(r.price_cents/100).toFixed(2),r.created_at].map(csvEscape).join(','))].join('\r\n');
