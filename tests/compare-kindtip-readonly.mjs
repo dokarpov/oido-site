@@ -28,9 +28,31 @@ for(const t of targets){
    width:document.documentElement.scrollWidth,
    viewport:window.innerWidth,
    languageSwitch:[...document.querySelectorAll('[lang],button[data-lang]')].length,
-   iframeSources:[...document.querySelectorAll('iframe')].map(x=>x.src).slice(0,4)
+   iframeSources:[...document.querySelectorAll('iframe')].map(x=>x.src).slice(0,4),
+   backendSourceHints:{
+    apiPHP:document.documentElement.outerHTML.includes('api.php'),
+    fetchCalls:(document.documentElement.outerHTML.match(/fetch\\s*\\(/g)||[]).length,
+    localStorage:document.documentElement.outerHTML.includes('localStorage'),
+    paymentProviderNames:['stripe','paypal','mollie'].filter(x=>document.documentElement.outerHTML.toLowerCase().includes(x))
+   },
+   visibleInputFields:[...document.querySelectorAll('input,select')].filter(x=>x.getClientRects().length).map(x=>({type:x.type,id:x.id,placeholder:x.placeholder?.slice(0,75)})).slice(0,12),
+   navigableVenueLinks:[...document.querySelectorAll('a[href]')].filter(x=>/Go|console/i.test(x.innerText||'') && x.href.startsWith(location.origin)).map(x=>({text:x.innerText,pathname:new URL(x.href).pathname,search:new URL(x.href).search})).slice(0,5)
   }));
   await page.screenshot({path:'artifacts/compare-kindtip/'+t.name+'-390.png',fullPage:true,timeout:15000});
+  if(t.name==='diego-original'){
+   const venue=await page.locator('a[href]').filter({hasText:'Go'}).first().getAttribute('href').catch(()=>null);
+   if(venue){
+    const loc=new URL(venue,t.url);
+    if(loc.origin===new URL(t.url).origin){
+     const first=await page.goto(loc.href,{waitUntil:'domcontentloaded',timeout:18000});
+     await page.waitForTimeout(500);
+     const detail=()=>page.evaluate(()=>({title:document.title,visibleText:document.body.innerText?.slice(0,350),visibleInputs:[...document.querySelectorAll('input')].filter(x=>x.getClientRects().length).map(x=>({type:x.type,placeholder:x.placeholder})),horizontalOverflow:document.documentElement.scrollWidth>innerWidth+2}));
+     const screen1=await detail();await page.reload({waitUntil:'domcontentloaded',timeout:18000});await page.waitForTimeout(400);const screen2=await detail();
+     result.directVenue={route:loc.pathname+loc.search,firstStatus:first.status(),onNavigation:screen1,onReload:screen2};
+     await page.screenshot({path:'artifacts/compare-kindtip/diego-direct-venue-390.png',fullPage:true,timeout:15000});
+    }
+   }
+  }
  }catch(e){result.error=String(e).slice(0,500);}
  result.jsErrors=errors.slice(0,8);
  result.failedRequests=failed.slice(0,8);
