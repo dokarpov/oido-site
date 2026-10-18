@@ -49,7 +49,7 @@ console.log('PASS 23 API assertions: secure invite, import, review, publish, gue
 
 const browser=await chromium.launch({headless:true});
 try{
- for(const viewport of [{width:390,height:844},{width:1440,height:900}]){
+ for(const viewport of [{width:390,height:844},{width:320,height:700},{width:375,height:812},{width:768,height:1024},{width:1440,height:900}]){
   const context=await browser.newContext({viewport});
   const page=await context.newPage();
   const errs=[];page.on('pageerror',e=>errs.push(e.message));
@@ -75,6 +75,10 @@ try{
   assert.equal(await page.locator('#offer-title').innerText(),'Tria un article');
   await page.locator('button[data-lang="en"]').click();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'guest horizontal overflow '+viewport.width);
+  const minTouch=await page.locator('[data-lang]').evaluateAll(buttons=>buttons.every(b=>b.getBoundingClientRect().height>=44));
+  assert.equal(minTouch,true,'guest language controls below 44px on '+viewport.width);
+  assert.equal(await page.locator('h1').count(),1);
+  assert.equal(await page.locator('#notice').isVisible(),true);
   await page.locator('#catalog button').first().click();
   await page.locator('#ack').check();
   await page.locator('#send').click();
@@ -84,5 +88,5 @@ try{
   assert.equal(errs.length,0,JSON.stringify(errs));
   await context.close();
  }
- console.log('PASS browser merchant/guest UX at 390px and 1440px, ES/CA/EN UI state, no overflow');
+ console.log('PASS browser merchant/guest UX at 320, 375, 390, 768 and 1440px: languages, touch targets, no overflow');
 }finally{await browser.close();}
