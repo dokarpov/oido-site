@@ -59,12 +59,28 @@ try{
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2);assert.equal(overflow,false,'merchant horizontal overflow '+viewport.width);
   await page.locator('#refresh').click();await page.waitForTimeout(180);
   assert.equal(await page.locator('#real-count').innerText(),'1');
+  // The new imported draft is intentionally unpublished until this merchant reviews it.
+  if(viewport.width===390){
+    assert.equal(await page.locator('#share').isVisible(),false);
+    await page.locator('#review-area input[type="checkbox"]').check();
+    await page.locator('#approve').click();
+    await page.waitForFunction(()=>!document.querySelector('#publish').disabled);
+    await page.locator('#publish').click();
+    await page.locator('#share').waitFor({state:'visible'});
+  }
   await page.goto(base+'/pilot/guest.html?m='+slug+'&test=1',{waitUntil:'networkidle'});
   await page.locator('button[data-lang="es"]').click();
   assert.equal(await page.locator('#offer-title').innerText(),'Elige un artículo');
+  await page.locator('button[data-lang="ca"]').click();
+  assert.equal(await page.locator('#offer-title').innerText(),'Tria un article');
+  await page.locator('button[data-lang="en"]').click();
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2),false,'guest horizontal overflow '+viewport.width);
-  // After reimport, storefront is unpublished; guest must show an honest unavailable state.
-  await page.waitForTimeout(170);assert.equal(await page.locator('#message').isVisible(),true);
+  await page.locator('#catalog button').first().click();
+  await page.locator('#ack').check();
+  await page.locator('#send').click();
+  await page.locator('#receipt').waitFor({state:'visible'});
+  assert.match(await page.locator('#request-state').innerText(),/Waiting for staff/);
+  await page.locator('#check').click();
   assert.equal(errs.length,0,JSON.stringify(errs));
   await context.close();
  }
