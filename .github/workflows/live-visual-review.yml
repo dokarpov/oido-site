@@ -1,0 +1,29 @@
+name: Verify published Oído visual review
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/live-visual-review.yml"
+      - "pilot-preview/**"
+  workflow_dispatch:
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Verify GitHub Pages merchant and guest visual builds
+        shell: bash
+        run: |
+          base="https://dokarpov.github.io/oido-site/pilot-preview"
+          for i in $(seq 1 48); do
+            if curl -fsSL --connect-timeout 8 --max-time 18 "$base/index.html" | grep -q "LIVE VISUAL REVIEW" \
+               && curl -fsSL --connect-timeout 8 --max-time 18 "$base/guest.html?m=demo-la-curandera\&test=1" | grep -q "LIVE VISUAL REVIEW" \
+               && curl -fsSL --connect-timeout 8 --max-time 18 "$base/mock-api.js" | grep -q "NOT the Cloudflare D1 API"; then
+                echo "PASS live URLs and visual demo assets are publicly reachable."
+                exit 0
+            fi
+            echo "Pages not ready yet (attempt $i); retrying in 5 sec."
+            sleep 5
+          done
+          echo "FAIL GitHub Pages visual URLs not accessible in time."
+          exit 1
