@@ -6,6 +6,9 @@ on:
       - ".github/workflows/live-visual-review.yml"
       - "pilot-preview/**"
   workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/live-visual-review.yml"
 jobs:
   live:
     runs-on: ubuntu-latest
