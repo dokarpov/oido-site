@@ -36,6 +36,7 @@ jobs:
         env:
           PILOT_ADMIN_TOKEN: ci-pilot-admin-testing-secret-00000000
         run: |
+          printf 'name = "oido-pilot-ci"\ncompatibility_date = "2026-10-18"\npages_build_output_dir = "."\n' > wrangler.toml
           npx wrangler pages dev . --d1 DB=00000000-0000-0000-0000-000000000001 --binding PILOT_ADMIN_TOKEN=$PILOT_ADMIN_TOKEN --persist-to .wrangler/pilot-state --port 8788 >/tmp/oido-pilot.log 2>&1 &
           echo $! > /tmp/oido-pilot.pid
           for i in $(seq 1 50); do
