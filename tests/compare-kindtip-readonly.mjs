@@ -31,7 +31,7 @@ for(const t of targets){
    iframeSources:[...document.querySelectorAll('iframe')].map(x=>x.src).slice(0,4),
    backendSourceHints:{
     apiPHP:document.documentElement.outerHTML.includes('api.php'),
-    fetchCalls:(document.documentElement.outerHTML.match(/fetch\\s*\\(/g)||[]).length,
+    fetchCalls:document.documentElement.outerHTML.split('fetch(').length-1,
     localStorage:document.documentElement.outerHTML.includes('localStorage'),
     paymentProviderNames:['stripe','paypal','mollie'].filter(x=>document.documentElement.outerHTML.toLowerCase().includes(x))
    },
