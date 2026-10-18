@@ -107,10 +107,10 @@ export async function onRequest(context){
    if(!/^[a-z0-9-]{2,70}$/.test(slug))throw new Error('Invalid storefront.');
    const m=await db.prepare('SELECT id,accepting_requests FROM merchants WHERE slug=? AND published=1').bind(slug).first();
    if(!m)return fail(404,'Storefront not found.');
-   if(!test&&!m.accepting_requests)return fail(409,'Merchant is not accepting requests. This is not a live ordering channel.');
    if(b.acknowledged!==true)throw new Error('Confirm that this is a request, not a paid or confirmed order.');
    const old=await db.prepare('SELECT public_ref,status,is_test FROM guest_requests WHERE merchant_id=? AND idempotency_key=?').bind(m.id,key).first();
    if(old)return json({reference:old.public_ref,status:old.status,isTest:!!old.is_test,idempotent:true});
+   if(!test&&!m.accepting_requests)return fail(409,'Merchant is not accepting requests. This is not a live ordering channel.');
    const item=await db.prepare('SELECT id,label,price_cents FROM items WHERE merchant_id=? AND id=? AND approved=1').bind(m.id,b.itemId).first();
    if(!item)return fail(404,'Selected item is not available.');
    const since=new Date(Date.now()-86400000).toISOString();const limit=await db.prepare("SELECT COUNT(*) n FROM guest_requests WHERE merchant_id=? AND created_at>=?").bind(m.id,since).first();
