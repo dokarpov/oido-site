@@ -41,6 +41,8 @@ const activity=await req('activity',{token});assert.equal(activity.data.requests
 const second=await req('invite',{method:'POST',token:admin,payload:{name:'Studio C'}});assert.equal(second.code,201);
 const isolation=await req('status',{method:'POST',token:second.data.merchantToken,payload:{reference:sent.data.reference,status:'declined'}});assert.equal(isolation.code,404);
 const pause=await req('settings',{method:'POST',token,payload:{acceptingRequests:false}});assert.equal(pause.code,200);
+const receiptAfterPause=await req('request',{method:'POST',payload:{slug,itemId:items[1].id,idempotencyKey:'pilot_real_1234567890',isTest:false,acknowledged:true}});
+assert.equal(receiptAfterPause.data.reference,sent.data.reference,'idempotency persists after requests are paused');
 const reimport=await req('import',{method:'POST',token,payload:{text:'New menu item; 6.00'}});assert.equal(reimport.code,200,JSON.stringify(reimport));
 const after=await req('activity',{token});assert.equal(after.data.requests.length,2,'historical requests must survive imports');
 const csv=await fetch(base+'/api/pilot/export',{headers:{Authorization:'Bearer '+token}});assert.equal(csv.status,200);const csvText=await csv.text();assert.match(csvText,/Patatas bravas/);assert.match(csvText,/Coffee/);
