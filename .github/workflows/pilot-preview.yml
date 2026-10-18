@@ -1,0 +1,42 @@
+name: Oído visual review smoke
+on:
+  pull_request:
+    paths:
+      - "pilot-preview/**"
+      - "tests/pilot-preview-smoke.mjs"
+      - ".github/workflows/pilot-preview.yml"
+  workflow_dispatch:
+jobs:
+  visual-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Check browser scripts
+        run: |
+          node --check pilot-preview/mock-api.js
+          node --check pilot-preview/merchant.js
+          node --check pilot-preview/guest.js
+      - name: Install browser
+        run: |
+          npm install --no-save playwright@1.56.0
+          npx playwright install --with-deps chromium
+      - name: Start isolated static preview
+        run: |
+          python3 -m http.server 8789 --bind 127.0.0.1 >/tmp/oido-visual.log 2>&1 &
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8789/pilot-preview/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          exit 1
+      - name: Browser visual and flow checks
+        run: node tests/pilot-preview-smoke.mjs
+      - name: Upload review screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oido-visual-review-screenshots
+          path: artifacts/pilot-visual/
