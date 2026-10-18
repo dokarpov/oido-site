@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS guest_requests(
  id TEXT PRIMARY KEY,
  public_ref TEXT NOT NULL UNIQUE,
  merchant_id TEXT NOT NULL REFERENCES merchants(id) ON DELETE CASCADE,
- item_id TEXT NOT NULL REFERENCES items(id),
+ item_id TEXT REFERENCES items(id) ON DELETE SET NULL,
  item_label TEXT NOT NULL,
  price_cents INTEGER NOT NULL,
  idempotency_key TEXT NOT NULL,
