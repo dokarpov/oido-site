@@ -1,0 +1,10 @@
+# Example for a SEPARATE Cloudflare Pages project dedicated to supervised Oído pilots.
+# Copy to wrangler.toml in an isolated deployment checkout, not the existing marketing project.
+name = "oido-pilot"
+compatibility_date = "2026-10-18"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "oido-pilot"
+database_id = "REPLACE_WITH_REAL_D1_DATABASE_UUID"

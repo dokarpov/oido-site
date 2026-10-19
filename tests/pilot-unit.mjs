@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import {extractItems,parsePrice,checkItem,checkIdempotency,csvRequests} from '../pilot/core.js';
+assert.equal(parsePrice('€3,50'),350);
+assert.equal(parsePrice('3.5 €'),350);
+assert.equal(parsePrice('12.00'),1200);
+assert.equal(parsePrice('0'),0);
+assert.equal(parsePrice('oops'),null);
+assert.equal(parsePrice('5001'),null);
+assert.equal(parsePrice('1.234.56'),null);
+const list=extractItems('Espresso 2,50\nCroissant; 3.20\nHaircut - 28.00\nMissing price');
+assert.equal(list.length,4);
+assert.deepEqual(list.map(x=>x.priceCents),[250,320,2800,null]);
+assert.equal(list.filter(x=>x.reviewRequired).length,4);
+assert.match(list[3].reason,/Missing/);
+assert.throws(()=>extractItems(''),/24,000/);
+assert.throws(()=>extractItems(Array.from({length:81},()=> 'Water 2').join('\n')),/80 lines/);
+assert.throws(()=>checkItem({label:'',priceCents:100}),/names/);
+assert.throws(()=>checkItem({label:'Latte',priceCents:NaN}),/Price/);
+assert.deepEqual(checkItem({label:'Latte ',priceCents:125}),{label:'Latte',priceCents:125});
+assert.throws(()=>checkIdempotency('short'),/idempotency/);
+const csv=csvRequests([{public_ref:'abc',status:'submitted',is_test:0,item_label:'=HYPERLINK("bad")',price_cents:310,created_at:'2026-10-18'}]);
+assert.ok(csv.includes(String.fromCharCode(39,61))); // leading apostrophe blocks spreadsheet execution
+console.log('PASS pilot domain parser, review guards, idempotency and safe CSV');

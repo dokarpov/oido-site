@@ -27,6 +27,14 @@ The next product decision should be informed by **observed merchant setup, guest
 
 The public-facing site and investor overview use separate HTML entry points in this repository. Both are currently hosted by GitHub Pages. The business pilot form sends submissions through FormSubmit.co to diego@sinthetic.io with a copy to dokarpov@gmail.com; delivery requires the FormSubmit recipient to activate the form. The investor meeting form currently opens a prepared email addressed to Diego with Daria in CC (the visitor must press Send). The GitHub Pages site does not host its own form backend or CRM. The repository also contains a Cloudflare Pages/Workers localization path for edge locale detection and runtime translation; those server-side functions are not executed by GitHub Pages. Prices and commercial terms presented on the site are hypotheses pending paid-merchant validation.
 
+## Supervised pilot candidate (not yet deployed)
+
+The separate `pilot/` pages and Cloudflare Pages D1 function implement a limited, staff-supervised merchant flow: TXT/CSV/pasted menu extraction → merchant approval → QR/link → real backend guest request → staff acknowledgement → request evidence CSV. This is **not** GitHub Pages functionality. It requires a separate Cloudflare Pages + D1 deployment, operator secret, privacy/abuse review and real merchant testing before live use. It does not charge cards, transfer tips, make booking commitments, write to POS or produce accounting-ready revenue reports.
+
+- [Release runbook and limitations](docs/PILOT_RUNBOOK.md)
+- [Real merchant fieldwork and definitions](docs/PILOT_FIELDWORK.md)
+- [Investor evidence-gap register](docs/PILOT_EVIDENCE_REGISTER.md)
+
 ## What is real today
 
 | Evidence | Status |
@@ -56,7 +64,7 @@ README.md              Project notes
 
 Open `index.html` locally in a browser to preview the public landing page. Open `investors/index.html` for the investor version. GitHub Pages publishes the `main` branch from `/(root)`, normally within a few minutes of a commit. No build step or package manager is required.
 
-To publish a change, update the relevant HTML file on `main`, then check the GitHub Actions **pages build and deployment** workflow and the public URL. This is a marketing/investor website, not the Oído application backend.
+To publish a change, update the relevant HTML file on `main`, then check the GitHub Actions **pages build and deployment** workflow and the public URL. The GitHub Pages deployment is a marketing/investor website, not the D1 pilot runtime.
 
 For the evidence ladder, pilot measures and decision rules, see [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
