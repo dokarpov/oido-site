@@ -2,92 +2,58 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="color-scheme" content="light">
-<title>Запрос — Дарья Карпова</title>
+<meta name="robots" content="noindex,nofollow">
+<title>Написать Дарье Карповой</title>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,Inter,Arial,sans-serif;color:#1b1b1b;background:#fff;font-synthesis:none}
-*{box-sizing:border-box}body{margin:0;min-height:100svh;padding:clamp(20px,5vw,52px)}main{max-width:530px;margin:0 auto}
-.top{font-size:13px;color:#626262;letter-spacing:.015em;margin:0 0 22px}
-h1{font-size:clamp(26px,6vw,36px);letter-spacing:-.04em;line-height:1.13;margin:0 0 10px;font-weight:680}
-.sub{font-size:15px;line-height:1.55;color:#666;margin:0 0 28px}
-label{font-size:13px;font-weight:600;display:block;margin:17px 0 7px}
-textarea,input{font:16px/1.5 inherit;display:block;width:100%;border:1px solid #c9c9c9;background:#fff;color:#111;border-radius:8px;padding:13px 14px;outline-offset:2px}
-textarea{resize:vertical;min-height:110px;font:16px/1.5 -apple-system,BlinkMacSystemFont,Arial,sans-serif}
-input{font:16px/1.5 -apple-system,BlinkMacSystemFont,Arial,sans-serif}
-textarea:focus,input:focus{outline:2px solid #323232;border-color:transparent}
-button{cursor:pointer;width:100%;margin-top:23px;background:#141414;border:1px solid #141414;color:white;padding:15px;border-radius:8px;font:600 16px -apple-system,BlinkMacSystemFont,Arial,sans-serif}
-button.secondary{background:white;color:#333;margin-top:10px;padding:12px;border-color:#d4d4d4;font-weight:500}
-.note{font-size:12px;color:#707070;line-height:1.5;margin-top:14px}
-#status{font-size:13px;line-height:1.45;color:#555;min-height:20px;margin-top:12px}
-footer{font-size:13px;color:#737373;margin-top:26px}a{color:inherit;text-underline-offset:3px}
+*{box-sizing:border-box}body{margin:0;padding:24px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:#1b1b1b;background:white}
+main{max-width:470px;margin:10vh auto 0}h1{font-size:26px;line-height:1.2;letter-spacing:-.02em}p{line-height:1.6;color:#555}
+a.btn{display:block;margin-top:26px;padding:16px 20px;text-align:center;border-radius:9px;text-decoration:none;color:white;background:#161616;font-weight:600}
+.small{font-size:13px}a{color:#161616}
 </style>
 </head>
-<body><main>
-<div class="top">Дарья Карпова · Барселона / онлайн</div>
-<h1 id="title">Расскажите о задаче</h1>
-<p class="sub" id="description">Пара деталей — и я смогу оценить объём работы. Без обязательств.</p>
-<form id="form">
-<label for="task">Что нужно сделать?</label>
-<textarea id="task" name="task" required placeholder="Опишите задачу своими словами"></textarea>
-<label for="context">Что уже есть? <span style="color:#777;font-weight:400">(необязательно)</span></label>
-<textarea id="context" name="context" style="min-height:72px" placeholder="Ссылка, фотографии, чертежи, инструменты или исходные материалы"></textarea>
-<label for="deadline">Когда нужен результат? <span style="color:#777;font-weight:400">(необязательно)</span></label>
-<input id="deadline" name="deadline" placeholder="Например, в течение месяца" autocomplete="off">
-<button type="submit">Открыть письмо с брифом ↗</button>
-<button type="button" id="copy" class="secondary">Скопировать готовый бриф</button>
-<div id="status" aria-live="polite"></div>
-</form>
-<p class="note">Ничего не отправляется с этой страницы автоматически. Сначала откроется ваша почтовая программа, где можно проверить и отправить письмо. Если почта не открывается, скопируйте бриф или напишите в Telegram.</p>
-<footer><a href="https://t.me/dokarpov" rel="noopener">Telegram @dokarpov</a> · <a href="mailto:dokarpov@gmail.com">dokarpov@gmail.com</a></footer>
+<body>
+<main>
+<h1>Открываем письмо…</h1>
+<p id="desc">Тема и короткий бриф для оценки стоимости уже подготовлены.</p>
+<a class="btn" id="email" href="mailto:dokarpov@gmail.com">Открыть письмо</a>
+<p class="small">Если почтовое приложение не открылось автоматически, нажмите кнопку. <a href="https://t.me/dokarpov">Или напишите в Telegram</a>.</p>
 </main>
 <script>
 (function(){
-const jobs={
-s:["Сайт есть, клиентов нет?","Сайт, лендинг, Shopify, конверсия","Что продаёте? Что уже работает? Что сейчас мешает клиенту купить?"],
-a:["Есть идея, нет приложения?","Приложение, SaaS, FinTech, EdTech","Кому нужен продукт? Какие ключевые функции должны работать?"],
-m:["Нужно продавать до запуска?","Рабочий MVP, демо, питч","Кому показываете? Что обязательно должно работать в демо?"],
-c:["Рутина съедает время?","AI, боты, CRM, интеграции","Какой процесс сейчас делаете вручную? Какие системы используете?"],
-g:["Пользователи уходят?","Онбординг, конверсия, удержание, монетизация","Где теряются пользователи? Есть ли цифры или аналитика?"],
-r:["Неясно, что запускать?","Исследование рынка, аудитории, конкурентов, стратегия","Какую гипотезу или бизнес-решение нужно проверить?"],
-v:["Не получается убедительно продать?","Бренд, UI, графика, ASO, креативы, презентации","Что нужно подготовить, для какой аудитории и в каком формате?"],
-b:["Балкон или терраса без уюта?","Недорогое оформление балкона или террасы","Площадь, фото, что хотите изменить и какие ограничения?"],
-i:["Интерьер не складывается?","Интерьерная концепция, планировка, материалы, свет","Что за пространство, его площадь и что не устраивает?"],
-f:["Открываете пространство?","Кафе, магазин, архитектурная концепция, 3D-рендеры","Тип объекта, площадь, стадия проекта и желаемые материалы?"],
-p:["Страшно купить с сюрпризом?","Недвижимость Барселоны, comunidad, коммуникации, ограничения","Ссылка на объект, какая проблема беспокоит, что уже известно?"],
-w:["Ремонт встал?","Сопровождение работ, поставщики, закупки","Что уже сделано? Что требуется подобрать, заказать или организовать?"],
-t:["Хочется не как у всех?","Авторский декор, живопись, апсайклинг","Какая вещь или пространство? Есть ли фото и пожелания?"],
-x:["Запутались с autónomo?","Бесплатный совет: AEAT, TEAR, gestor, гранты","Коротко расскажите ситуацию и о чём хотите спросить. Это обмен личным опытом, не юридическая или налоговая консультация."]
-};
-const qs=new URLSearchParams(location.search);
-const code=qs.get("j")||"";
-const job=Object.prototype.hasOwnProperty.call(jobs,code)?jobs[code]:["Опишите задачу","Новый запрос","Что нужно сделать?"];
-document.getElementById("title").textContent=job[0];
-document.getElementById("description").textContent=job[1]+". Короткий бриф для ответа по задаче.";
-document.getElementById("task").placeholder=job[2];
-const form=document.getElementById("form");
-function draft(){
-const task=document.getElementById("task").value.trim();
-const context=document.getElementById("context").value.trim();
-const deadline=document.getElementById("deadline").value.trim();
-const subject=(code==="x"?"Вопрос":"Запрос на оценку")+" — "+job[1];
-const body=["Здравствуйте, Дарья!","","Услуга: "+job[1],"","Задача: "+(task||"—"),"","Исходные материалы: "+(context||"—"),"","Сроки: "+(deadline||"—"),"","Спасибо!"].join("\n");
-return {subject,body,task};
-}
-document.getElementById("form").addEventListener("submit",function(e){
-e.preventDefault();
-const d=draft();if(!d.task){document.getElementById("task").focus();return;}
-const url="mailto:dokarpov@gmail.com?subject="+encodeURIComponent(d.subject)+"&body="+encodeURIComponent(d.body);
-document.getElementById("status").textContent="Почтовая программа должна открыть черновик. Если ничего не произошло, используйте «Скопировать готовый бриф».";
-window.location.href=url;
-});
-document.getElementById("copy").addEventListener("click",async function(){
-const d=draft();const content="Кому: dokarpov@gmail.com\nТема: "+d.subject+"\n\n"+d.body;
-try{
-if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(content);}
-else{const temp=document.createElement("textarea");temp.value=content;temp.style.position="fixed";temp.style.opacity="0";document.body.appendChild(temp);temp.select();if(!document.execCommand("copy"))throw new Error("copy unavailable");temp.remove();}
-document.getElementById("status").textContent="Бриф скопирован. Вставьте его в любое письмо на dokarpov@gmail.com.";
-}catch(err){document.getElementById("status").textContent="Не удалось скопировать автоматически. Напишите в Telegram @dokarpov.";}
-});
+  const jobs = {
+    s:["Сайт, лендинг, Shopify","Ссылка на проект:\nЧто необходимо сделать:\nЧто уже есть:\nСроки:"],
+    a:["Приложение, SaaS, FinTech, EdTech","Идея и пользователи:\nКакие функции нужны:\nЧто уже готово:\nСроки:"],
+    m:["MVP и демо для продаж","Кому показывать:\nКакие сценарии должны работать:\nЧто уже есть:\nДата презентации:"],
+    c:["AI, боты, CRM, интеграции","Какой процесс автоматизировать:\nКакие системы используются:\nКакой результат нужен:\nСроки:"],
+    g:["Конверсия, онбординг, рост","Ссылка на продукт:\nГде теряются клиенты:\nКакие данные есть:\nСроки:"],
+    r:["Исследование, стратегия, рынок","Продукт и рынок:\nЧто нужно выяснить:\nКакое решение предстоит принять:\nСроки:"],
+    v:["Бренд, UI, графика, ASO","Что необходимо создать:\nДля какой аудитории:\nРеференсы и материалы:\nСроки:"],
+    b:["Балкон или терраса","Адрес или район:\nРазмеры и фотографии:\nЧто хочется изменить:\nСроки:"],
+    i:["Интерьер, планировка, свет","Тип пространства и площадь:\nПлан или фотографии:\nЧто нужно изменить:\nСроки:"],
+    f:["Архитектура, коммерческое пространство, 3D","Тип и площадь объекта:\nКакая задача:\nПланы или чертежи:\nСроки:"],
+    p:["Недвижимость, comunidad, коммуникации","Ссылка на объект или адрес:\nКакие вопросы или риски:\nДокументы или фотографии:\nСроки:"],
+    w:["Ремонт, материалы, поставщики, закупки","Адрес или район:\nЧто требуется сделать или закупить:\nТекущая стадия:\nСроки:"],
+    t:["Декор, арт, апсайклинг","Что за объект или пространство:\nФото или референсы:\nКаким должен быть результат:\nСроки:"],
+    x:["Бесплатно: autónomo и бюрократия","Коротко о ситуации:\nКакой совет нужен:\nЧто уже предпринимали:"],
+    o:["ASO и страницы приложений","Ссылка на приложение:\nРынок и язык:\nКакие материалы нужны:\nСроки:"],
+    q:["Питч, презентация, коммерческое предложение","Кто аудитория:\nЧто хотите получить:\nКакие материалы есть:\nСроки:"],
+    k:["Подбор материалов, света, мебели","Объект и район:\nЧто ищем:\nРазмеры и фотографии:\nСроки:"],
+    d:["3D-модели, рендеры, визуализации","Что визуализируем:\nЧертежи, фото, размеры:\nНужные виды:\nСроки:"],
+    n:["Поставщики и закупки","Что требуется найти или закупить:\nОбъёмы и доставка:\nСроки:"],
+    z:["Ремонт и сопровождение стройки","Объект и локация:\nОбъём работ:\nПодрядчики и стадия:\nСроки:"]
+  };
+  const code=new URLSearchParams(location.search).get("j")||"";
+  const valid=Object.prototype.hasOwnProperty.call(jobs,code);
+  const job=valid?jobs[code]:["Запрос по проекту","Что необходимо сделать:\nЧто уже есть:\nСроки:"];
+  const subject=(code==="x"?"Вопрос":"Запрос")+" — "+job[0];
+  const body="Здравствуйте, Дарья!\n\n"+job[1]+"\n\nСпасибо!";
+  const url="mailto:dokarpov@gmail.com?subject="+encodeURIComponent(subject)+"&body="+encodeURIComponent(body);
+  document.title="Письмо: "+job[0];
+  document.getElementById("email").href=url;
+  document.getElementById("desc").textContent=(code==="x"?"Личный опыт, не юридическая или налоговая консультация.":"Заготовлен короткий бриф для оценки стоимости.")+" Если письмо не открылось автоматически, нажмите кнопку ниже.";
+  window.setTimeout(function(){window.location.href=url;},150);
 })();
-</script></body></html>
+</script>
+</body></html>
