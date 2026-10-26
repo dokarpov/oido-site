@@ -4,11 +4,11 @@
 
 **A browser-first service-commerce layer for independent hospitality and service businesses.** Oído helps merchants turn menus and service lists into mobile customer experiences: QR storefronts, demo ordering, optional tips, feedback, and merchant reporting—without replacing their existing POS.
 
-**Status:** pre-incorporation, bootstrapped, pre-seed working browser beta. The public website demonstrates a product concept and pilot offering; production payment settlement, paying merchants, GMV, and revenue are **not** being claimed as verified.
+**Stage:** Bootstrapped browser beta and merchant pilot proposition. Paid merchant adoption and live payment settlement are next-stage validation goals.
 
 ## Product case for reviewers
 
-**Role and scope:** Daria Karpova is presented as CPO in the public [investor overview](https://dokarpov.github.io/oido-site/investors/), with responsibility for product strategy, pilot design and merchant evidence. This is a founding product exploration, not a claim of a commercially validated company.
+**Role and scope:** Daria Karpova is presented as CPO in the public [investor overview](https://dokarpov.github.io/oido-site/investors/), with responsibility for product strategy, pilot design and merchant evidence. This is a founding product exploration.
 
 | Product question | Current decision / learning |
 | --- | --- |
@@ -16,16 +16,16 @@
 | Where should the product intervene? | Merchant reviews uncertain extraction, guest browses and completes illustrative actions, business sees resulting activity. |
 | What trade-off remains open? | A broad commerce proposition needs narrower segment, activation and operating-cost validation before claiming a repeatable business. |
 | What can be inspected? | Live marketing site, investor/product walkthrough, synthetic browser states, implementation and design QA. |
-| What cannot yet be concluded? | Willingness to pay, retained merchant usage, payment conversion, settled GMV or validated unit economics. |
+| What needs validation next? | Merchant activation, willingness to pay, repeat usage and support economics. |
 
-The next product decision should be informed by **observed merchant setup, guest completion, repeated use and accepted payment terms**, not the number of mock screens or feature concepts. See [validation criteria](docs/VALIDATION.md).
+The next product decision depends on **observed merchant setup, guest completion, repeat use and accepted payment terms**. See [validation criteria](docs/VALIDATION.md).
 
 ## Public site
 
 - **For businesses:** https://dokarpov.github.io/oido-site/
 - **For investors and partners:** https://dokarpov.github.io/oido-site/investors/
 
-The public-facing site and investor overview use separate HTML entry points in this repository. Both are currently hosted by GitHub Pages. The business pilot form sends submissions through FormSubmit.co to diego@sinthetic.io with a copy to dokarpov@gmail.com; delivery requires the FormSubmit recipient to activate the form. The investor meeting form currently opens a prepared email addressed to Diego with Daria in CC (the visitor must press Send). The GitHub Pages site does not host its own form backend or CRM. The repository also contains a Cloudflare Pages/Workers localization path for edge locale detection and runtime translation; those server-side functions are not executed by GitHub Pages. Prices and commercial terms presented on the site are hypotheses pending paid-merchant validation.
+The public-facing site and investor overview use separate HTML entry points in this repository. Both are currently hosted by GitHub Pages. The business pilot form sends submissions through FormSubmit.co to diego@sinthetic.io with a copy to dokarpov@gmail.com; delivery requires the FormSubmit recipient to activate the form. The investor meeting form currently opens a prepared email addressed to Diego with Daria in CC (the visitor must press Send). The GitHub Pages site does not host its own form backend or CRM. The repository also contains a Cloudflare Pages/Workers localization path for edge locale detection and runtime translation; those server-side functions are not executed by GitHub Pages. Prices are pilot hypotheses.
 
 ## What is real today
 
@@ -37,11 +37,8 @@ The public-facing site and investor overview use separate HTML entry points in t
 | Automatic locale selection + compact manual language menu | implemented |
 | Production locale catalogue | English, Spanish and Catalan only; other languages fall back to English |
 | Edge/IP-country locale fallback + runtime translation | implemented for Cloudflare Pages/Workers, **not active on GitHub Pages** |
-| Payment settlement | **not live / not claimed** |
-| Paying merchants, GMV, revenue | **not yet claimed as verified** |
-| Prices / commercial terms | hypotheses pending paid validation |
 
-This is deliberately a **working product and pilot proposition, not a fabricated traction story**. The next credibility step is external: paid merchant evidence, activation/usage, repeat value and support economics.
+Next: recruit pilot merchants and measure activation, repeated use and support economics.
 
 ## Repository layout
 
@@ -56,7 +53,7 @@ README.md              Project notes
 
 Open `index.html` locally in a browser to preview the public landing page. Open `investors/index.html` for the investor version. GitHub Pages publishes the `main` branch from `/(root)`, normally within a few minutes of a commit. No build step or package manager is required.
 
-To publish a change, update the relevant HTML file on `main`, then check the GitHub Actions **pages build and deployment** workflow and the public URL. This is a marketing/investor website, not the Oído application backend.
+To publish a change, update the relevant HTML file on `main`, then check the GitHub Actions **pages build and deployment** workflow and the public URL. This repository publishes the business and investor websites.
 
 For the evidence ladder, pilot measures and decision rules, see [`docs/VALIDATION.md`](docs/VALIDATION.md).
 
