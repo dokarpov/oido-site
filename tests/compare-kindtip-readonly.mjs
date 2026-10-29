@@ -62,7 +62,9 @@ for(const profile of profiles){
      }
    }
   }
-  result.status=(result.httpStatus>=400||result.ui?.width>result.ui?.viewport+2||!result.ui?.titleText?.trim()||errors.length)?'FAIL':'PASS';
+  const challenge=/(just a moment|checking your browser|verify you are human|captcha|access denied)/i.test((result.title||'')+' '+(result.ui?.titleText||'').slice(0,260));
+  result.status=(result.httpStatus>=400||result.ui?.width>result.ui?.viewport+2||!result.ui?.titleText?.trim()||errors.length||challenge)?'FAIL':'PASS';
+  if(challenge)result.challengeDetected=true;
   if(result.directVenue&&(!result.directVenue.onReload.visibleText?.trim()||result.directVenue.onReload.horizontalOverflow)){
     result.directRouteStatus='FAIL';
     result.status='FAIL';
@@ -78,7 +80,8 @@ for(const profile of profiles){
 }
 const live=audit.filter(x=>x.source==='external-live');
 const liveVerified=live.some(x=>x.status==='PASS');
-const rows=audit.map(x=>'| '+x.name+' / '+x.profile+' | '+x.source+' | '+x.status+' | '+(x.httpStatus??'-')+' | '+(x.directRouteStatus||'-')+' | '+(x.error||'').replace(/\\|/g,'/').replace(/\\n/g,' ').slice(0,90)+' |');
+const cleanError=value=>String(value||'').split('|').join('/').split(String.fromCharCode(10)).join(' ').slice(0,90);
+const rows=audit.map(x=>'| '+x.name+' / '+x.profile+' | '+x.source+' | '+x.status+' | '+(x.httpStatus??'-')+' | '+(x.directRouteStatus||'-')+' | '+cleanError(x.error)+' |');
 const report=[
  '# Diego deployment vs Oído mock visual audit',
  '',
