@@ -20,7 +20,7 @@ for(const profile of profiles){
  const page=await ctx.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(e.message.slice(0,180)));
  const failed=[];page.on('requestfailed',r=>failed.push({url:r.url().split('?')[0],reason:r.failure()?.errorText}));
- const result={name:t.name,url:t.url,profile:profile.name,source:t.name==='diego-original'?'external-live':'mock-preview'};
+ const result={name:t.name,url:new URL(t.url).origin+new URL(t.url).pathname,profile:profile.name,source:t.name==='diego-original'?'external-live':'mock-preview'};
  try{
   const resp=await page.goto(t.url,{waitUntil:'domcontentloaded',timeout:23000});
   result.httpStatus=resp?.status();
@@ -36,7 +36,7 @@ for(const profile of profiles){
    width:document.documentElement.scrollWidth,
    viewport:window.innerWidth,
    languageSwitch:[...document.querySelectorAll('[lang],button[data-lang]')].length,
-   iframeSources:[...document.querySelectorAll('iframe')].map(x=>x.src).slice(0,4),
+   iframeSources:[...document.querySelectorAll('iframe')].map(x=>{try{const u=new URL(x.src);return u.origin+u.pathname;}catch{return '';}}).slice(0,4),
    backendSourceHints:{
     apiPHP:document.documentElement.outerHTML.includes('api.php'),
     fetchCalls:document.documentElement.outerHTML.split('fetch(').length-1,
@@ -44,7 +44,7 @@ for(const profile of profiles){
     paymentProviderNames:['stripe','paypal','mollie'].filter(x=>document.documentElement.outerHTML.toLowerCase().includes(x))
    },
    visibleInputFields:[...document.querySelectorAll('input,select')].filter(x=>x.getClientRects().length).map(x=>({type:x.type,id:x.id,placeholder:x.placeholder?.slice(0,75)})).slice(0,12),
-   navigableVenueLinks:[...document.querySelectorAll('a[href]')].filter(x=>/Go|console/i.test(x.innerText||'') && x.href.startsWith(location.origin)).map(x=>({text:x.innerText,pathname:new URL(x.href).pathname,search:new URL(x.href).search})).slice(0,5)
+   navigableVenueLinks:[...document.querySelectorAll('a[href]')].filter(x=>/Go|console/i.test(x.innerText||'') && x.href.startsWith(location.origin)).map(x=>({text:x.innerText,pathname:new URL(x.href).pathname,search:'[redacted]'})).slice(0,5)
   }));
   await page.screenshot({path:'artifacts/compare-kindtip/'+t.name+'-'+profile.name+'.png',fullPage:true,timeout:15000});
   if(t.name==='diego-original'&&profile.name==='mobile-chromium'){
@@ -94,10 +94,10 @@ const report=[
  '',
  'Screenshots: see the uploaded workflow artifact (each viewport has a separate PNG). No form submissions, real orders or credentials were used.',
  ''
-].join('\\n');
+].join(String.fromCharCode(10));
 await writeFile('artifacts/compare-kindtip/results.json',JSON.stringify({liveVerified,audit},null,2));
 await writeFile('artifacts/compare-kindtip/REPORT.md',report);
-if(process.env.GITHUB_STEP_SUMMARY)await writeFile(process.env.GITHUB_STEP_SUMMARY,report+'\\n',{flag:'a'});
+if(process.env.GITHUB_STEP_SUMMARY)await writeFile(process.env.GITHUB_STEP_SUMMARY,report+String.fromCharCode(10),{flag:'a'});
 console.log('LIVE_VISUAL_VERIFIED='+liveVerified+' PROFILES='+profiles.length+' RESULTS='+audit.length);
 if(process.env.REQUIRE_LIVE==='true'&&!liveVerified){
  console.error('LIVE GATE FAILED: the external app could not be visually validated.');
