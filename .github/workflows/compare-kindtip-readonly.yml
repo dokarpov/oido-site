@@ -3,11 +3,27 @@ on:
   pull_request:
     paths:
       - ".github/workflows/compare-kindtip-readonly.yml"
+      - "tests/compare-kindtip-readonly.mjs"
   workflow_dispatch:
+    inputs:
+      diego_app_url:
+        description: Public Diego deployment URL (no secrets)
+        required: false
+        default: https://diegoarredondo.com/kindtip/index.html
+      require_live:
+        description: Fail the run if live app cannot be visually verified
+        type: boolean
+        required: false
+        default: true
 jobs:
   compare:
+    permissions:
+      contents: read
+    env:
+      DIEGO_APP_URL: ${{ inputs.diego_app_url || 'https://diegoarredondo.com/kindtip/index.html' }}
+      REQUIRE_LIVE: ${{ github.event_name == 'workflow_dispatch' && inputs.require_live && 'true' || 'false' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -16,12 +32,13 @@ jobs:
       - name: Install read-only browser tools
         run: |
           npm install --no-save playwright@1.56.0
-          npx playwright install --with-deps chromium
-      - name: Read-only public endpoint and UX inspection
+          npx playwright install --with-deps chromium webkit
+      - name: Read-only public URL, direct-route, mobile and iPhone inspection
         run: node tests/compare-kindtip-readonly.mjs
-      - name: Save UI screenshots for manual comparison
+      - name: Save screenshots, structured results and GitHub step summary
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: kindtip-and-oido-readonly-screenshots
           path: artifacts/compare-kindtip/
+          retention-days: 14
