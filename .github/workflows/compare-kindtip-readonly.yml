@@ -41,3 +41,4 @@ jobs:
         with:
           name: kindtip-and-oido-readonly-screenshots
           path: artifacts/compare-kindtip/
+          retention-days: 14
