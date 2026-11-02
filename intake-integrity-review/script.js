@@ -1,5 +1,5 @@
 /**
- * Intake Integrity — editorial site interactions.
+ * Acorde — editorial site interactions.
  * No trackers, no external runtime dependencies, no customer data.
  * All demo records and states are synthetic and never sent anywhere.
  */
