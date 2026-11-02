@@ -34,3 +34,21 @@ Do **not** silently redefine activation after seeing the data. Define the intend
 ## Current boundary
 
 The website, investor view, responsive browser tests and pilot enquiry flow are real. Paid merchant demand, retention, GMV and revenue remain unproven and are labelled that way in the public materials.
+
+
+## Additive commercial learning loop — 2026-11-02
+
+This supplements—not replaces—the P1/P2/P3 merchant and technical/payment-compliance gates above. Capture one **consented, identifiable pilot decision log** per merchant:
+
+| Checkpoint | Evidence to record |
+| --- | --- |
+| Qualified merchant | Segment, current POS/process, economic buyer, source of introduction, confirmed problem and comparable baseline |
+| Merchant setup | Invitation → agreed pilot → actual live setup; elapsed time, staff interventions, founder/support minutes |
+| Guest first value | Real guest reaches an intended action; completion, drop-off and observed errors; keep synthetic interactions distinct |
+| Repeat value | Merchant returns to the experience after the initial setup and would continue without founder intervention |
+| Commercial decision | Actual offer presented, buyer's accepted/rejected price, named payer, next decision date, signed/paid status evidenced separately |
+| Economics | One-off onboarding effort, ongoing support minutes, payment/provider fees and realistic margin at the offered price |
+
+Keep **denominators** and dated event evidence for every reported rate: contacted ≠ replied ≠ qualified ≠ activated ≠ paying. Mark missing data as unknown rather than zero. Maintain an objection ledger (price, integration, staff effort, risk, lack of guest demand); feed the *confirmed* top blocker into the existing roadmap rather than adding feature work for every suggestion.
+
+**Next decision:** after one bounded live merchant run, decide with the buyer whether to extend to a paid pilot and whether another similar merchant can be onboarded without bespoke development. A merchant demonstration, CETT discovery call, founder-provided mock or illustrative order is not a commercial win. Do not imply that planned pricing, payment settlement, revenue, retention or conversion are already measured. No external outreach or application is automatically authorized by this document.
