@@ -49,6 +49,25 @@ investors/index.html   Investor and partner overview
 README.md              Project notes
 ```
 
+## Maintainability and transfer budget (draft 2026-11-06)
+
+The business landing page previously embedded its full 663 KB page stylesheet and
+base64 assets directly inside `index.html`. The engineering review branch
+moves those exact CSS rules to `shared/oido-page.css` (no selector or design
+changes), keeping the original link position so cascade order is preserved.
+There are no non-data relative asset URLs in that block, so URL resolution
+remains unchanged.
+
+Measured **source sizes**, not user-perceived network timings:
+- index.html: 831,008 → 167,602 characters;
+- extracted CSS: 663,455 characters in a shared, browser-cacheable resource.
+
+This splits caching and review responsibility without introducing a UI redesign.
+It does **not** independently demonstrate improved Core Web Vitals or lower total
+cold-load transfer. Continue with real mobile network timings, LCP/CLS and
+screenshots before publishing; check `npm run test:bundle` and the existing
+Playwright UI/i18n suite.
+
 ## Preview and publishing
 
 Open `index.html` locally in a browser to preview the public landing page. Open `investors/index.html` for the investor version. GitHub Pages publishes the `main` branch from `/(root)`, normally within a few minutes of a commit. No build step or package manager is required.

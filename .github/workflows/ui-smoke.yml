@@ -38,6 +38,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm run check
+      - run: npm run test:bundle
       - run: npm run test:i18n
       - run: npm install --no-save playwright
       - run: npx playwright install --with-deps chromium
