@@ -49,6 +49,21 @@ investors/index.html   Investor and partner overview
 README.md              Project notes
 ```
 
+## Code navigation
+
+- `index.html`: semantic HTML and ordering of scripts/styles (no page inline JavaScript).
+- `shared/oido-page.css`: the existing visual and typography rules, moved verbatim out of HTML.
+- `shared/oido-page.js`: page-level interaction logic.
+- `shared/oido-plans.js`: plan-selection/navigation behavior.
+- `shared/oido-enquiry.js`: lead form interaction and response behavior.
+- `shared/oido-i18n.*`: locale logic and translations; independently tested.
+- `functions/api/*`: Cloudflare server endpoints; **not** shipped as client JavaScript.
+- `tests/*`: content, locale and real-browser UI regression coverage.
+
+The three interaction files are loaded as classic synchronous scripts at their
+original DOM locations and in their original order. This is a safe extraction,
+not a rewrite, and does not authorize publication before visual/functional QA.
+
 ## Maintainability and transfer budget (draft 2026-11-06)
 
 The business landing page previously embedded its full 663 KB page stylesheet and
