@@ -49,6 +49,40 @@ investors/index.html   Investor and partner overview
 README.md              Project notes
 ```
 
+## Code navigation
+
+- `index.html`: semantic HTML and ordering of scripts/styles (no page inline JavaScript).
+- `shared/oido-page.css`: the existing visual and typography rules, moved verbatim out of HTML.
+- `shared/oido-page.js`: page-level interaction logic.
+- `shared/oido-plans.js`: plan-selection/navigation behavior.
+- `shared/oido-enquiry.js`: lead form interaction and response behavior.
+- `shared/oido-i18n.*`: locale logic and translations; independently tested.
+- `functions/api/*`: Cloudflare server endpoints; **not** shipped as client JavaScript.
+- `tests/*`: content, locale and real-browser UI regression coverage.
+
+The three interaction files are loaded as classic synchronous scripts at their
+original DOM locations and in their original order. This is a safe extraction,
+not a rewrite, and does not authorize publication before visual/functional QA.
+
+## Maintainability and transfer budget (draft 2026-11-06)
+
+The business landing page previously embedded its full 663 KB page stylesheet and
+base64 assets directly inside `index.html`. The engineering review branch
+moves those exact CSS rules to `shared/oido-page.css` (no selector or design
+changes), keeping the original link position so cascade order is preserved.
+There are no non-data relative asset URLs in that block, so URL resolution
+remains unchanged.
+
+Measured **source sizes**, not user-perceived network timings:
+- index.html: 831,008 → 167,602 characters;
+- extracted CSS: 663,455 characters in a shared, browser-cacheable resource.
+
+This splits caching and review responsibility without introducing a UI redesign.
+It does **not** independently demonstrate improved Core Web Vitals or lower total
+cold-load transfer. Continue with real mobile network timings, LCP/CLS and
+screenshots before publishing; check `npm run test:bundle` and the existing
+Playwright UI/i18n suite.
+
 ## Preview and publishing
 
 Open `index.html` locally in a browser to preview the public landing page. Open `investors/index.html` for the investor version. GitHub Pages publishes the `main` branch from `/(root)`, normally within a few minutes of a commit. No build step or package manager is required.
