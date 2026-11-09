@@ -19,6 +19,6 @@ for (const file of ['oido-page.js','oido-plans.js','oido-enquiry.js']) {
   const source=readFileSync(new URL('../shared/'+file,import.meta.url),'utf8');
   assert(source.trim().length>100,file+' extraction unexpectedly empty');
 }
-assert(!/<script(?![^>]*\\bsrc=)[^>]*>/.test(html),'business page must not contain inline JS');
+assert(!/<script(?![^>]*\bsrc=)[^>]*>/.test(html),'business page must not contain inline JS');
 console.log(JSON.stringify({htmlBytes,cssBytes,previousHtmlBytes:referenceBytes,
   htmlReductionPct:+((1-htmlBytes/referenceBytes)*100).toFixed(1)},null,2));
