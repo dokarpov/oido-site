@@ -238,11 +238,13 @@ let galleryItems=[];
 const cat={print:'Art print',wall:'Wall colouring',decal:'Illustrated decal',wallpaper:'Wallpaper'};
 function getGallery(p){
  const gallery=[];
- if(p.type==='print') gallery.push({id:'mounted',label:'Framed preview',alt:p.name+' with a mount'});
- if(p.type!=='print'&&p.room&&p.room!==p.original)gallery.push({id:'room',label:'In a room',src:p.room,alt:p.name+' interior preview'});
+ if(p.type==='print')gallery.push({id:'mounted',label:'White mount',src:p.original,alt:p.name+' with white passepartout'});
  if(p.original)gallery.push({id:'artwork',label:'Original artwork',src:p.original,alt:p.name+' complete artwork'});
- if(p.type==='print'&&p.room&&p.room!==p.original)gallery.push({id:'room',label:'In a room',src:p.room,alt:p.name+' staged interior'});
- (p.photos||[]).forEach((photo,i)=>{if(photo.src&&!gallery.some(g=>g.src===photo.src))gallery.push({id:'photo-'+i,label:photo.alt||'Photo '+(i+1),src:photo.src,alt:photo.alt||p.name})});
+ if(p.room&&p.room!==p.original&&(p.type!=='print'||!/(matte-black|black-frame)/i.test(p.room)))gallery.push({id:'room',label:'In a room',src:p.room,alt:p.name+' in a room'});
+ (p.photos||[]).forEach((photo,i)=>{
+  if(p.type==='print'&&/(matte-black|black-frame)/i.test(photo.src||''))return;
+  if(photo.src&&!gallery.some(g=>g.src===photo.src))gallery.push({id:'photo-'+i,label:photo.alt||'Photo '+(i+1),src:photo.src,alt:photo.alt||p.name});
+ });
  return gallery;
 }
 function selectGalleryView(id){activeView=id;setDetailImage();renderGallery();renderMats()}
