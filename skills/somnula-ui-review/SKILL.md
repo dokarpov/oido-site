@@ -14,6 +14,15 @@ Use before **every** Somnula theme review, publish decision, or visual change. A
 - Verify glyphs don't collide, headings don't clip at screen edges, accented letters and long names still fit. Adjust size or wrapping, **not tracking below zero**, to solve overflow.
 - On iOS: `-webkit-text-size-adjust:100%`; never let button and caption text scale to enormous sizes.
 
+## Brand consistency across every route
+
+- The **existing homepage Somnula Studies design is the source of truth**, not V19, a generic Shopify page, or a newly improvised wordmark. Reuse the exact five-point star SVG and `SOMNULA` uppercase text in Space Grotesk (700 weight, visible positive letter spacing) for inner-page headers. Never substitute the older uploaded lowercase SVG logo.
+- Header on interior pages must match the homepage's compact 76px desktop / 67px mobile bar, neutral `#f7f8f8` ground, `#111419` text, and desktop category links with one mobile `MENU +` toggle. Never duplicate Bag/menu controls or add link-arrow glyphs.
+- Footer must use the homepage's oversized uppercase wordmark, dark `#111419` background, same collection and policy links, and positive tracking. No legacy lilac V19 footer.
+- Every route, including Shopify Pages templates, legacy artwork and wallpaper URLs, native products, collections, cart, contact, and policy pages, must look like one Somnula Studies store. Preserve functional Shopify forms, variants, cart, legal copy and accessible navigation.
+- Route test: follow real homepage card links to at least one artwork preview, a wallpaper, wall-sticker concept, native product, category, cart and legal page. Check visual parity and back navigation on both mobile and desktop; do not infer consistency from mere published URL existence.
+- Load shared fonts/style in `<head>` once where possible; avoid reloading unnecessary V19 styles, fonts, and brand assets. Do not modify the live theme without approval.
+
 ## Layout, cards, imagery
 
 - On 320, 375, 390, 430, 768 and 1440px (at least), verify no unintended horizontal scroll, clipped labels, huge blank sections, overlapping UI or image cropping.
