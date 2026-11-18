@@ -26,7 +26,7 @@ Use before **every** Somnula theme review, publish decision, or visual change. A
 ## Layout, cards, imagery
 
 - On 320, 375, 390, 430, 768 and 1440px (at least), verify no unintended horizontal scroll, clipped labels, huge blank sections, overlapping UI or image cropping.
-- Art inside a thin matte black frame, with visible wide passepartout (20–24% padding where feasible). Preserve the complete artwork and its proportions. Use `contain`; do not crop or simulate details not present in originals. Avoid treating a room preview as the print master.
+- Artwork is presented with **one clean white passepartout** (approximately 20–24% padding), without a black frame, dark mount choices, shadows or decorative outlines. Do not show mat-color swatches. Preserve the complete artwork and its proportions with `contain`; do not crop or simulate details not present in originals. Avoid treating a room preview as the print master.
 - Image cards must be centered. Empty or broken assets show a real fallback, never giant placeholder text/numbering.
 - Wall stickers: show the room / in-situ image first where available, otherwise the unaltered art.
 - Mobile hero: balanced negative space, text and artwork separated, no awkward dead zone after Explore the editions; page sections follow naturally.
@@ -34,7 +34,7 @@ Use before **every** Somnula theme review, publish decision, or visual change. A
 ## Product gallery and interactions
 
 - Only one set of gallery controls: image-only thumbnails, with clear selected state and accessible labels. No duplicate textual tabs.
-- Individual artwork-specific mat choices **inside** the product card. Never a global site-wide mat selector. Changing a mat doesn't alter unrelated products.
+- All artworks use the same white passepartout, including cards, hero previews, thumbnails and opened product details. Do not render mount color selectors, black frame strokes or unnecessary decorative lines. Preserve clear focus-visible states for accessibility.
 - Mobile taps must have intentional tactile response on artworks, gallery thumbnails, swatches, variant options and CTAs (roughly 100–160ms; press scale between 0.92 and 0.98). Do not rely on desktop `:hover` alone. Keep reveal animation functional; never globally disable it as a shortcut for a rendering bug. Respect `prefers-reduced-motion: reduce` completely. Check tap-down, tap-up, selected state and interaction while scrolling on iOS.
 - On mobile, product details scroll naturally without pinning half the screen or cropping a large image. Ensure swatches, price, variants and primary action are reachable; no overlapping fixed browser-like navigation.
 - Previous / Next works with zero, one or several items; opening resets to the top; closing returns focus; Escape works; swipe doesn't compete with vertical scrolling. Don't introduce arrow glyphs in links.
