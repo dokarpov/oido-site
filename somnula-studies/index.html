@@ -24,7 +24,7 @@
 @media(min-width:960px){.hero-art{filter:drop-shadow(0 16px 26px #26364518)}}
 @media(max-width:1100px){.decal-grid{grid-template-columns:repeat(3,1fr)}.decal-card:nth-child(1){grid-column:span 2;min-height:450px;grid-row:span 1}.decal-card:nth-child(1) img{height:365px}.decal-card{min-height:310px}.decal-card img{height:210px}}
 @media(max-width:760px){.topbar{height:67px}.top-nav{display:none;position:absolute;left:0;right:0;top:67px;background:var(--paper);padding:24px;flex-direction:column;align-items:flex-start;border-bottom:1px solid var(--line);gap:20px}.top-nav.open{display:flex}.nav-open{display:block}.hero{height:760px;min-height:0;max-height:none}.hero-top{padding-top:25px}.hero-mid{margin-top:195px}.hero-logo{font-size:18vw;letter-spacing:.02em}.hero-art.h1{left:-7vw;top:10vh;width:34vw}.hero-art.h2{right:-1vw;top:9vh;width:35vw}.hero-art.h3{left:34vw;bottom:14vh;width:30vw}.hero-art.h4{right:-4vw;bottom:-3vh;width:32vw}.hero-art.h5{left:-6vw;bottom:-4vh;width:31vw}.hero-low{bottom:22px}.hero-low .num{display:none}.section-head{align-items:start;margin-bottom:30px}.section-head h2{font-size:clamp(59px,14vw,105px)}.section-note{display:none}.works{padding-top:78px;padding-bottom:80px}.display-tools{gap:12px;margin-bottom:30px}.tool-title{width:100%}.print-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 8px}.print-card,.print-card:nth-child(n){grid-column:auto;grid-row:auto;margin:0}.print-card:nth-child(4n+2){margin-top:65px}.print-card:nth-child(5n){grid-column:span 2;width:66%;margin-left:17%}.print-stage{padding:3%}.piece-label{opacity:1;transform:none;font-size:10px;gap:8px;flex-wrap:wrap}.walls-intro{min-height:0;padding-block:70px}.walls-intro h2{font-size:16vw;margin:45px 0 55px}.walls-intro p{max-width:250px}.wall-story{height:auto!important;padding:20px 0 70px;overflow:hidden}.wall-sticky{position:relative;height:auto;display:block;overflow:visible}.wall-rail{overflow-x:auto;scroll-snap-type:x mandatory;transform:none!important;padding:20px 6vw 45px;gap:5vw;scrollbar-width:none}.wall-rail::-webkit-scrollbar{display:none}.wall-tile{flex:0 0 86vw;height:56vw;scroll-snap-align:center}.wall-caption{bottom:-30px;font-size:10px}.wall-next{top:auto;bottom:10px;right:6vw}.wall-meter{bottom:10px;right:130px}.decal-section{padding-top:80px;padding-bottom:80px}.decal-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.decal-card,.decal-card:nth-child(1){grid-column:auto;grid-row:auto;min-height:235px;padding:15px 12px}.decal-card img,.decal-card:nth-child(1) img{height:180px}.decal-card .bottom{flex-direction:column;align-items:start;font-size:10px;gap:3px}.decal-card .bottom strong{font-size:11px}.wallpaper-section{padding-block:75px}.wallpaper-grid{grid-template-columns:1fr;gap:12px}.wallpaper-card img{height:55vw}.detail-layout{grid-template-columns:1fr}.detail-visual{min-height:55svh}.detail-info{gap:25px}.detail-info h2{font-size:41px}.detail-object{max-width:245px}.end{padding-top:70px}.end-logo{font-size:18vw}}
-@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.reveal{opacity:0;transform:translateY(22px)}}
 
 /* Somnula Studies: image gallery and mobile artwork-first detail navigation */
 .detail-gallery{display:flex;justify-content:center;gap:8px;align-items:center;max-width:100%;overflow-x:auto;scrollbar-width:thin}
@@ -154,6 +154,28 @@ html,body{letter-spacing:.012em;-webkit-text-size-adjust:100%;text-size-adjust:1
 @media(max-width:350px){.hero-logo{font-size:12.2vw}}
 
 .image-unavailable{display:flex;align-items:center;justify-content:center;min-height:120px;text-align:center;font-size:12px;letter-spacing:.02em;color:#59646b}
+
+/* Somnula tactile interactions — touch surfaces, no lost artwork detail */
+@media(hover:none) and (pointer:coarse) and (prefers-reduced-motion:no-preference){
+ .hero-art,.print-stage,.decal-card img,.wallpaper-card img,.wall-tile img{
+  transition:transform .16s cubic-bezier(.16,1,.3,1),filter .18s cubic-bezier(.16,1,.3,1)}
+ .hero-art:hover:not(:active){transform:translate(var(--dx,0),var(--dy,0)) rotate(var(--rot,0deg))}
+ .hero-art:active{transform:translate(var(--dx,0),var(--dy,0)) rotate(0deg) scale(.955)}
+ .print-card:hover:not(:active) .print-stage{transform:rotate(var(--r,0))}
+ .print-card:active .print-stage{transform:rotate(0deg) translateY(-5px) scale(.965)}
+ .decal-card:hover:not(:active) img{transform:none}
+ .decal-card:active img{transform:scale(.965)}
+ .wallpaper-card:active img{transform:scale(.98);filter:contrast(1.06)}
+ .wall-tile:active img{transform:scale(.98)}
+ :is(.hero-art,.print-card,.decal-card,.wallpaper-card,.wall-tile,button,a){-webkit-tap-highlight-color:transparent}
+}
+@media(prefers-reduced-motion:no-preference){
+ :is(.detail-gallery__thumb,.detail-mounts-swatch,.variant,.detail-bottom button,.detail-top button,.detail-order-link,.detail-full-link,.nav-open){
+  transition:transform .14s cubic-bezier(.16,1,.3,1),background-color .18s,border-color .18s}
+ :is(.detail-gallery__thumb,.detail-mounts-swatch):active{transform:scale(.92)}
+ :is(.variant,.detail-bottom button,.detail-top button,.detail-order-link,.detail-full-link,.nav-open):active{transform:scale(.97)}
+}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important}}
 </style></head>
 <body>
 <header class="topbar shell"><a href="#top" class="brand" aria-label="Somnula home"><svg class="star" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M50 0C51 28 71 48 100 50C71 52 51 72 50 100C49 72 29 52 0 50C29 48 49 28 50 0Z"/></svg>SOMNULA</a><nav class="top-nav" id="topnav" aria-label="Collections"><a href="#prints">Prints</a><a href="#colouring">Wall colouring</a><a href="#decals">Illustrated decals</a><a href="#wallpapers">Wallpapers</a></nav><button class="nav-open" id="navOpen" aria-expanded="false" aria-controls="topnav">MENU <span aria-hidden="true">+</span></button></header>
