@@ -153,6 +153,7 @@ html,body{letter-spacing:.012em;-webkit-text-size-adjust:100%;text-size-adjust:1
 }
 @media(max-width:350px){.hero-logo{font-size:12.2vw}}
 
+.image-unavailable{display:flex;align-items:center;justify-content:center;min-height:120px;text-align:center;font-size:12px;letter-spacing:.02em;color:#59646b}
 </style></head>
 <body>
 <header class="topbar shell"><a href="#top" class="brand" aria-label="Somnula home"><svg class="star" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M50 0C51 28 71 48 100 50C71 52 51 72 50 100C49 72 29 52 0 50C29 48 49 28 50 0Z"/></svg>SOMNULA</a><nav class="top-nav" id="topnav" aria-label="Collections"><a href="#prints">Prints</a><a href="#colouring">Wall colouring</a><a href="#decals">Illustrated decals</a><a href="#wallpapers">Wallpapers</a></nav><button class="nav-open" id="navOpen" aria-expanded="false" aria-controls="topnav">MENU <span aria-hidden="true">+</span></button></header>
@@ -179,7 +180,7 @@ const prints=byType('print'), walls=byType('wall'),decals=byType('decal'),papers
 const E=(tag,klass,txt)=>{const node=document.createElement(tag);if(klass)node.className=klass;if(txt!=null)node.textContent=txt;return node};
 const euro=n=>'€'+new Intl.NumberFormat('en-IE',{maximumFractionDigits:0}).format(n);
 let active=null,activeIndex=0,activeView='mounted',activeMat='#f9f9f6',lastFocus=null;
-function image(src,alt,lazy=true,fallback=''){const i=E('img');i.alt=alt;i.decoding='async';if(lazy)i.loading='lazy';if(fallback&&fallback!==src)i.addEventListener('error',()=>{i.src=fallback},{once:true});i.src=src;return i}
+function image(src,alt,lazy=true,fallback=''){const i=E('img');i.alt=alt;i.decoding='async';i.loading=lazy?'lazy':'eager';let triedFallback=false;i.addEventListener('error',()=>{if(!triedFallback&&fallback&&fallback!==i.src){triedFallback=true;i.src=fallback;return}i.hidden=true;if(i.parentElement&&!i.parentElement.querySelector('.image-unavailable'))i.after(E('span','image-unavailable','Image preview unavailable'))});i.src=src||fallback||'';return i}
 function framed(p,color){const f=E('span','framed');f.style.setProperty('--matcolor',color||(p.mounts&&p.mounts[0]?.color)||'#f9f9f6');const m=E('span','frame-mat');m.append(image(p.original,p.name));m.lastChild.className='frame-img';f.append(m);return f}
 function mkButton(p,cls){const b=E('button',cls);b.type='button';b.setAttribute('aria-label','View '+p.name);b.addEventListener('click',()=>openDetail(p));return b}
 const hero=document.getElementById('heroPieces');[0,4,5,1,7].forEach((id,i)=>{const p=prints[id];if(!p)return;const b=mkButton(p,'hero-art h'+(i+1));b.append(framed(p));hero.append(b)});
