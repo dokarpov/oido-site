@@ -72,6 +72,59 @@
  .detail-bottom{padding-left:16px;padding-right:16px}
 }
 
+
+/* Mobile composition, native iOS text sizing, and consistent image presentation. */
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.hero-top:empty{display:none}
+.section-head .index{display:none}
+.wall-caption span:not(:first-child){display:none}
+.wall-next{top:auto;bottom:42px;z-index:4}
+.wall-next button{box-sizing:border-box;width:auto;min-width:66px;height:34px;padding:7px 12px;border-radius:4px;font-size:12px!important;line-height:20px!important;font-weight:500;white-space:nowrap;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.wall-tile img{object-position:center;max-width:100%}
+.decal-card,.wallpaper-card{overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+.decal-card img{mix-blend-mode:normal;object-position:center;max-width:100%}
+.decal-card .bottom,.decal-card .bottom strong,.wallpaper-meta{font-size:12px!important;line-height:1.3!important;overflow-wrap:anywhere;white-space:normal}
+@media(max-width:760px){
+ .hero{height:clamp(510px,75svh,650px)!important;min-height:0!important;max-height:none}
+ .hero-top{display:none}
+ .hero-mid{position:absolute;top:42%;left:0;right:0;transform:translateY(-50%);margin:0!important;z-index:4;pointer-events:none}
+ .hero-logo{font-size:clamp(51px,17vw,87px);line-height:.94;margin:0}
+ .hero-art.h1{left:-8vw;top:5%;width:33vw}
+ .hero-art.h2{right:-7vw;top:7%;width:34vw}
+ .hero-art.h3{left:33vw;bottom:10%;width:28vw}
+ .hero-art.h4{right:-5vw;bottom:9%;width:30vw}
+ .hero-art.h5{left:-9vw;bottom:13%;width:29vw}
+ .hero-low{height:58px;bottom:0;left:0;right:0;width:100%;z-index:7;display:flex;align-items:center;background:#f7f8f8ed;border-top:1px solid #d7dce0;padding:12px 20px}
+ .hero-low a{border-bottom:1px solid #111419;display:inline-flex;align-items:center;gap:0;max-width:100%;padding:0 0 3px;font-size:11px;letter-spacing:.1em}
+ .works{padding-top:46px;padding-bottom:75px}
+ .works .section-head{margin-bottom:26px}
+ .works .section-head h2{margin-top:0}
+ .walls-intro{padding-block:55px;min-height:0}
+ .walls-intro h2{margin:15px 0 25px}
+ .wall-story{padding:0 0 30px!important;height:auto!important}
+ .wall-sticky{display:flex;flex-direction:column;height:auto!important;min-height:0;align-items:stretch;overflow:visible}
+ .wall-rail{width:100%;padding:12px 6vw 42px;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;transform:none!important}
+ .wall-tile{height:auto;aspect-ratio:16/10;flex:0 0 86vw;min-height:0;scroll-snap-align:center;overflow:visible}
+ .wall-tile img{height:100%;width:100%;max-height:100%;object-fit:contain}
+ .wall-caption{position:absolute;bottom:-24px;left:0;right:0;font-size:11px!important;line-height:1.2!important}
+ .wall-next{display:none!important}
+ .wall-meter{display:none!important}
+ .decal-section{padding-block:65px}
+ .decal-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+ .decal-card,.decal-card:nth-child(1){grid-column:auto;grid-row:auto;min-height:0;max-height:none;padding:12px 10px;display:flex;flex-direction:column;gap:10px}
+ .decal-card img,.decal-card:nth-child(1) img{width:100%;height:auto;max-height:220px;aspect-ratio:4/3;object-fit:contain;mix-blend-mode:normal}
+ .decal-card .bottom{margin-top:0;min-height:32px;padding:0;gap:0;display:block;font-size:11px!important}
+ .decal-card .bottom strong{font-size:11px!important;line-height:1.3!important}
+ .wallpaper-section{padding-block:65px}
+ .wallpaper-card img{height:auto;aspect-ratio:16/9;object-fit:contain}
+}
+@media(max-width:390px){
+ .hero{height:clamp(480px,71svh,610px)!important}
+ .hero-art.h3{bottom:13%}
+ .hero-art.h5{bottom:18%}
+}
+
 </style></head>
 <body>
 <header class="topbar shell"><a href="#top" class="brand" aria-label="Somnula home"><svg class="star" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M50 0C51 28 71 48 100 50C71 52 51 72 50 100C49 72 29 52 0 50C29 48 49 28 50 0Z"/></svg>SOMNULA</a><nav class="top-nav" id="topnav" aria-label="Collections"><a href="#prints">Prints</a><a href="#colouring">Wall colouring</a><a href="#decals">Illustrated decals</a><a href="#wallpapers">Wallpapers</a></nav><button class="nav-open" id="navOpen" aria-expanded="false" aria-controls="topnav">MENU <span aria-hidden="true">+</span></button></header>
@@ -98,14 +151,14 @@ const prints=byType('print'), walls=byType('wall'),decals=byType('decal'),papers
 const E=(tag,klass,txt)=>{const node=document.createElement(tag);if(klass)node.className=klass;if(txt!=null)node.textContent=txt;return node};
 const euro=n=>'€'+new Intl.NumberFormat('en-IE',{maximumFractionDigits:0}).format(n);
 let active=null,activeIndex=0,activeView='mounted',activeMat='#f9f9f6',lastFocus=null;
-function image(src,alt,lazy=true){const i=E('img');i.src=src;i.alt=alt;if(lazy)i.loading='lazy';i.decoding='async';return i}
+function image(src,alt,lazy=true,fallback=''){const i=E('img');i.alt=alt;i.decoding='async';if(lazy)i.loading='lazy';if(fallback&&fallback!==src)i.addEventListener('error',()=>{i.src=fallback},{once:true});i.src=src;return i}
 function framed(p,color){const f=E('span','framed');f.style.setProperty('--matcolor',color||(p.mounts&&p.mounts[0]?.color)||'#f9f9f6');const m=E('span','frame-mat');m.append(image(p.original,p.name));m.lastChild.className='frame-img';f.append(m);return f}
 function mkButton(p,cls){const b=E('button',cls);b.type='button';b.setAttribute('aria-label','View '+p.name);b.addEventListener('click',()=>openDetail(p));return b}
 const hero=document.getElementById('heroPieces');[0,4,5,1,7].forEach((id,i)=>{const p=prints[id];if(!p)return;const b=mkButton(p,'hero-art h'+(i+1));b.append(framed(p));hero.append(b)});
 const printGrid=document.getElementById('printGrid');prints.forEach((p,i)=>{const b=mkButton(p,'print-card reveal');const st=E('span','print-stage');st.append(framed(p));b.append(st);const label=E('span','piece-label');label.append(E('strong','',p.name),E('span','',p.variants.length?'From '+euro(p.variants[0].price):''));b.append(label);printGrid.append(b)});
-const wallRail=document.getElementById('wallRail');walls.forEach((p,i)=>{const b=mkButton(p,'wall-tile');b.append(image(p.room,p.name+' in a room'));const cap=E('span','wall-caption');cap.append(E('span','',p.name));b.append(cap);wallRail.append(b)});
-const decalGrid=document.getElementById('decalGrid');decals.forEach((p,i)=>{const b=mkButton(p,'decal-card reveal');b.append(image(p.room||p.original,p.name+(p.room&&p.room!==p.original?' in a room':'')));const meta=E('span','bottom');meta.append(E('strong','',p.name));b.append(meta);decalGrid.append(b)});
-const wallpaperGrid=document.getElementById('wallpaperGrid');papers.forEach((p,i)=>{const b=mkButton(p,'wallpaper-card reveal');b.append(image(p.room,p.name));const meta=E('span','wallpaper-meta');meta.append(E('strong','',p.name));b.append(meta);wallpaperGrid.append(b)});
+const wallRail=document.getElementById('wallRail');walls.forEach((p,i)=>{const b=mkButton(p,'wall-tile');b.append(image(p.room||p.original,p.name+' in a room',true,p.original));const cap=E('span','wall-caption');cap.append(E('span','',p.name));b.append(cap);wallRail.append(b)});
+const decalGrid=document.getElementById('decalGrid');decals.forEach((p,i)=>{const b=mkButton(p,'decal-card reveal');b.append(image(p.room||p.original,p.name+(p.room&&p.room!==p.original?' in a room':''),true,p.original));const meta=E('span','bottom');meta.append(E('strong','',p.name));b.append(meta);decalGrid.append(b)});
+const wallpaperGrid=document.getElementById('wallpaperGrid');papers.forEach((p,i)=>{const b=mkButton(p,'wallpaper-card reveal');b.append(image(p.room||p.original,p.name,true,p.original));const meta=E('span','wallpaper-meta');meta.append(E('strong','',p.name));b.append(meta);wallpaperGrid.append(b)});
 let wallDistance=0,wallStart=0,mobile=false;
 function layoutWalls(){mobile=matchMedia('(max-width:760px)').matches;const story=document.getElementById('wallStory');wallDistance=Math.max(0,wallRail.scrollWidth-innerWidth);if(!mobile){story.style.height=(wallDistance+innerHeight)+'px';wallStart=story.getBoundingClientRect().top+scrollY}else{story.style.height='auto';wallRail.style.transform='none'}updateWalls()}
 function updateWalls(){const story=document.getElementById('wallStory');if(mobile){const max=wallRail.scrollWidth-wallRail.clientWidth;document.getElementById('wallProgress').style.width=(max?wallRail.scrollLeft/max*100:0)+'%';return}const progress=Math.max(0,Math.min(1,(scrollY-wallStart)/Math.max(1,wallDistance)));wallRail.style.transform='translate3d('+(-wallDistance*progress)+'px,0,0)';document.getElementById('wallProgress').style.width=(100*progress)+'%'}
