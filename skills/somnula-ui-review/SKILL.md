@@ -35,6 +35,7 @@ Use before **every** Somnula theme review, publish decision, or visual change. A
 
 - Only one set of gallery controls: image-only thumbnails, with clear selected state and accessible labels. No duplicate textual tabs.
 - Individual artwork-specific mat choices **inside** the product card. Never a global site-wide mat selector. Changing a mat doesn't alter unrelated products.
+- Mobile taps must have intentional tactile response on artworks, gallery thumbnails, swatches, variant options and CTAs (roughly 100–160ms; press scale between 0.92 and 0.98). Do not rely on desktop `:hover` alone. Keep reveal animation functional; never globally disable it as a shortcut for a rendering bug. Respect `prefers-reduced-motion: reduce` completely. Check tap-down, tap-up, selected state and interaction while scrolling on iOS.
 - On mobile, product details scroll naturally without pinning half the screen or cropping a large image. Ensure swatches, price, variants and primary action are reachable; no overlapping fixed browser-like navigation.
 - Previous / Next works with zero, one or several items; opening resets to the top; closing returns focus; Escape works; swipe doesn't compete with vertical scrolling. Don't introduce arrow glyphs in links.
 - All anchors lead to published valid destinations. Shopify's active/live products feed must remain dynamic, preserve native product pages and variant selection. `Active` does not itself prove `availableForSale`; never imply checkout/fulfillment readiness or publish untested items.
