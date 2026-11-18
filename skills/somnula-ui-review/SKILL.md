@@ -39,6 +39,14 @@ Use before **every** Somnula theme review, publish decision, or visual change. A
 - Previous / Next works with zero, one or several items; opening resets to the top; closing returns focus; Escape works; swipe doesn't compete with vertical scrolling. Don't introduce arrow glyphs in links.
 - All anchors lead to published valid destinations. Shopify's active/live products feed must remain dynamic, preserve native product pages and variant selection. `Active` does not itself prove `availableForSale`; never imply checkout/fulfillment readiness or publish untested items.
 
+## Customer-facing copy and enquiry actions
+
+- Never publish internal statuses or technical caveats as storefront copy: no "Studio preview", "production pending", "print-ready master pending", "DRAFT", "cannot be ordered", implementation notes, workflow labels, or similar comments. Keep legitimate product details and required legal/disclosure information accurate, but do not expose internal checklists to customers.
+- For a product that is not enabled for checkout, show an **Enquire to order** action, not a disabled or misleading purchase button. Open Somnula's native Shopify contact form with artwork and chosen size/finish (and mount colour where applicable) prefilled. The enquiry is **not** a completed purchase or payment.
+- Preserve a welcoming, brief editorial voice. No invented manufacturing or delivery promises, no automatic claims of availability, and no removal of mandatory consumer information.
+- Validate the customer journey from homepage drawer, legacy artwork detail, native product page, to contact form with prefilled information; check that submission works before claiming it works.
+- Do not replace the contact form with an unverified social messaging endpoint.
+
 ## Review process — evidence before declaring complete
 
 1. Compare live Shopify theme, unpublished QA theme and GitHub Studies to locate regressions; preserve production design and user-approved behavior.
