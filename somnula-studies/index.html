@@ -177,8 +177,8 @@ html,body{letter-spacing:.012em;-webkit-text-size-adjust:100%;text-size-adjust:1
 }
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important}}
 
-/* White passepartout, no black frame or decorative outlines */
-.framed{background:transparent!important;padding:0!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+/* Somnula artwork presentation: uniform thin black frame, white passepartout and no decorative shadows */
+.framed{background:#111419!important;padding:3px!important;border:0!important;border-radius:0!important;box-shadow:none!important}
 .framed::before,.framed::after{content:none!important;display:none!important}
 .framed .frame-mat{display:block;padding:20%!important;background:#fff!important;border:0!important;outline:0!important;box-shadow:none!important}
 .framed .frame-img{background:transparent!important;border:0!important;box-shadow:none!important;object-fit:contain!important;height:auto!important;aspect-ratio:auto!important;width:100%}
@@ -193,6 +193,8 @@ html,body{letter-spacing:.012em;-webkit-text-size-adjust:100%;text-size-adjust:1
 .detail-gallery__thumb:focus-visible{outline:2px solid #547ba3!important;outline-offset:2px}
 .variant{border:0!important;background:#eff1f2}
 .variant[aria-pressed=true]{background:#111419;color:#fff}
+.piece-label,.wall-caption,.wallpaper-meta,.variant,.selected-price,.detail-order-link{font-family:'DM Sans',Arial,sans-serif;letter-spacing:.018em}
+.detail-info h2,.section-head h2{font-family:'Space Grotesk','DM Sans',Arial,sans-serif;letter-spacing:.025em}
 </style></head>
 <body>
 <header class="topbar shell"><a href="#top" class="brand" aria-label="Somnula home"><svg class="star" viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M50 0C51 28 71 48 100 50C71 52 51 72 50 100C49 72 29 52 0 50C29 48 49 28 50 0Z"/></svg>SOMNULA</a><nav class="top-nav" id="topnav" aria-label="Collections"><a href="#prints">Prints</a><a href="#colouring">Wall colouring</a><a href="#decals">Illustrated decals</a><a href="#wallpapers">Wallpapers</a></nav><button class="nav-open" id="navOpen" aria-expanded="false" aria-controls="topnav">MENU <span aria-hidden="true">+</span></button></header>
