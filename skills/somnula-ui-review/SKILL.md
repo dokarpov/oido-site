@@ -13,6 +13,7 @@ Use before **every** Somnula theme review, publish decision, or visual change. A
 - Ensure visible air between characters: body >= `0.01em`, display/heading >= `0.015em` and preferably `0.02em`, uppercase small labels >= `0.06em`; allow an exception for an imported SVG brand mark that isn't CSS text.
 - Verify glyphs don't collide, headings don't clip at screen edges, accented letters and long names still fit. Adjust size or wrapping, **not tracking below zero**, to solve overflow.
 - On iOS: `-webkit-text-size-adjust:100%`; never let button and caption text scale to enormous sizes.
+- **Use the same two-font system on every route:** Space Grotesk 600–700 for artwork headings and display titles; DM Sans 400–700 for card names, captions, prices, variant options, buttons and body copy. Do not allow legacy Anton/Roboto Condensed or browser-default fonts in native Shopify product cards. Keep positive letter spacing throughout.
 
 ## Brand consistency across every route
 
@@ -26,7 +27,7 @@ Use before **every** Somnula theme review, publish decision, or visual change. A
 ## Layout, cards, imagery
 
 - On 320, 375, 390, 430, 768 and 1440px (at least), verify no unintended horizontal scroll, clipped labels, huge blank sections, overlapping UI or image cropping.
-- Artwork is presented with **one clean white passepartout** (approximately 20–24% padding), without a black frame, dark mount choices, shadows or decorative outlines. Do not show mat-color swatches. Preserve the complete artwork and its proportions with `contain`; do not crop or simulate details not present in originals. Avoid treating a room preview as the print master.
+- Artwork is presented with a **consistent thin black outer frame (approximately 3px)** around **one clean white passepartout** (approximately 20–24% padding). Remove dark/colored mount choices, extra strokes, inner borders and decorative shadows, but **never remove the outer frame**. Do not show mat-color swatches. Preserve the complete artwork and its proportions with `contain`; do not crop or simulate details not present in originals. Avoid treating a room preview as the print master.
 - Image cards must be centered. Empty or broken assets show a real fallback, never giant placeholder text/numbering.
 - Wall stickers: show the room / in-situ image first where available, otherwise the unaltered art.
 - Mobile hero: balanced negative space, text and artwork separated, no awkward dead zone after Explore the editions; page sections follow naturally.
@@ -34,7 +35,7 @@ Use before **every** Somnula theme review, publish decision, or visual change. A
 ## Product gallery and interactions
 
 - Only one set of gallery controls: image-only thumbnails, with clear selected state and accessible labels. No duplicate textual tabs.
-- All artworks use the same white passepartout, including cards, hero previews, thumbnails and opened product details. Do not render mount color selectors, black frame strokes or unnecessary decorative lines. Preserve clear focus-visible states for accessibility.
+- All framed artwork previews (home hero, art cards, thumbnails, detail drawer, Shopify products and editorial pages) use the same thin black outer frame with white passepartout. No mat color selectors or decorative lines. Preserve clear focus-visible states for accessibility. Preserve clear focus-visible states for accessibility.
 - Mobile taps must have intentional tactile response on artworks, gallery thumbnails, swatches, variant options and CTAs (roughly 100–160ms; press scale between 0.92 and 0.98). Do not rely on desktop `:hover` alone. Keep reveal animation functional; never globally disable it as a shortcut for a rendering bug. Respect `prefers-reduced-motion: reduce` completely. Check tap-down, tap-up, selected state and interaction while scrolling on iOS.
 - On mobile, product details scroll naturally without pinning half the screen or cropping a large image. Ensure swatches, price, variants and primary action are reachable; no overlapping fixed browser-like navigation.
 - Previous / Next works with zero, one or several items; opening resets to the top; closing returns focus; Escape works; swipe doesn't compete with vertical scrolling. Don't introduce arrow glyphs in links.
