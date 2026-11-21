@@ -382,9 +382,13 @@ for (const viewport of [{width:390,height:844},{width:1440,height:1000}]) {
     await page.waitForTimeout(50);
   }
   if(!blend) throw new Error('pain crossfade not observed within the animation window at '+viewport.width);
-  const still=await go(.245,0);
-  if(Math.abs(still.scenes[0].opacity-blend.scenes[0].opacity)>.06)
-    throw new Error('pain blend advanced without scroll input at '+viewport.width+': '+JSON.stringify({blend,still}));
+  // A CSS opacity transition may still be finishing when the first
+  // overlapping frame is observed. Compare two stable, paused samples
+  // rather than comparing a mid-transition frame with the next animation frame.
+  const settled=await go(.245,1100);
+  const still=await go(.245,500);
+  if(Math.abs(still.scenes[0].opacity-settled.scenes[0].opacity)>.04)
+    throw new Error('pain blend advanced after settling without scroll at '+viewport.width+': '+JSON.stringify({settled,still}));
   const after=await go(.33);
   if(blend.scenes.some(x=>x.display==='none'))
     throw new Error('pain scene still display-switches at '+viewport.width+': '+JSON.stringify(blend));
